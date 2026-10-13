@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-display: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  
+  body {
+    font-family: var(--font-sans);
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+/* Dark Mode Deep Midnight-Navy Background & Atmosphere */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #060913;
+  color: #f1f5f9;
+}
+
+/* Studio Ambient Mesh Background for Dark Mode */
+.dark-studio-bg {
+  background-color: #060913;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(99, 102, 241, 0.18), transparent 70%),
+    radial-gradient(ellipse 65% 45% at 90% 15%, rgba(56, 189, 248, 0.12), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 10% 45%, rgba(139, 92, 246, 0.10), transparent 60%),
+    radial-gradient(ellipse 75% 45% at 85% 75%, rgba(59, 130, 246, 0.08), transparent 60%),
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.035) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 32px 32px;
+  background-attachment: fixed;
+}
+
+/* Light Mode Studio Background */
+.light-studio-bg {
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(224, 231, 255, 0.4), transparent 70%),
+    radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.06) 1px, transparent 0);
+  background-size: 100% 100%, 24px 24px;
+}
+
+/* Dark Glass Card Utility */
+.dark-glass {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(7, 11, 22, 0.85) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.dark-glass:hover {
+  border-color: rgba(99, 102, 241, 0.38);
+  box-shadow: 0 16px 36px 0 rgba(0, 0, 0, 0.5), 0 0 25px 0 rgba(99, 102, 241, 0.18);
+}
+
+/* Light Mode Global Theme Styling */
+html.light {
+  color-scheme: light;
+}
+
+html.light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Light Mode Card and Surface Overrides */
+html.light .bg-slate-950 {
+  background-color: #f8fafc;
+}
+
+html.light .bg-slate-900 {
+  background-color: #ffffff;
+}
+
+html.light .bg-slate-900\/95,
+html.light .bg-slate-900\/90,
+html.light .bg-slate-900\/80,
+html.light .bg-slate-900\/60,
+html.light .bg-slate-900\/50,
+html.light .bg-slate-900\/40 {
+  background-color: #ffffff;
+}
+
+html.light .bg-slate-800,
+html.light .bg-slate-800\/80,
+html.light .bg-slate-800\/60,
+html.light .bg-slate-800\/50 {
+  background-color: #f1f5f9;
+}
+
+html.light .border-slate-800,
+html.light .border-slate-800\/80,
+html.light .border-slate-700,
+html.light .border-slate-700\/80 {
+  border-color: #e2e8f0;
+}
+
+html.light .border-slate-900 {
+  border-color: #e2e8f0;
+}
+
+/* Text readability in Light Mode */
+html.light h1:not([class*="text-transparent"]):not([class*="text-white"]):not([class*="text-indigo-"]):not([class*="text-cyan-"]),
+html.light h2:not([class*="text-transparent"]):not([class*="text-white"]):not([class*="text-indigo-"]):not([class*="text-cyan-"]),
+html.light h3:not([class*="text-transparent"]):not([class*="text-white"]):not([class*="text-indigo-"]):not([class*="text-cyan-"]),
+html.light h4:not([class*="text-transparent"]):not([class*="text-white"]):not([class*="text-indigo-"]):not([class*="text-cyan-"]) {
+  color: #0f172a;
+}
+
+html.light input[type="text"],
+html.light input[type="number"],
+html.light input[type="search"],
+html.light textarea,
+html.light select {
+  color: #0f172a;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Subtle checkerboard for canvas transparency */
+.bg-checkerboard {
+  background-color: #0f172a;
+  background-image: 
+    linear-gradient(45deg, #1e293b 25%, transparent 25%),
+    linear-gradient(-45deg, #1e293b 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1e293b 75%),
+    linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+html.light .bg-checkerboard {
+  background-color: #f8fafc;
+  background-image: 
+    linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+}
+
+.bg-checkerboard-light {
+  background-color: #f8fafc;
+  background-image: 
+    linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
