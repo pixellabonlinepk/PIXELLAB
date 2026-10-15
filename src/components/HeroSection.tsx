@@ -82,7 +82,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 theme === 'dark' ? 'text-slate-100' : 'text-slate-800'
               }`}
             >
-              PIXEL LAB
+              PIXAL LAB
             </span>
             <span className="text-slate-400">·</span>
             <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-500'}>

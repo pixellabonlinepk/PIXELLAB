@@ -30,7 +30,7 @@ export const PrivacyPage: React.FC = () => {
             theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
           }`}
         >
-          Last updated: October 2026. Pixel Lab guarantees 100% in-browser processing with zero remote file storage.
+          Last updated: October 2026. Pixal Lab guarantees 100% in-browser processing with zero remote file storage.
         </p>
       </div>
 
@@ -59,7 +59,7 @@ export const PrivacyPage: React.FC = () => {
               theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
             }`}
           >
-            Unlike traditional online file converters that transmit your files to backend servers, Pixel Lab performs all image manipulation, compression, resizing, filtering, and conversion using client-side HTML5 Canvas, Web Workers, and browser Blobs. No image data is ever transferred to our servers or stored on remote disks.
+            Unlike traditional online file converters that transmit your files to backend servers, Pixal Lab performs all image manipulation, compression, resizing, filtering, and conversion using client-side HTML5 Canvas, Web Workers, and browser Blobs. No image data is ever transferred to our servers or stored on remote disks.
           </p>
         </div>
 
@@ -131,7 +131,7 @@ export const PrivacyPage: React.FC = () => {
               theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
             }`}
           >
-            Pixel Lab does not ask for your email, credit card, phone number, or login credentials. All tools are unlocked and freely accessible without an account.
+            Pixal Lab does not ask for your email, credit card, phone number, or login credentials. All tools are unlocked and freely accessible without an account.
           </p>
         </div>
       </div>

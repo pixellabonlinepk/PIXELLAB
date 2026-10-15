@@ -1124,7 +1124,7 @@ export async function generateQrCodeUrl(
   const dark = options?.darkColor || '#000000';
   const light = options?.lightColor || '#ffffff';
 
-  const dataUrl = await QRCode.toDataURL(text || 'https://pixellab.app', {
+  const dataUrl = await QRCode.toDataURL(text || 'https://pixallab.app', {
     width,
     margin: 2,
     color: { dark, light },

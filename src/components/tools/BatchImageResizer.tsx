@@ -256,7 +256,7 @@ export const BatchImageResizer: React.FC<BatchImageResizerProps> = ({
       });
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
-      downloadBlob(zipBlob, `pixellab-batch-resized-${Date.now()}.zip`);
+      downloadBlob(zipBlob, `pixallab-batch-resized-${Date.now()}.zip`);
     } catch (err: any) {
       setStatusMessage(`Failed to create ZIP: ${err.message}`);
     } finally {

@@ -311,7 +311,7 @@ export const ImageJoiner: React.FC<ImageJoinerProps> = ({
   const handleDownloadJoined = () => {
     if (!joinedBlob) return;
     const ext = isTransparent || outputFormat === 'image/png' ? 'png' : outputFormat === 'image/jpeg' ? 'jpg' : 'webp';
-    downloadBlob(joinedBlob, `pixellab-joined-${layout}-${Date.now()}.${ext}`);
+    downloadBlob(joinedBlob, `pixallab-joined-${layout}-${Date.now()}.${ext}`);
   };
 
   return (

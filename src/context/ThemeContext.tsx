@@ -17,7 +17,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (saved === 'light' || saved === 'dark') {
         return saved;
       }
-      // If no saved preference, default to dark to preserve Pixel Lab's signature dark navy style
+      // If no saved preference, default to dark to preserve Pixal Lab's signature dark navy style
       return 'dark';
     } catch {
       return 'dark';

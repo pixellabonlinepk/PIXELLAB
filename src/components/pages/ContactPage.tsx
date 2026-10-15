@@ -33,7 +33,7 @@ export const ContactPage: React.FC = () => {
             theme === 'dark' ? 'text-white' : 'text-slate-900'
           }`}
         >
-          Get in Touch with Pixel Lab
+          Get in Touch with Pixal Lab
         </h1>
         <p
           className={`text-xs sm:text-sm ${
@@ -74,7 +74,7 @@ export const ContactPage: React.FC = () => {
                 theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
               }`}
             >
-              Thank you for reaching out to the Pixel Lab team. We appreciate your feedback and suggestions!
+              Thank you for reaching out to the Pixal Lab team. We appreciate your feedback and suggestions!
             </p>
             <button
               onClick={() => {

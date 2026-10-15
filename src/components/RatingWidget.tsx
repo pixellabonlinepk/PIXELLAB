@@ -79,7 +79,7 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
 
       existing[targetId] = {
         toolId: targetId,
-        toolName: toolName || 'Pixel Lab Tool',
+        toolName: toolName || 'Pixal Lab Tool',
         rating: selectedRating,
         timestamp: new Date().toISOString(),
         storageType: 'local-only',
@@ -166,7 +166,7 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
                   theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
                 }`}
               >
-                {toolName ? `Using ${toolName}` : 'How is Pixel Lab working for you?'}
+                {toolName ? `Using ${toolName}` : 'How is Pixal Lab working for you?'}
               </p>
             </div>
 

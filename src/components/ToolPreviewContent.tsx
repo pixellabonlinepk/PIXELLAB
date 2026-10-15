@@ -370,7 +370,7 @@ export const ToolPreviewContent: React.FC<ToolPreviewContentProps> = ({ toolId }
           />
           <div className="absolute inset-0 bg-slate-950/20 flex items-center justify-center">
             <span className="font-extrabold font-display text-white/70 tracking-widest text-lg sm:text-xl drop-shadow-lg -rotate-12 select-none border-2 border-white/40 px-3 py-1 rounded">
-              © PIXEL LAB
+              © PIXAL LAB
             </span>
           </div>
           <span className="absolute bottom-1.5 right-1.5 px-2 py-0.5 rounded bg-slate-950/80 text-[10px] text-slate-300">
@@ -582,7 +582,7 @@ export const ToolPreviewContent: React.FC<ToolPreviewContentProps> = ({ toolId }
           <div className="w-24 h-24 bg-white rounded-xl p-1.5 shadow-xl border border-slate-700 shrink-0 flex items-center justify-center">
             <img
               src={qrScannable}
-              alt="Genuinely scannable QR Code to Pixel Lab"
+              alt="Genuinely scannable QR Code to Pixal Lab"
               className="w-full h-full object-contain"
             />
           </div>
@@ -615,7 +615,7 @@ export const ToolPreviewContent: React.FC<ToolPreviewContentProps> = ({ toolId }
           </div>
           <div className="text-[10px] text-slate-300 space-y-1">
             <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-[9px] border border-cyan-800 block">
-              https://pixellab.app
+              https://pixallab.app
             </span>
             <div className="text-slate-400">Decoded safely in browser</div>
           </div>
@@ -955,7 +955,7 @@ export const ToolPreviewContent: React.FC<ToolPreviewContentProps> = ({ toolId }
         <div className="w-full h-full rounded-lg overflow-hidden relative">
           <img
             src={landscapeAlpineLake}
-            alt="Pixel Lab tool sample"
+            alt="Pixal Lab tool sample"
             className="w-full h-full object-cover"
           />
         </div>

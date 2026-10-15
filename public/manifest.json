@@ -1,0 +1,15 @@
+{
+  "short_name": "Pixal Lab",
+  "name": "Pixal Lab — Every Image. More Possibilities.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#050811",
+  "theme_color": "#0b1022",
+  "display": "standalone"
+}

@@ -22,7 +22,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
           }`}
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>About Pixel Lab</span>
+          <span>About Pixal Lab</span>
         </div>
         <h1
           className={`text-3xl sm:text-4xl font-extrabold font-display mb-4 ${
@@ -36,7 +36,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
             theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
           }`}
         >
-          Pixel Lab is a professional suite of {TOOLS.length} image processing and graphic creation tools designed from the ground up to run entirely inside your web browser without expensive server subscriptions or invasive data collection.
+          Pixal Lab is a professional suite of {TOOLS.length} image processing and graphic creation tools designed from the ground up to run entirely inside your web browser without expensive server subscriptions or invasive data collection.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
               theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
             }`}
           >
-            Most image converters upload your personal photos to remote cloud servers. Pixel Lab runs client-side JavaScript, Web Workers, and HTML5 Canvas directly on your computer or phone. Your photos never leave your device.
+            Most image converters upload your personal photos to remote cloud servers. Pixal Lab runs client-side JavaScript, Web Workers, and HTML5 Canvas directly on your computer or phone. Your photos never leave your device.
           </p>
         </div>
 
@@ -141,7 +141,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
             theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
           }`}
         >
-          We believe that basic image utilities should not require creating accounts, solving captchas, watching full-screen advertisements, or waiting in line for remote cloud render queues. Pixel Lab empowers photographers, content creators, students, and developers with blazing-fast, honest tools.
+          We believe that basic image utilities should not require creating accounts, solving captchas, watching full-screen advertisements, or waiting in line for remote cloud render queues. Pixal Lab empowers photographers, content creators, students, and developers with blazing-fast, honest tools.
         </p>
         <div className="pt-2">
           <button

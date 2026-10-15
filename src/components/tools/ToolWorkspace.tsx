@@ -139,7 +139,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   const [sharpenAmount, setSharpenAmount] = useState<number>(2);
 
   // 10. Watermark
-  const [wmText, setWmText] = useState<string>('PIXEL LAB');
+  const [wmText, setWmText] = useState<string>('PIXAL LAB');
   const [wmSize, setWmSize] = useState<number>(36);
   const [wmColor, setWmColor] = useState<string>('#ffffff');
   const [wmOpacity, setWmOpacity] = useState<number>(0.7);
@@ -167,7 +167,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
   // 15. YouTube Thumbnail
   const [ytTitle, setYtTitle] = useState<string>('HOW TO EDIT LIKE A PRO');
-  const [ytSubtitle, setYtSubtitle] = useState<string>('Pixel Lab Masterclass 2026');
+  const [ytSubtitle, setYtSubtitle] = useState<string>('Pixal Lab Masterclass 2026');
   const [ytBadge, setYtBadge] = useState<string>('NEW GUIDE');
   const [ytGradient, setYtGradient] = useState<'blue-violet' | 'emerald-cyan' | 'amber-rose' | 'dark-scrim'>('blue-violet');
 
@@ -182,7 +182,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // 18. QR Code Generator
-  const [qrText, setQrText] = useState<string>('https://pixellab.app');
+  const [qrText, setQrText] = useState<string>('https://pixallab.app');
   const [qrDarkColor, setQrDarkColor] = useState<string>('#000000');
   const [qrLightColor, setQrLightColor] = useState<string>('#ffffff');
 

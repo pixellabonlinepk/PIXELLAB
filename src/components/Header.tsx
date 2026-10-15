@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
                       theme === 'dark' ? 'text-white' : 'text-slate-900'
                     }`}
                   >
-                    PIXEL
+                    PIXAL
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">
                       LAB
                     </span>

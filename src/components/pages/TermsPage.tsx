@@ -58,7 +58,7 @@ export const TermsPage: React.FC = () => {
               theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
             }`}
           >
-            Pixel Lab provides web-based client-side graphic processing software on an &quot;as-is&quot; and &quot;as-available&quot; basis. Because processing runs in your browser, performance depends on your device CPU, memory, and browser capabilities.
+            Pixal Lab provides web-based client-side graphic processing software on an &quot;as-is&quot; and &quot;as-available&quot; basis. Because processing runs in your browser, performance depends on your device CPU, memory, and browser capabilities.
           </p>
         </div>
 
@@ -81,7 +81,7 @@ export const TermsPage: React.FC = () => {
               theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
             }`}
           >
-            You retain 100% full copyright and ownership of any images, graphics, memes, or documents processed through Pixel Lab. Pixel Lab claims zero rights or ownership over your output files.
+            You retain 100% full copyright and ownership of any images, graphics, memes, or documents processed through Pixal Lab. Pixal Lab claims zero rights or ownership over your output files.
           </p>
         </div>
 
@@ -104,7 +104,7 @@ export const TermsPage: React.FC = () => {
               theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
             }`}
           >
-            You agree not to use the tools to create illicit, infringing, defamatory, or abusive content. Pixel Lab is designed for legitimate creative, photography, and graphic design tasks.
+            You agree not to use the tools to create illicit, infringing, defamatory, or abusive content. Pixal Lab is designed for legitimate creative, photography, and graphic design tasks.
           </p>
         </div>
 

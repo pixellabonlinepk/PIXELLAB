@@ -200,7 +200,7 @@ export default function App() {
                       theme === 'dark' ? 'text-white' : 'text-slate-900'
                     }`}
                   >
-                    Why Creators Choose Pixel Lab
+                    Why Creators Choose Pixal Lab
                   </h2>
                   <p
                     className={`text-xs sm:text-sm ${
@@ -311,7 +311,7 @@ export default function App() {
                   theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
                 }`}
               >
-                Browse every utility in the Pixel Lab platform. Click any tool to open its dedicated workspace.
+                Browse every utility in the Pixal Lab platform. Click any tool to open its dedicated workspace.
               </p>
             </div>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Heart } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { TOOLS } from '../data/tools';
 
 interface FooterProps {
   onNavigate: (view: string, toolId?: string) => void;
@@ -35,7 +36,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   theme === 'dark' ? 'text-white' : 'text-slate-900'
                 }`}
               >
-                PIXEL<span className="text-cyan-500">LAB</span>
+                PIXAL<span className="text-cyan-500">LAB</span>
               </span>
             </div>
             <p
@@ -43,7 +44,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
               }`}
             >
-              Every Image. More Possibilities. Twenty-six high-performance browser tools for compressing, resizing, cropping, filtering, and converting images with total privacy.
+              Every Image. More Possibilities. Over {TOOLS.length} high-performance browser tools for compressing, resizing, cropping, filtering, and converting images with total privacy.
             </p>
             <div className="flex items-center gap-2 text-[11px] text-emerald-500 font-medium">
               <ShieldCheck className="w-4 h-4 shrink-0" />
@@ -194,7 +195,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                     theme === 'dark' ? 'hover:text-white' : 'hover:text-slate-900'
                   }`}
                 >
-                  About Pixel Lab
+                  About Pixal Lab
                 </button>
               </li>
               <li>
@@ -240,7 +241,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           }`}
         >
           <div>
-            © {new Date().getFullYear()} PIXEL LAB. All rights reserved. Built with HTML5 Canvas, Web Audio/Image APIs, and Zero-Budget Architecture.
+            © {new Date().getFullYear()} PIXAL LAB. All rights reserved. Built with HTML5 Canvas, Web Audio/Image APIs, and Zero-Budget Architecture.
           </div>
           <div className="flex items-center gap-1">
             <span>Crafted for creators everywhere with</span>
