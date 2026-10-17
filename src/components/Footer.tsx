@@ -234,16 +234,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Bottom bar */}
         <div
-          className={`pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] ${
+          className={`pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-center sm:text-left ${
             theme === 'dark'
               ? 'border-slate-900 text-slate-500'
               : 'border-slate-200 text-slate-500'
           }`}
         >
-          <div>
+          <div className="max-w-full break-words">
             © {new Date().getFullYear()} PIXAL LAB. All rights reserved. Built with HTML5 Canvas, Web Audio/Image APIs, and Zero-Budget Architecture.
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center justify-center gap-1 shrink-0">
             <span>Crafted for creators everywhere with</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
           </div>

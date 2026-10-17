@@ -1659,37 +1659,37 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-[#060a12] text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       {/* 1. TOP TOOLBAR */}
       <header
-        className={`sticky top-0 z-30 px-4 py-2.5 border-b backdrop-blur-md flex items-center justify-between gap-3 ${
+        className={`sticky top-0 z-30 px-3 sm:px-4 py-2 sm:py-2.5 border-b backdrop-blur-md flex items-center justify-between gap-2 sm:gap-3 w-full max-w-full overflow-hidden ${
           theme === 'dark' ? 'bg-[#090d16]/95 border-slate-800' : 'bg-white/95 border-slate-200'
         }`}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={onBack}
-            className={`p-1.5 rounded-lg border transition-colors flex items-center gap-1.5 text-xs font-medium ${
+            className={`p-1.5 rounded-lg border transition-colors flex items-center gap-1.5 text-xs font-medium shrink-0 ${
               theme === 'dark'
                 ? 'border-slate-800 hover:bg-slate-800/60 text-slate-300'
                 : 'border-slate-200 hover:bg-slate-100 text-slate-700'
             }`}
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Tools</span>
+            <span className="hidden sm:inline">Back</span>
           </button>
 
           <div className="h-4 w-px bg-slate-700/50 hidden sm:block" />
 
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center text-white shadow-md">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center text-white shadow-md shrink-0">
               <Users className="w-4 h-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm font-bold tracking-tight">Photo Collage & DP Maker</h1>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-400 border border-violet-500/30">
-                  Pro Studio
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-xs sm:text-sm font-bold tracking-tight truncate">Photo Collage & DP</h1>
+                <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-400 border border-violet-500/30 shrink-0">
+                  Pro
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 hidden md:block">
+              <p className="text-[10px] sm:text-[11px] text-slate-400 hidden md:block">
                 {selectedPreset.name} • {customWidth} × {customHeight} px
               </p>
             </div>
@@ -1697,7 +1697,7 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
         </div>
 
         {/* Center Controls: Undo, Redo, Zoom, Safe Area, Grid */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={handleUndo}
             disabled={historyIndex <= 0}
@@ -1724,7 +1724,7 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
           <button
             onClick={() => setShowSafeGuide(!showSafeGuide)}
             title="Toggle WhatsApp / IG Circle Guide"
-            className={`px-2 py-1 rounded-lg border text-xs flex items-center gap-1 transition-colors ${
+            className={`px-2 py-1 rounded-lg border text-xs hidden sm:flex items-center gap-1 transition-colors ${
               showSafeGuide
                 ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400'
                 : theme === 'dark'
@@ -1739,7 +1739,7 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
           <button
             onClick={() => setShowGridLines(!showGridLines)}
             title="Toggle Grid Lines"
-            className={`p-1.5 rounded-lg border text-xs transition-colors ${
+            className={`p-1.5 rounded-lg border text-xs hidden sm:flex transition-colors ${
               showGridLines
                 ? 'bg-violet-500/20 border-violet-500/50 text-violet-400'
                 : theme === 'dark'
@@ -1774,11 +1774,11 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
         </div>
 
         {/* Right Actions: Showcase Toggle, Clipboard Copy & Download */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             onClick={() => setShowShowcaseBanner((prev) => !prev)}
             title="Toggle Before/After Showcase"
-            className={`px-2.5 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1 ${
+            className={`px-2 py-1.5 rounded-xl border text-xs font-medium hidden sm:flex items-center gap-1 ${
               showShowcaseBanner
                 ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300'
                 : 'border-slate-800 bg-slate-900/60 text-slate-400'
@@ -1791,7 +1791,7 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
           <button
             onClick={handleCopyToClipboard}
             title="Copy to Clipboard"
-            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all ${
+            className={`p-1.5 sm:px-3 sm:py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all ${
               clipboardCopied
                 ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300'
                 : theme === 'dark'
@@ -1806,7 +1806,7 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
           <button
             onClick={handleExportDownload}
             disabled={isExporting}
-            className="px-4 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 text-white shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+            className="px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 text-white shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
           >
             {isExporting ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -1847,7 +1847,7 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
             </div>
 
             {/* Visual Transformation: Before (6 Photos) -> Arrow -> After (Circular Group DP) */}
-            <div className="flex items-center justify-center gap-4 sm:gap-6 w-full md:w-auto">
+            <div className="flex items-center justify-center gap-2.5 sm:gap-6 w-full md:w-auto max-w-full overflow-hidden">
               {/* Left Side: Before */}
               <div className="flex flex-col items-center">
                 <span className="px-2.5 py-0.5 rounded-full bg-blue-600 border border-blue-400/80 text-white text-[10px] font-bold uppercase tracking-wider mb-2 shadow-md shadow-blue-500/40">
@@ -2422,13 +2422,13 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
           </div>
 
           {/* Bottom Layer Strip (matching reference bottom panel) */}
-          <div className="w-full max-w-3xl mt-4 px-4 py-2.5 rounded-2xl bg-slate-900/90 border border-slate-800/80 backdrop-blur-md shadow-2xl flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+          <div className="w-full max-w-3xl mt-4 px-3 sm:px-4 py-2.5 rounded-2xl bg-slate-900/90 border border-slate-800/80 backdrop-blur-md shadow-2xl flex items-center justify-between gap-3 min-w-0">
+            <div className="flex items-center gap-2 shrink-0">
               <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Layers</span>
             </div>
 
             {/* Horizontal layer thumbnails */}
-            <div className="flex items-center gap-2 overflow-x-auto py-1">
+            <div className="flex items-center gap-2 overflow-x-auto py-1 min-w-0 flex-1">
               {slots.map((s, idx) => (
                 <div
                   key={s.id}

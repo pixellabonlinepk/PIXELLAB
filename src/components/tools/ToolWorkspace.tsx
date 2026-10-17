@@ -537,11 +537,11 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
   return (
     <div
-      className={`min-h-screen pb-20 pt-6 transition-colors duration-200 ${
+      className={`min-h-screen pb-20 pt-6 w-full max-w-full overflow-x-hidden transition-colors duration-200 ${
         theme === 'dark' ? 'dark-studio-bg text-slate-100' : 'light-studio-bg text-slate-900'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full min-w-0">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between mb-6">
           <div

@@ -67,6 +67,25 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Track page/view with Google Analytics on route or tool changes
+  useEffect(() => {
+    if (typeof (window as any).gtag === 'function') {
+      const pagePath = currentView === 'tool' ? `/#/tool/${selectedToolId}` : `/#/${currentView}`;
+      const pageTitle = currentView === 'tool' 
+        ? `${TOOLS.find(t => t.id === selectedToolId)?.name || 'Tool'} — Pixal Lab`
+        : currentView === 'home'
+        ? 'Pixal Lab — Every Image. More Possibilities.'
+        : `Pixal Lab — ${currentView.charAt(0).toUpperCase() + currentView.slice(1)}`;
+      
+      (window as any).gtag('event', 'page_view', {
+        page_title: pageTitle,
+        page_location: window.location.href,
+        page_path: pagePath,
+        send_to: 'G-ZBTVJ487QP',
+      });
+    }
+  }, [currentView, selectedToolId]);
+
   const navigateTo = (view: string, toolId?: string) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     if (view === 'tool' && toolId) {
@@ -103,7 +122,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col transition-colors duration-200 ${
+      className={`min-h-screen flex flex-col w-full max-w-full overflow-x-hidden transition-colors duration-200 ${
         theme === 'dark'
           ? 'dark-studio-bg text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200'
           : 'light-studio-bg text-slate-900 selection:bg-blue-500/30 selection:text-blue-900'
@@ -113,7 +132,7 @@ export default function App() {
       <Header currentView={currentView} onNavigate={navigateTo} />
 
       {/* MAIN VIEW CONTROLLER */}
-      <main className="flex-1">
+      <main className="flex-1 w-full max-w-full min-w-0">
         {/* VIEW 1: HOME PAGE */}
         {currentView === 'home' && (
           <div>
@@ -127,12 +146,12 @@ export default function App() {
             />
 
             {/* Tools Gallery Anchor Section */}
-            <section id="tools-gallery" className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <section id="tools-gallery" className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-hidden">
               {/* Subtle ambient light accents behind tool cards */}
               {theme === 'dark' && (
                 <>
-                  <div className="absolute top-1/4 -left-32 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
-                  <div className="absolute top-2/3 -right-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+                  <div className="absolute top-1/4 -left-12 sm:-left-32 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-600/10 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none" />
+                  <div className="absolute top-2/3 -right-12 sm:-right-32 w-72 sm:w-96 h-72 sm:h-96 bg-cyan-500/10 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none" />
                   <div className="absolute bottom-10 left-1/3 w-80 h-80 bg-violet-600/10 rounded-full blur-[100px] pointer-events-none" />
                 </>
               )}
@@ -161,7 +180,7 @@ export default function App() {
               </div>
 
               {/* Category Segmented Filter Tabs */}
-              <div className="relative z-10 mb-8">
+              <div className="relative z-10 mb-8 w-full max-w-full min-w-0">
                 <CategoryFilters
                   activeCategory={activeCategory}
                   onSelectCategory={(cat) => setActiveCategory(cat)}
@@ -315,7 +334,7 @@ export default function App() {
               </p>
             </div>
 
-            <div className="mb-8">
+            <div className="mb-8 w-full max-w-full min-w-0">
               <CategoryFilters
                 activeCategory={activeCategory}
                 onSelectCategory={(cat) => setActiveCategory(cat)}

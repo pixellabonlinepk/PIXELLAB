@@ -15,9 +15,9 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
   const { theme } = useTheme();
 
   return (
-    <div className="w-full overflow-x-auto pb-2 scrollbar-none">
+    <div className="w-full max-w-full overflow-x-auto pb-2 scrollbar-none min-w-0">
       <div
-        className={`flex items-center gap-1.5 p-1.5 border rounded-2xl w-max max-w-full transition-colors ${
+        className={`inline-flex items-center gap-1.5 p-1.5 border rounded-2xl min-w-max transition-colors ${
           theme === 'dark'
             ? 'bg-slate-900/70 backdrop-blur-md border-indigo-500/20 shadow-md shadow-black/20'
             : 'bg-white border-slate-200 shadow-xs'

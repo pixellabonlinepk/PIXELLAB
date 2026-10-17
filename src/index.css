@@ -6,10 +6,21 @@
     --font-display: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
+
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+  }
   
   body {
     font-family: var(--font-sans);
     transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  #root {
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   h1, h2, h3, .font-display {

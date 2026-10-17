@@ -108,7 +108,7 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
   return (
     <aside
       aria-label="Rate your experience"
-      className={`fixed top-24 sm:top-28 right-3 sm:right-6 z-40 w-[calc(100vw-24px)] max-w-xs sm:w-80 border rounded-2xl p-4 backdrop-blur-xl animate-in slide-in-from-top-3 fade-in duration-200 transition-colors ${
+      className={`fixed top-20 sm:top-28 left-3 right-3 sm:left-auto sm:right-6 sm:w-80 max-w-sm sm:max-w-xs mx-auto sm:mx-0 z-40 border rounded-2xl p-4 backdrop-blur-xl animate-in slide-in-from-top-3 fade-in duration-200 transition-colors ${
         theme === 'dark'
           ? 'bg-[#0b1022]/95 border-indigo-500/30 shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_20px_rgba(99,102,241,0.15)] text-white'
           : 'bg-white/95 border-slate-200 shadow-xl shadow-slate-300/60 text-slate-900'

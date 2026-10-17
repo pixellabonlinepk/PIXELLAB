@@ -20,32 +20,32 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
           : 'bg-white/90 border-slate-200 text-slate-900 shadow-xs'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
           {/* ZONE 1: BRAND LOGO */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={() => onNavigate('home')}
-              className="flex items-center gap-3 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1"
+              className="flex items-center gap-2.5 sm:gap-3 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1 min-w-0"
             >
-              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-500 to-cyan-400 p-[2px] shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-500 to-cyan-400 p-[2px] shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow shrink-0">
                 <div
                   className={`w-full h-full rounded-[10px] flex items-center justify-center relative overflow-hidden ${
                     theme === 'dark' ? 'bg-slate-950' : 'bg-slate-900'
                   }`}
                 >
-                  <div className="grid grid-cols-2 gap-1 p-2">
-                    <div className="w-2.5 h-2.5 rounded-sm bg-indigo-500 group-hover:scale-110 transition-transform" />
-                    <div className="w-2.5 h-2.5 rounded-sm bg-cyan-400 opacity-90 group-hover:scale-110 transition-transform delay-75" />
-                    <div className="w-2.5 h-2.5 rounded-sm bg-violet-400 opacity-90 group-hover:scale-110 transition-transform delay-100" />
-                    <div className="w-2.5 h-2.5 rounded-sm bg-blue-500 group-hover:scale-110 transition-transform delay-150" />
+                  <div className="grid grid-cols-2 gap-1 p-1.5 sm:p-2">
+                    <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-sm bg-indigo-500 group-hover:scale-110 transition-transform" />
+                    <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-sm bg-cyan-400 opacity-90 group-hover:scale-110 transition-transform delay-75" />
+                    <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-sm bg-violet-400 opacity-90 group-hover:scale-110 transition-transform delay-100" />
+                    <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-sm bg-blue-500 group-hover:scale-110 transition-transform delay-150" />
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1">
                   <span
-                    className={`font-display font-extrabold text-xl tracking-tight ${
+                    className={`font-display font-extrabold text-lg sm:text-xl tracking-tight leading-none ${
                       theme === 'dark' ? 'text-white' : 'text-slate-900'
                     }`}
                   >
@@ -56,11 +56,12 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
                   </span>
                 </div>
                 <span
-                  className={`text-[10px] tracking-wider uppercase font-semibold ${
+                  className={`text-[9px] sm:text-[10px] tracking-wider uppercase font-semibold truncate ${
                     theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
                   }`}
                 >
-                  Every Image. More Possibilities.
+                  <span className="hidden sm:inline">Every Image. More Possibilities.</span>
+                  <span className="sm:hidden">More Possibilities</span>
                 </span>
               </div>
             </button>
@@ -117,14 +118,14 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
           </nav>
 
           {/* ZONE 3: THEME TOGGLE & QUICK ACTIONS */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* COMPACT THEME TOGGLE (Exact position where the small secondary search bar was) */}
             <button
               type="button"
               onClick={toggleTheme}
               aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-xl border transition-all duration-200 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+              className={`flex items-center gap-2 p-2 sm:px-3 sm:py-1.5 text-xs font-medium rounded-xl border transition-all duration-200 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 shrink-0 ${
                 theme === 'dark'
                   ? 'bg-slate-900 border-slate-700/80 hover:border-slate-600 text-slate-200 hover:text-white hover:bg-slate-800/90 shadow-sm'
                   : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-100 shadow-xs'
@@ -257,15 +258,15 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
 
       {/* Zero Server Upload Privacy Guarantee Subheader Banner */}
       <div
-        className={`border-t py-1.5 px-4 text-center transition-colors ${
+        className={`border-t py-1.5 px-3 sm:px-4 text-center transition-colors w-full overflow-hidden ${
           theme === 'dark'
             ? 'bg-[#080d1e]/80 border-slate-800/50 text-slate-400'
             : 'bg-slate-100/70 border-slate-200 text-slate-600'
         }`}
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-[11px]">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] leading-tight">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-          <span>
+          <span className="break-words">
             <strong
               className={`font-semibold ${
                 theme === 'dark' ? 'text-slate-200' : 'text-slate-800'
@@ -273,7 +274,8 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
             >
               100% Client-Side Processing
             </strong>{' '}
-            — Your images never leave your browser. Zero uploads, zero storage, complete privacy.
+            <span className="hidden sm:inline">—</span>{' '}
+            <span>Your images never leave your browser. Zero uploads, zero storage.</span>
           </span>
         </div>
       </div>
