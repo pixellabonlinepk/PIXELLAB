@@ -62,6 +62,7 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
     // Save dismissal timestamp so it doesn't immediately prompt again
     try {
       localStorage.setItem('pixellab_rating_dismissed', new Date().toISOString());
+      localStorage.setItem('pixallab_rated', 'true');
     } catch {
       // storage unavailable
     }
@@ -88,6 +89,7 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
       // Persist in localStorage
       localStorage.setItem('pixellab_tool_ratings', JSON.stringify(existing));
       localStorage.setItem('pixellab_rating_dismissed', new Date().toISOString());
+      localStorage.setItem('pixallab_rated', 'true');
     } catch {
       // storage unavailable
     }

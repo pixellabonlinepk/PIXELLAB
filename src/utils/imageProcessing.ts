@@ -785,13 +785,17 @@ export async function generateWhatsAppDP(
 // 16. PASSPORT PHOTO RESIZER
 export async function generatePassportPhoto(
   img: HTMLImageElement,
-  preset: 'us-passport' | 'schengen' | 'uk-passport' | 'india-passport'
+  preset: 'pakistan-passport' | 'us-passport' | 'schengen' | 'uk-passport' | 'india-passport'
 ): Promise<{ blob: Blob; url: string; dimensionsText: string; dpi: number }> {
   let targetW = 600;
   let targetH = 600;
   let dimensionsText = '2x2 inches (51x51 mm) @ 300 DPI';
 
-  if (preset === 'schengen' || preset === 'uk-passport') {
+  if (preset === 'pakistan-passport') {
+    targetW = 413; // 35mm @ 300dpi
+    targetH = 531; // 45mm @ 300dpi
+    dimensionsText = '35x45 mm (Pakistan Passport & CNIC) @ 300 DPI';
+  } else if (preset === 'schengen' || preset === 'uk-passport') {
     targetW = 413; // 35mm @ 300dpi
     targetH = 531; // 45mm @ 300dpi
     dimensionsText = '35x45 mm @ 300 DPI';
@@ -1124,7 +1128,7 @@ export async function generateQrCodeUrl(
   const dark = options?.darkColor || '#000000';
   const light = options?.lightColor || '#ffffff';
 
-  const dataUrl = await QRCode.toDataURL(text || 'https://pixallab.app', {
+  const dataUrl = await QRCode.toDataURL(text || 'https://pixallab.online', {
     width,
     margin: 2,
     color: { dark, light },

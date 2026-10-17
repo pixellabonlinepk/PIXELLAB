@@ -16,8 +16,17 @@ import {
   Unlock,
   AlertTriangle,
   ZoomIn,
+  Share2,
+  Link2,
+  HelpCircle,
+  BookOpen,
+  ShieldCheck,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
 } from 'lucide-react';
 import { ToolMetadata } from '../../types';
+import { getToolGuide } from '../../data/toolGuides';
 import { ImageUploader } from '../ImageUploader';
 import {
   loadImage,
@@ -101,6 +110,10 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   // Comparison view toggle
   const [compareMode, setCompareMode] = useState<'after' | 'before' | 'split'>('after');
   const [splitPos, setSplitPos] = useState<number>(50);
+  const [openToolFaq, setOpenToolFaq] = useState<number | null>(0);
+
+  // High-value SEO guide for this specific tool
+  const guide = getToolGuide(tool.id, tool.name, tool.categoryLabel);
 
   // Specific Tool Settings:
   // 1. Compressor
@@ -163,7 +176,9 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   const [dpRingColor, setDpRingColor] = useState<string>('#3b82f6');
 
   // 14. Passport
-  const [passportPreset, setPassportPreset] = useState<'us-passport' | 'schengen' | 'uk-passport' | 'india-passport'>('us-passport');
+  const [passportPreset, setPassportPreset] = useState<
+    'pakistan-passport' | 'us-passport' | 'schengen' | 'uk-passport' | 'india-passport'
+  >('pakistan-passport');
 
   // 15. YouTube Thumbnail
   const [ytTitle, setYtTitle] = useState<string>('HOW TO EDIT LIKE A PRO');
@@ -603,6 +618,96 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
           </p>
         </div>
 
+        {/* 1-2-3 Step Progress Indicator for Common Users */}
+        <div className="mb-8">
+          <div
+            className={`p-3 sm:p-4 rounded-2xl border transition-all ${
+              theme === 'dark'
+                ? 'bg-slate-900/60 border-slate-800 backdrop-blur-md'
+                : 'bg-white border-slate-200 shadow-xs'
+            }`}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Step 1 */}
+              <div
+                className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${
+                  sourceImg || tool.id === 'qr-code-generator'
+                    ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
+                    : 'bg-indigo-950/40 border-indigo-500/60 text-indigo-200 ring-2 ring-indigo-500/20'
+                }`}
+              >
+                <div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                    sourceImg || tool.id === 'qr-code-generator'
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-indigo-600 text-white animate-pulse'
+                  }`}
+                >
+                  {sourceImg || tool.id === 'qr-code-generator' ? <Check className="w-4 h-4" /> : '1'}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold truncate">Step 1: Select Image</div>
+                  <div className="text-[10px] text-slate-400 truncate">
+                    {sourceImg ? 'Photo loaded' : 'Drop or upload photo'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div
+                className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${
+                  resultBlob
+                    ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
+                    : sourceImg || tool.id === 'qr-code-generator'
+                    ? 'bg-cyan-950/40 border-cyan-500/60 text-cyan-200 ring-2 ring-cyan-500/20'
+                    : 'bg-slate-950/40 border-slate-800 text-slate-500 opacity-60'
+                }`}
+              >
+                <div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                    resultBlob
+                      ? 'bg-emerald-500 text-white'
+                      : sourceImg || tool.id === 'qr-code-generator'
+                      ? 'bg-cyan-500 text-white animate-pulse'
+                      : 'bg-slate-800 text-slate-400'
+                  }`}
+                >
+                  {resultBlob ? <Check className="w-4 h-4" /> : '2'}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold truncate">Step 2: Customize Settings</div>
+                  <div className="text-[10px] text-slate-400 truncate">
+                    {sourceImg ? 'Adjust sliders & presets' : 'Waiting for photo'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div
+                className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${
+                  resultBlob
+                    ? 'bg-blue-950/40 border-blue-500/60 text-blue-200 ring-2 ring-blue-500/20'
+                    : 'bg-slate-950/40 border-slate-800 text-slate-500 opacity-60'
+                }`}
+              >
+                <div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                    resultBlob ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white' : 'bg-slate-800 text-slate-400'
+                  }`}
+                >
+                  3
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold truncate">Step 3: Instant Download</div>
+                  <div className="text-[10px] text-slate-400 truncate">
+                    {resultBlob ? 'Ready to save (100% private)' : 'Finish edits to export'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* WORKBENCH CONTENT */}
         {!sourceImg && tool.id !== 'qr-code-generator' ? (
           /* Empty / Upload View */
@@ -684,11 +789,25 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         Original
                       </button>
                     )}
+                    {sourceUrl && resultUrl && (
+                      <button
+                        onClick={() => setCompareMode('split')}
+                        className={`px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 ${
+                          compareMode === 'split'
+                            ? 'bg-indigo-600 text-white font-semibold'
+                            : theme === 'dark'
+                            ? 'text-slate-400 hover:text-white'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <span>Split View</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
                 {/* The Canvas / Image Viewer */}
-                <div className="w-full min-h-[360px] max-h-[560px] rounded-xl bg-checkerboard flex items-center justify-center p-3 relative overflow-hidden border border-slate-800">
+                <div className="w-full min-h-[360px] max-h-[560px] rounded-xl bg-checkerboard flex items-center justify-center p-3 relative overflow-hidden border border-slate-800 select-none">
                   {/* Color Picker Interactive Canvas */}
                   {tool.id === 'color-picker-image' && sourceImg ? (
                     <div className="relative">
@@ -719,6 +838,71 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         </div>
                       )}
                     </div>
+                  ) : compareMode === 'split' && sourceUrl && resultUrl ? (
+                    /* Interactive Before / After Split Slider */
+                    <div
+                      className="relative w-full max-h-[500px] flex items-center justify-center cursor-ew-resize overflow-hidden rounded-lg"
+                      onMouseDown={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const updateSplit = (clientX: number) => {
+                          const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+                          setSplitPos(Math.round((x / rect.width) * 100));
+                        };
+                        updateSplit(e.clientX);
+                        const handleMouseMove = (moveEv: MouseEvent) => updateSplit(moveEv.clientX);
+                        const handleMouseUp = () => {
+                          window.removeEventListener('mousemove', handleMouseMove);
+                          window.removeEventListener('mouseup', handleMouseUp);
+                        };
+                        window.addEventListener('mousemove', handleMouseMove);
+                        window.addEventListener('mouseup', handleMouseUp);
+                      }}
+                      onTouchMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const touch = e.touches[0];
+                        if (touch) {
+                          const x = Math.max(0, Math.min(rect.width, touch.clientX - rect.left));
+                          setSplitPos(Math.round((x / rect.width) * 100));
+                        }
+                      }}
+                    >
+                      {/* Underlying Output (Result) Image */}
+                      <img
+                        src={resultUrl}
+                        alt="Output"
+                        className="max-h-[500px] max-w-full object-contain pointer-events-none rounded-lg"
+                      />
+
+                      {/* Clipped Original (Source) Image */}
+                      <div
+                        className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center"
+                        style={{ clipPath: `inset(0 ${100 - splitPos}% 0 0)` }}
+                      >
+                        <img
+                          src={sourceUrl}
+                          alt="Original"
+                          className="max-h-[500px] max-w-full object-contain rounded-lg"
+                        />
+                      </div>
+
+                      {/* Draggable Vertical Divider Line & Handle */}
+                      <div
+                        className="absolute top-0 bottom-0 w-0.5 bg-white cursor-ew-resize shadow-[0_0_8px_rgba(0,0,0,0.6)] z-20 pointer-events-none"
+                        style={{ left: `${splitPos}%` }}
+                      >
+                        <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-xl border-2 border-white text-xs font-bold tracking-tighter">
+                          ⇄
+                        </div>
+                      </div>
+
+                      {/* Overlay Labels */}
+                      <span className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-white text-[10px] font-bold tracking-wider pointer-events-none z-10 border border-white/10">
+                        ORIGINAL ({splitPos}%)
+                      </span>
+                      <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-indigo-600/90 backdrop-blur-md text-white text-[10px] font-bold tracking-wider pointer-events-none z-10 border border-white/20">
+                        OUTPUT ({100 - splitPos}%)
+                      </span>
+                    </div>
                   ) : compareMode === 'before' && sourceUrl ? (
                     <img
                       src={sourceUrl}
@@ -737,6 +921,25 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                     </div>
                   )}
                 </div>
+
+                {/* Slider bar control when in Split mode */}
+                {compareMode === 'split' && sourceUrl && resultUrl && (
+                  <div className="mt-3 px-2">
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                      <span>Original</span>
+                      <span className="font-mono text-cyan-400 font-bold">{splitPos}% / {100 - splitPos}%</span>
+                      <span>Output</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={splitPos}
+                      onChange={(e) => setSplitPos(Number(e.target.value))}
+                      className="w-full accent-indigo-500 cursor-ew-resize"
+                    />
+                  </div>
+                )}
 
                 {/* Footer specs inside preview card */}
                 <div
@@ -822,10 +1025,44 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                   {/* Image Compressor */}
                   {tool.id === 'image-compressor' && (
                     <div className="space-y-4">
+                      {/* 1-Click Quick Presets for Common Users */}
+                      <div>
+                        <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                          1-Click Quick Presets
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { label: 'WhatsApp / Email', quality: 0.6, format: 'image/jpeg', tag: 'Fast send' },
+                            { label: 'Best Web Quality', quality: 0.8, format: 'image/webp', tag: 'Recommended' },
+                            { label: 'Extreme 80% Shrink', quality: 0.35, format: 'image/jpeg', tag: 'Smallest size' },
+                            { label: 'Lossless Clarity', quality: 0.95, format: 'image/png', tag: 'Max quality' },
+                          ].map((p) => (
+                            <button
+                              key={p.label}
+                              type="button"
+                              onClick={() => {
+                                setCompQuality(p.quality);
+                                setCompFormat(p.format);
+                              }}
+                              className={`p-2 rounded-xl text-left border transition-all ${
+                                Math.abs(compQuality - p.quality) < 0.05 && compFormat === p.format
+                                  ? 'bg-cyan-950/80 border-cyan-500 text-cyan-200'
+                                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                              }`}
+                            >
+                              <div className="font-semibold text-[11px] text-white">{p.label}</div>
+                              <div className="text-[10px] text-cyan-400 font-mono mt-0.5">
+                                {Math.round(p.quality * 100)}% · {p.tag}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
                       <div>
                         <div className="flex justify-between text-xs text-slate-300 mb-1.5">
-                          <span>Quality</span>
-                          <span className="font-mono text-cyan-400">
+                          <span>Manual Quality Slider</span>
+                          <span className="font-mono text-cyan-400 font-bold">
                             {Math.round(compQuality * 100)}%
                           </span>
                         </div>
@@ -866,6 +1103,41 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                   {/* 6. Image Resizer */}
                   {tool.id === 'image-resizer' && (
                     <div className="space-y-4">
+                      {/* 1-Click Popular Resolution Presets */}
+                      <div>
+                        <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                          1-Click Social & Screen Presets
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {[
+                            { label: 'Full HD', w: 1920, h: 1080 },
+                            { label: 'Instagram Post', w: 1080, h: 1080 },
+                            { label: 'WhatsApp DP', w: 500, h: 500 },
+                            { label: 'Social Banner', w: 1200, h: 630 },
+                            { label: 'Story / Reel', w: 1080, h: 1920 },
+                            { label: '4K Ultra HD', w: 3840, h: 2160 },
+                          ].map((p) => (
+                            <button
+                              key={p.label}
+                              type="button"
+                              onClick={() => {
+                                setResizeW(p.w);
+                                setResizeH(p.h);
+                                setLockAspect(false);
+                              }}
+                              className={`p-2 rounded-xl text-left border transition-all ${
+                                resizeW === p.w && resizeH === p.h
+                                  ? 'bg-blue-950/80 border-blue-500 text-blue-200'
+                                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                              }`}
+                            >
+                              <div className="font-semibold text-[11px] text-white">{p.label}</div>
+                              <div className="text-[10px] text-blue-400 font-mono mt-0.5">{p.w}×{p.h}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="text-xs text-slate-400 block mb-1">
@@ -1333,6 +1605,11 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                       <div className="space-y-2">
                         {[
                           {
+                            id: 'pakistan-passport',
+                            label: 'Pakistan Passport & CNIC (35×45 mm)',
+                            spec: '413×531 px @ 300 DPI (Official NADRA / Visa Standard)',
+                          },
+                          {
                             id: 'us-passport',
                             label: 'United States (2×2 in / 51×51 mm)',
                             spec: '600×600 px @ 300 DPI',
@@ -1625,15 +1902,242 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                   <p className="text-[11px] text-center text-slate-500 mt-2">
                     Processed safely in your browser. Never uploaded to servers.
                   </p>
+
+                  {/* Social Share Bar */}
+                  <div className="mt-4 pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span className="text-slate-400 font-medium text-[11px]">Share this tool:</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+                            `Check out this free 100% private ${tool.name} on Pixal Lab: https://pixallab.online/#/tool/${tool.id}`
+                          )}`;
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                        }}
+                        className="p-1.5 px-2.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-800/60 text-emerald-300 flex items-center gap-1 text-[11px] transition-colors"
+                        title="Share on WhatsApp"
+                      >
+                        <Share2 className="w-3 h-3" />
+                        <span>WhatsApp</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                            `Free 100% private in-browser ${tool.name} without any server uploads — Pixal Lab`
+                          )}&url=${encodeURIComponent(`https://pixallab.online/#/tool/${tool.id}`)}`;
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                        }}
+                        className="p-1.5 px-2.5 rounded-lg bg-sky-950/60 hover:bg-sky-900 border border-sky-800/60 text-sky-300 flex items-center gap-1 text-[11px] transition-colors"
+                        title="Share on X / Twitter"
+                      >
+                        <span>X / Twitter</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`https://pixallab.online/#/tool/${tool.id}`);
+                          setCopiedText(`Link copied!`);
+                          setTimeout(() => setCopiedText(null), 2500);
+                        }}
+                        className="p-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 flex items-center gap-1 text-[11px] transition-colors"
+                        title="Copy Link"
+                      >
+                        <Link2 className="w-3 h-3" />
+                        <span>Copy Link</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
+        {/* HIGH-VALUE SEO & EDUCATIONAL ARTICLE SECTION (AdSense & Search Optimization) */}
+        <section
+          className={`mt-16 rounded-3xl p-6 sm:p-10 border transition-all ${
+            theme === 'dark'
+              ? 'bg-slate-900/60 border-slate-800/90 shadow-2xl backdrop-blur-md'
+              : 'bg-white border-slate-200 shadow-md'
+          }`}
+        >
+          {/* Article Header */}
+          <div className="max-w-3xl mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-3">
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>User Guide & Reference</span>
+            </div>
+            <h2
+              className={`text-2xl sm:text-3xl font-extrabold font-display mb-3 ${
+                theme === 'dark' ? 'text-white' : 'text-slate-900'
+              }`}
+            >
+              How to Use {tool.name} Online
+            </h2>
+            <p
+              className={`text-sm leading-relaxed ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+              }`}
+            >
+              Learn how Pixal Lab executes instantaneous, client-side {tool.name.toLowerCase()} directly within your browser, ensuring enterprise-grade data privacy and zero quality loss.
+            </p>
+          </div>
+
+          {/* 3 Step Guide Cards */}
+          <div className="mb-12">
+            <h3
+              className={`text-base font-bold mb-4 flex items-center gap-2 ${
+                theme === 'dark' ? 'text-white' : 'text-slate-900'
+              }`}
+            >
+              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+              <span>Quick 3-Step Walkthrough</span>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {guide.steps.map((st) => (
+                <div
+                  key={st.step}
+                  className={`p-5 rounded-2xl border transition-all ${
+                    theme === 'dark'
+                      ? 'bg-slate-950/80 border-slate-800 hover:border-slate-700'
+                      : 'bg-slate-50 border-slate-200 hover:border-indigo-300'
+                  }`}
+                >
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-white flex items-center justify-center font-bold text-sm mb-3 shadow-md">
+                    0{st.step}
+                  </div>
+                  <h4
+                    className={`text-sm font-bold mb-1.5 ${
+                      theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    }`}
+                  >
+                    {st.title}
+                  </h4>
+                  <p
+                    className={`text-xs leading-relaxed ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                    }`}
+                  >
+                    {st.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* How It Works Deep Dive */}
+          <div className="mb-12">
+            <h3
+              className={`text-base font-bold mb-3 flex items-center gap-2 ${
+                theme === 'dark' ? 'text-white' : 'text-slate-900'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>How It Works & Architectural Security</span>
+            </h3>
+            <div
+              className={`p-6 rounded-2xl border leading-relaxed text-xs sm:text-sm ${
+                theme === 'dark'
+                  ? 'bg-slate-950/60 border-slate-800/80 text-slate-300'
+                  : 'bg-slate-50/80 border-slate-200 text-slate-700'
+              }`}
+            >
+              <p>{guide.howItWorks}</p>
+            </div>
+          </div>
+
+          {/* Key Advantages Grid */}
+          <div className="mb-12">
+            <h3
+              className={`text-base font-bold mb-4 flex items-center gap-2 ${
+                theme === 'dark' ? 'text-white' : 'text-slate-900'
+              }`}
+            >
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>Key Benefits & Advantages</span>
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {guide.benefits.map((b, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3.5 rounded-xl border flex items-start gap-3 ${
+                    theme === 'dark'
+                      ? 'bg-slate-950/60 border-slate-800/80 text-slate-300'
+                      : 'bg-white border-slate-200 text-slate-700'
+                  }`}
+                >
+                  <Check className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                  <span className="text-xs sm:text-[13px]">{b}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Frequently Asked Questions Accordion */}
+          <div>
+            <h3
+              className={`text-base font-bold mb-4 flex items-center gap-2 ${
+                theme === 'dark' ? 'text-white' : 'text-slate-900'
+              }`}
+            >
+              <HelpCircle className="w-4 h-4 text-indigo-400" />
+              <span>Frequently Asked Questions ({guide.faqs.length})</span>
+            </h3>
+            <div className="space-y-3">
+              {guide.faqs.map((faq, idx) => {
+                const isOpen = openToolFaq === idx;
+                return (
+                  <div
+                    key={idx}
+                    className={`rounded-2xl border transition-all ${
+                      theme === 'dark'
+                        ? 'bg-slate-950/70 border-slate-800/80 hover:border-slate-700'
+                        : 'bg-slate-50 border-slate-200 hover:border-indigo-300'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenToolFaq(isOpen ? null : idx)}
+                      className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4"
+                    >
+                      <span
+                        className={`text-xs sm:text-sm font-semibold ${
+                          theme === 'dark' ? 'text-slate-200' : 'text-slate-900'
+                        }`}
+                      >
+                        {faq.question}
+                      </span>
+                      <span className="p-1 rounded-lg text-slate-400 shrink-0">
+                        {isOpen ? (
+                          <ChevronUp className="w-4 h-4 text-indigo-400" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </span>
+                    </button>
+                    {isOpen && (
+                      <div
+                        className={`px-4 pb-4 sm:px-5 sm:pb-5 pt-0 text-xs sm:text-sm leading-relaxed border-t ${
+                          theme === 'dark'
+                            ? 'text-slate-400 border-slate-800/60'
+                            : 'text-slate-600 border-slate-200/80'
+                        }`}
+                      >
+                        {faq.answer}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* RELATED TOOLS SECTION */}
         <div
-          className={`mt-20 pt-10 border-t ${
+          className={`mt-16 pt-10 border-t ${
             theme === 'dark' ? 'border-slate-800' : 'border-slate-200'
           }`}
         >

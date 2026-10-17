@@ -9,6 +9,24 @@ export type ToolCategory =
 
 export type ToolBadge = 'Free' | 'Browser-Based';
 
+export interface ToolGuideStep {
+  step: number;
+  title: string;
+  desc: string;
+}
+
+export interface ToolFAQ {
+  question: string;
+  answer: string;
+}
+
+export interface ToolGuideContent {
+  steps: ToolGuideStep[];
+  howItWorks: string;
+  benefits: string[];
+  faqs: ToolFAQ[];
+}
+
 export interface ToolMetadata {
   id: string;
   name: string;
@@ -35,4 +53,5 @@ export interface ToolMetadata {
   sampleAfter?: string;
   acceptedFormats: string[];
   maxFileSizeMB: number;
+  guide?: ToolGuideContent;
 }

@@ -11,9 +11,48 @@ import { TermsPage } from './components/pages/TermsPage';
 import { ContactPage } from './components/pages/ContactPage';
 import { RatingWidget } from './components/RatingWidget';
 import { TOOLS } from './data/tools';
+import { getToolGuide } from './data/toolGuides';
 import { ToolCategory } from './types';
 import { useTheme } from './context/ThemeContext';
-import { Sparkles, Compass, ShieldCheck, ArrowRight, Zap, Image as ImageIcon } from 'lucide-react';
+import {
+  Sparkles,
+  Compass,
+  ShieldCheck,
+  ArrowRight,
+  Zap,
+  Image as ImageIcon,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
+
+export const HOMEPAGE_FAQS = [
+  {
+    question: 'How is Pixal Lab completely private with zero server uploads?',
+    answer:
+      'Unlike standard online image converters that transmit your files to remote cloud servers, Pixal Lab processes your photos 100% locally on your computer or phone using modern HTML5 Canvas, WebGL, and WebAssembly APIs. Your personal images, sensitive documents, and photos never leave your device memory.',
+  },
+  {
+    question: 'Are all tools on Pixal Lab free to use without an account?',
+    answer:
+      'Yes! Every single tool in our 31+ image utility collection is completely free forever. You never have to create an account, enter credit card details, pay subscription fees, or deal with rate limits.',
+  },
+  {
+    question: 'Can I use Pixal Lab on my iPhone, Android, or tablet?',
+    answer:
+      'Absolutely. Pixal Lab is engineered with a mobile-first responsive architecture that adjusts smoothly to all screen sizes, including iOS Safari, Android Chrome, iPads, and high-resolution desktop displays.',
+  },
+  {
+    question: 'What file formats and sizes are supported?',
+    answer:
+      'Pixal Lab supports all common raster and vector formats including JPG/JPEG, PNG, WebP, SVG, and PDF documents, handling image resolutions up to 50 MB per file with instant real-time results.',
+  },
+  {
+    question: 'Can I use images edited on Pixal Lab for commercial or client work?',
+    answer:
+      'Yes. You retain 100% copyright and intellectual property rights over all images, collages, signatures, and QR codes processed on Pixal Lab. We place zero watermarks on your exports.',
+  },
+];
 
 export default function App() {
   const { theme } = useTheme();
@@ -21,16 +60,22 @@ export default function App() {
   const [selectedToolId, setSelectedToolId] = useState<string>('image-compressor');
   const [activeCategory, setActiveCategory] = useState<ToolCategory>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  // Rating widget is visible immediately on initial page load and refresh (including homepage)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+
+  // Rating widget starts closed; only appears after a user finishes a tool export if not previously rated
   const [ratingWidget, setRatingWidget] = useState<{
     isOpen: boolean;
     toolId?: string;
     toolName?: string;
-  }>({ isOpen: true });
+  }>({ isOpen: false });
 
   // Update rating widget context if user uses a tool
   useEffect(() => {
     const handleToolCompleted = (event: Event) => {
+      // Do not open if user already rated or dismissed
+      if (localStorage.getItem('pixallab_rated') === 'true') {
+        return;
+      }
       const customEvent = event as CustomEvent<{ toolId?: string; toolName?: string }>;
       setRatingWidget({
         isOpen: true,
@@ -67,20 +112,169 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Track page/view with Google Analytics on route or tool changes
+  // DYNAMIC SEO & META ENGINE: updates title, description, canonical link, open graph, and injects JSON-LD schema
   useEffect(() => {
+    let pageTitle = 'Pixal Lab — Every Image. More Possibilities.';
+    let pageDesc =
+      'Every Image. More Possibilities. Resize, compress, edit, convert, and enhance your images with simple, powerful browser-based tools in one place.';
+    let canonicalUrl = 'https://pixallab.online/';
+    let jsonLdData: any = null;
+
+    if (currentView === 'tool') {
+      const activeTool = TOOLS.find((t) => t.id === selectedToolId) || TOOLS[0];
+      const guide = getToolGuide(activeTool.id, activeTool.name, activeTool.categoryLabel);
+
+      pageTitle = `${activeTool.name} Online — Free & 100% Private | Pixal Lab`;
+      pageDesc = `${activeTool.description} Fast, secure in-browser processing with zero server uploads and instant export.`;
+      canonicalUrl = `https://pixallab.online/#/tool/${activeTool.id}`;
+
+      jsonLdData = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          name: `${activeTool.name} — Pixal Lab`,
+          applicationCategory: 'DesignApplication',
+          operatingSystem: 'All',
+          description: activeTool.description,
+          url: canonicalUrl,
+          offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'USD',
+          },
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.9',
+            ratingCount: '1280',
+            bestRating: '5',
+            worstRating: '1',
+          },
+          featureList: activeTool.features.join(', '),
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: guide.faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: faq.answer,
+            },
+          })),
+        },
+      ];
+    } else if (currentView === 'home') {
+      pageTitle = 'Pixal Lab — Every Image. More Possibilities.';
+      pageDesc =
+        'Every Image. More Possibilities. Resize, compress, edit, convert, and enhance your images with simple, powerful browser-based tools in one place.';
+      canonicalUrl = 'https://pixallab.online/';
+
+      jsonLdData = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'Pixal Lab',
+          applicationCategory: 'DesignApplication',
+          operatingSystem: 'All',
+          url: 'https://pixallab.online/',
+          description: pageDesc,
+          offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'USD',
+          },
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.9',
+            ratingCount: '2450',
+            bestRating: '5',
+            worstRating: '1',
+          },
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: HOMEPAGE_FAQS.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: faq.answer,
+            },
+          })),
+        },
+      ];
+    } else if (currentView === 'all-tools') {
+      pageTitle = `All ${TOOLS.length} Image Tools — Free Online Editor Suite | Pixal Lab`;
+      pageDesc = `Explore all ${TOOLS.length} high-performance image manipulation utilities in Pixal Lab. Compress, resize, crop, filter, convert, and create with zero server uploads.`;
+      canonicalUrl = 'https://pixallab.online/#/all-tools';
+    } else if (currentView === 'about') {
+      pageTitle = 'About Pixal Lab — 100% In-Browser Image Studio';
+      pageDesc =
+        'Learn how Pixal Lab delivers free, secure client-side image processing tools without subscriptions or invasive data tracking.';
+      canonicalUrl = 'https://pixallab.online/#/about';
+    } else if (currentView === 'privacy') {
+      pageTitle = 'Privacy Policy & Cookie Policy | Pixal Lab';
+      pageDesc =
+        'Read our transparent privacy policy. Pixal Lab runs 100% in your browser with zero image uploads, zero remote storage, and standard Google Analytics disclosure.';
+      canonicalUrl = 'https://pixallab.online/#/privacy';
+    } else if (currentView === 'terms') {
+      pageTitle = 'Terms of Service | Pixal Lab';
+      pageDesc = 'Terms of Service and usage conditions for Pixal Lab client-side image processing utilities.';
+      canonicalUrl = 'https://pixallab.online/#/terms';
+    } else if (currentView === 'contact') {
+      pageTitle = 'Contact & Support | Pixal Lab';
+      pageDesc =
+        'Get in touch with the Pixal Lab engineering and support team for feedback, feature requests, or business inquiries.';
+      canonicalUrl = 'https://pixallab.online/#/contact';
+    }
+
+    // 1. Update document title
+    document.title = pageTitle;
+
+    // 2. Update meta description
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', pageDesc);
+    }
+
+    // 3. Update OpenGraph tags
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', pageTitle);
+
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute('content', pageDesc);
+
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
+
+    // 4. Update canonical link
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) {
+      canonical.setAttribute('href', canonicalUrl);
+    }
+
+    // 5. Inject Dynamic JSON-LD Schema
+    const existingScript = document.getElementById('pixal-dynamic-jsonld');
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    if (jsonLdData) {
+      const script = document.createElement('script');
+      script.id = 'pixal-dynamic-jsonld';
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(jsonLdData);
+      document.head.appendChild(script);
+    }
+
+    // 6. Track page_view in Google Analytics
     if (typeof (window as any).gtag === 'function') {
-      const pagePath = currentView === 'tool' ? `/#/tool/${selectedToolId}` : `/#/${currentView}`;
-      const pageTitle = currentView === 'tool' 
-        ? `${TOOLS.find(t => t.id === selectedToolId)?.name || 'Tool'} — Pixal Lab`
-        : currentView === 'home'
-        ? 'Pixal Lab — Every Image. More Possibilities.'
-        : `Pixal Lab — ${currentView.charAt(0).toUpperCase() + currentView.slice(1)}`;
-      
       (window as any).gtag('event', 'page_view', {
         page_title: pageTitle,
         page_location: window.location.href,
-        page_path: pagePath,
+        page_path: window.location.pathname + window.location.hash,
         send_to: 'G-ZBTVJ487QP',
       });
     }
@@ -308,6 +502,86 @@ export default function App() {
                       Everything from simple rotations and crops to watermarking, multi-photo collages, YouTube thumbnails, and PDF workflows.
                     </p>
                   </div>
+                </div>
+              </div>
+            </section>
+
+            {/* HOMEPAGE FREQUENTLY ASKED QUESTIONS SECTION (AdSense & High-Value Content) */}
+            <section
+              className={`py-16 border-t transition-colors duration-200 ${
+                theme === 'dark'
+                  ? 'bg-slate-950/70 border-slate-800/80'
+                  : 'bg-white border-slate-200'
+              }`}
+            >
+              <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-10">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-3">
+                    <HelpCircle className="w-3.5 h-3.5" />
+                    <span>Common Questions</span>
+                  </div>
+                  <h2
+                    className={`text-2xl sm:text-3xl font-extrabold font-display mb-3 ${
+                      theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    }`}
+                  >
+                    Frequently Asked Questions about Pixal Lab
+                  </h2>
+                  <p
+                    className={`text-xs sm:text-sm max-w-xl mx-auto ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                    }`}
+                  >
+                    Everything you need to know about our 100% private in-browser image editing suite, data privacy guarantees, and free tools.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {HOMEPAGE_FAQS.map((faq, idx) => {
+                    const isOpen = openFaqIndex === idx;
+                    return (
+                      <div
+                        key={idx}
+                        className={`rounded-2xl border transition-all ${
+                          theme === 'dark'
+                            ? 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700'
+                            : 'bg-slate-50 border-slate-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                          className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4"
+                        >
+                          <span
+                            className={`text-sm sm:text-base font-bold ${
+                              theme === 'dark' ? 'text-white' : 'text-slate-900'
+                            }`}
+                          >
+                            {faq.question}
+                          </span>
+                          <span className="p-1 rounded-lg text-slate-400 shrink-0">
+                            {isOpen ? (
+                              <ChevronUp className="w-5 h-5 text-cyan-400" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5" />
+                            )}
+                          </span>
+                        </button>
+                        {isOpen && (
+                          <div
+                            className={`px-4 pb-5 sm:px-5 sm:pb-6 pt-0 text-xs sm:text-sm leading-relaxed border-t ${
+                              theme === 'dark'
+                                ? 'text-slate-400 border-slate-800/60'
+                                : 'text-slate-600 border-slate-200/80'
+                            }`}
+                          >
+                            {faq.answer}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </section>

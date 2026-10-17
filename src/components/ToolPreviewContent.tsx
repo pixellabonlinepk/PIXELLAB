@@ -615,7 +615,7 @@ export const ToolPreviewContent: React.FC<ToolPreviewContentProps> = ({ toolId }
           </div>
           <div className="text-[10px] text-slate-300 space-y-1">
             <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-[9px] border border-cyan-800 block">
-              https://pixallab.app
+              https://pixallab.online
             </span>
             <div className="text-slate-400">Decoded safely in browser</div>
           </div>

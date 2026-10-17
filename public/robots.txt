@@ -1,3 +1,6 @@
-# https://www.robotstxt.org/robotstxt.html
+# Pixal Lab Robots.txt
+# https://pixallab.online
 User-agent: *
 Allow: /
+
+Sitemap: https://pixallab.online/sitemap.xml
