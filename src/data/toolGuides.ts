@@ -222,6 +222,88 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       },
     ],
   },
+
+  'signature-maker': {
+    steps: [
+      { step: 1, title: 'Draw Signature', desc: 'Use mouse, trackpad, stylus, or touch screen to draw your signature smoothly.' },
+      { step: 2, title: 'Customize Stroke & Color', desc: 'Adjust pen width, select ink colors (black, blue, white), or switch to eraser mode.' },
+      { step: 3, title: 'Download PNG / SVG', desc: 'Export as transparent PNG for PDF contracts or copy straight to clipboard.' },
+    ],
+    howItWorks:
+      'Pixal Lab Digital Signature Maker captures high-precision vector touch coordinates and draws smooth quadratic Bezier curves on an HTML5 Canvas. The generated signature is rendered directly on your local device without sending strokes across the network, providing 100% security for legal agreements and document signings.',
+    benefits: [
+      'Smooth Bezier stroke interpolation prevents pixelation and jagged handwriting',
+      'Transparent PNG and scalable SVG vector download options',
+      '100% private: signature data never leaves your device memory',
+      'One-click direct copy to clipboard for rapid contract pasting',
+    ],
+    faqs: [
+      {
+        question: 'Is my digital signature legally valid?',
+        answer: 'Yes, electronic and digital signatures are accepted on most standard agreements, commercial contracts, and NDAs under the US ESIGN Act and international e-signature laws.',
+      },
+      {
+        question: 'Are my signatures saved on any server?',
+        answer: 'No. Everything is drawn and exported entirely inside your local browser memory. Zero signatures are stored, logged, or uploaded.',
+      },
+      {
+        question: 'Can I draw with an Apple Pencil or stylus pen?',
+        answer: 'Yes! The canvas is fully touch and stylus-enabled on iPad, Android tablets, and touchscreen laptops.',
+      },
+    ],
+  },
+
+  'image-splitter': {
+    steps: [
+      { step: 1, title: 'Upload Photo', desc: 'Select any wide photo, panorama, or square image.' },
+      { step: 2, title: 'Pick Grid Preset', desc: 'Select 3x1 carousel, 3x2, or 3x3 Instagram feed grid layout.' },
+      { step: 3, title: 'Download ZIP Tiles', desc: 'Download all slices packaged into a ZIP file with numbered ordering.' },
+    ],
+    howItWorks:
+      'The Image Splitter slices the source canvas into exact mathematical columns and rows using client-side sub-pixel coordinate bounding boxes. Each tile is encoded into high-resolution PNG or JPG format and bundled into a ZIP file using the JSZip library.',
+    benefits: [
+      'Create viral 3x3 puzzle feeds and seamless multi-slide panoramic carousels',
+      'Pre-configured presets for Instagram feeds, carousels, and stories',
+      'Numbered tile naming for effortless sequential uploading',
+      'Lossless client-side image slicing with zero server uploads',
+    ],
+    faqs: [
+      {
+        question: 'How do I upload the split images to Instagram in order?',
+        answer: 'Upload tile 1 to tile 9 in reverse or sequential order as labeled on the downloaded files so the profile feed matches perfectly.',
+      },
+      {
+        question: 'Will splitting reduce image resolution?',
+        answer: 'No, each tile is cropped directly from original high-resolution pixels without downsampling.',
+      },
+    ],
+  },
+
+  'brightness-contrast-tool': {
+    steps: [
+      { step: 1, title: 'Upload Photo', desc: 'Drop any underexposed, dark, or washed-out photo into the editor.' },
+      { step: 2, title: 'Fine-Tune Sliders', desc: 'Adjust Brightness, dynamic Contrast, and Convolution Sharpening.' },
+      { step: 3, title: 'Instant Export', desc: 'Inspect split before/after view and download the enhanced high-def image.' },
+    ],
+    howItWorks:
+      'This studio processes raw pixel RGBA buffers via HTML5 Canvas ImageData. It applies mathematical contrast normalization curves, exposure gain adjustments, and 3x3 unsharp convolution matrices locally on your device CPU for instantaneous, artifact-free photo retouching.',
+    benefits: [
+      'Rescues dark, poorly lit, or hazy photos in seconds',
+      'Convolution sharpening brings out crisp texture and fine facial details',
+      'Real-time before-and-after split preview slider',
+      '100% private: photos remain strictly within browser memory',
+    ],
+    faqs: [
+      {
+        question: 'Does increasing contrast wash out skin tones?',
+        answer: 'Our algorithm applies balanced tonal scaling to preserve highlights and shadows without harsh clipping.',
+      },
+      {
+        question: 'What does the sharpen slider do?',
+        answer: 'It applies a 3x3 unsharp mask kernel to edges in the image, making soft or slightly blurry photos look much crisper.',
+      },
+    ],
+  },
 };
 
 export function getToolGuide(toolId: string, toolName: string, categoryLabel: string): ToolGuideContent {

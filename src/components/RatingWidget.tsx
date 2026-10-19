@@ -110,11 +110,7 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
   return (
     <aside
       aria-label="Rate your experience"
-      className={`fixed top-20 sm:top-28 left-3 right-3 sm:left-auto sm:right-6 sm:w-80 max-w-sm sm:max-w-xs mx-auto sm:mx-0 z-40 border rounded-2xl p-4 backdrop-blur-xl animate-in slide-in-from-top-3 fade-in duration-200 transition-colors ${
-        theme === 'dark'
-          ? 'bg-[#0b1022]/95 border-indigo-500/30 shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_20px_rgba(99,102,241,0.15)] text-white'
-          : 'bg-white/95 border-slate-200 shadow-xl shadow-slate-300/60 text-slate-900'
-      }`}
+      className="fixed top-20 sm:top-28 left-3 right-3 sm:left-auto sm:right-6 sm:w-80 max-w-sm sm:max-w-xs mx-auto sm:mx-0 z-40 glass-panel rounded-2xl p-4 animate-in slide-in-from-top-3 fade-in duration-200 shadow-2xl"
     >
       {/* Top ambient color bar */}
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 rounded-t-2xl" />
@@ -126,18 +122,10 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
-            <div
-              className={`text-xs font-bold font-display ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              }`}
-            >
+            <div className="text-xs font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7]">
               Thank you for rating!
             </div>
-            <div
-              className={`text-[11px] mt-0.5 ${
-                theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-              }`}
-            >
+            <div className="text-[11px] mt-0.5 text-[#6E6E73] dark:text-[#86868B]">
               Saved <span className="text-amber-500 font-semibold">{selectedRating} stars</span> for your experience.
             </div>
           </div>
@@ -156,18 +144,10 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
           {/* Header Row: Title and Close button */}
           <div className="flex items-center justify-between gap-2">
             <div className="text-left">
-              <h4
-                className={`text-xs font-bold font-display flex items-center gap-1.5 ${
-                  theme === 'dark' ? 'text-white' : 'text-slate-900'
-                }`}
-              >
+              <h4 className="text-xs font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7] flex items-center gap-1.5">
                 <span>Rate Your Experience</span>
               </h4>
-              <p
-                className={`text-[10px] ${
-                  theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
-                }`}
-              >
+              <p className="text-[10px] text-[#6E6E73] dark:text-[#86868B]">
                 {toolName ? `Using ${toolName}` : 'How is Pixal Lab working for you?'}
               </p>
             </div>
@@ -176,11 +156,7 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
               type="button"
               onClick={handleDismiss}
               aria-label="Close rating widget"
-              className={`p-1 rounded-lg transition-colors ${
-                theme === 'dark'
-                  ? 'text-slate-400 hover:text-white hover:bg-slate-800'
-                  : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'
-              }`}
+              className="p-1 rounded-lg text-[#6E6E73] dark:text-[#86868B] hover:text-[#1D1D1F] dark:hover:text-[#F5F5F7] hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -257,11 +233,7 @@ export const RatingWidget: React.FC<RatingWidgetProps> = ({
             <button
               type="button"
               onClick={handleDismiss}
-              className={`px-2.5 py-1.5 rounded-xl text-xs transition-colors ${
-                theme === 'dark'
-                  ? 'text-slate-400 hover:text-slate-200 bg-slate-800/60 hover:bg-slate-800'
-                  : 'text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200'
-              }`}
+              className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-[#6E6E73] dark:text-[#86868B] hover:text-[#1D1D1F] dark:hover:text-[#F5F5F7] bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 transition-colors"
             >
               Later
             </button>

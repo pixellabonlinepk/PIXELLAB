@@ -1,11 +1,10 @@
 export type ToolCategory =
   | 'all'
-  | 'edit'
-  | 'compress-resize'
-  | 'conversion'
-  | 'social'
-  | 'pdf'
-  | 'color-qr';
+  | 'optimize-resize'
+  | 'convert-pdf'
+  | 'social-identity'
+  | 'edit-retouch'
+  | 'qr-utilities';
 
 export type ToolBadge = 'Free' | 'Browser-Based';
 

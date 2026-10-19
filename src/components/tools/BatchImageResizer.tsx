@@ -889,8 +889,8 @@ export const BatchImageResizer: React.FC<BatchImageResizerProps> = ({
             {[
               { id: 'image-resizer', name: 'Image Resizer', desc: 'Single image resizing with exact pixels' },
               { id: 'image-compressor', name: 'Image Compressor', desc: 'Shrink file size up to 90%' },
-              { id: 'image-splitter', name: 'Image Splitter', desc: 'Cut photos into grid pieces' },
-              { id: 'image-joiner', name: 'Image Joiner', desc: 'Stitch photos horizontally or vertically' },
+              { id: 'image-cropper', name: 'Image Cropper', desc: 'Cut photos to exact aspect ratios' },
+              { id: 'image-format-converter', name: 'Format Converter', desc: 'Convert PNG, JPG, and WebP' },
             ].map((related) => (
               <button
                 key={related.id}

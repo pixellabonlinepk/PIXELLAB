@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { UploadCloud, Image as ImageIcon, FileCheck, AlertCircle, Sparkles } from 'lucide-react';
+import { UploadCloud, FileCheck, AlertCircle, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { createSamplePortrait, createSampleLandscape } from '../utils/sampleImages';
-import { useTheme } from '../context/ThemeContext';
+import portraitYoungWoman from '../assets/images/portrait_young_woman_1791695480567.jpg';
+import landscapeAlpineLake from '../assets/images/landscape_alpine_lake_1791695494103.jpg';
 
 interface ImageUploaderProps {
   onImageSelected: (file: File | string, filename?: string) => void;
@@ -97,8 +98,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     onImageSelected(sampleDataUrl, `sample-${type}.png`);
   };
 
-  const { theme } = useTheme();
-
   return (
     <div className="w-full">
       <div
@@ -106,14 +105,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative rounded-3xl border-2 border-dashed p-8 sm:p-12 text-center transition-all cursor-pointer group ${
+        className={`relative rounded-3xl border-2 border-dashed p-8 sm:p-14 text-center transition-all cursor-pointer group glass-panel ${
           isDragging
-            ? theme === 'dark'
-              ? 'border-cyan-400 bg-cyan-950/20 scale-[0.99]'
-              : 'border-indigo-500 bg-indigo-50/50 scale-[0.99]'
-            : theme === 'dark'
-            ? 'border-slate-700/80 hover:border-slate-500 bg-slate-900/50 hover:bg-slate-900/80'
-            : 'border-slate-300 hover:border-indigo-400 bg-white hover:bg-slate-50 shadow-sm'
+            ? 'border-indigo-500 scale-[0.99] ring-4 ring-indigo-500/20'
+            : 'border-indigo-500/30 hover:border-indigo-500'
         }`}
       >
         <input
@@ -125,89 +120,89 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           className="hidden"
         />
 
-        <div className="flex flex-col items-center justify-center max-w-md mx-auto">
-          {/* Animated upload icon */}
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/25 mb-4 group-hover:scale-110 transition-transform">
+        <div className="flex flex-col items-center justify-center max-w-lg mx-auto">
+          {/* Liquid upload icon */}
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-blue-500 to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-4 group-hover:scale-105 transition-transform duration-300">
             <UploadCloud className="w-8 h-8" />
           </div>
 
-          <h3
-            className={`text-base sm:text-lg font-bold mb-2 ${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
-            }`}
-          >
-            Drag & drop your {acceptPdf ? 'PDF' : multiple ? 'images' : 'image'} here
+          <h3 className="text-xl sm:text-2xl font-bold mb-2 text-[#1D1D1F] dark:text-[#F5F5F7] font-display">
+            Drag & drop your {acceptPdf ? 'PDF document' : multiple ? 'images' : 'photo'} here
           </h3>
 
-          <p
-            className={`text-xs mb-5 ${
-              theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
-            }`}
-          >
-            or click to browse files from your computer or phone
+          <p className="text-xs sm:text-sm mb-6 text-[#6E6E73] dark:text-[#86868B]">
+            or click anywhere to browse files from your computer or phone
           </p>
 
-          {/* Action button */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          {/* Action buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 fileInputRef.current?.click();
               }}
-              className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 transition-colors"
+              className="px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md transition-all active:scale-95"
             >
               Browse Files
             </button>
 
             {!acceptPdf && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleLoadSample('portrait');
-                }}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold border transition-colors flex items-center gap-1.5 ${
-                  theme === 'dark'
-                    ? 'text-cyan-300 bg-cyan-950/60 hover:bg-cyan-900/60 border-cyan-800/60'
-                    : 'text-cyan-800 bg-cyan-50 hover:bg-cyan-100 border-cyan-200'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Load Sample Photo</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLoadSample('portrait');
+                  }}
+                  className="px-3.5 py-2 rounded-full text-xs font-semibold bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[#1D1D1F] dark:text-[#F5F5F7] border border-black/5 dark:border-white/10 flex items-center gap-2 transition-all active:scale-95"
+                >
+                  <img
+                    src={portraitYoungWoman}
+                    alt="Portrait sample"
+                    className="w-4 h-4 rounded-full object-cover"
+                  />
+                  <span>Try Portrait Sample</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLoadSample('landscape');
+                  }}
+                  className="px-3.5 py-2 rounded-full text-xs font-semibold bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[#1D1D1F] dark:text-[#F5F5F7] border border-black/5 dark:border-white/10 flex items-center gap-2 transition-all active:scale-95"
+                >
+                  <img
+                    src={landscapeAlpineLake}
+                    alt="Landscape sample"
+                    className="w-4 h-4 rounded-full object-cover"
+                  />
+                  <span>Try Landscape Sample</span>
+                </button>
+              </div>
             )}
           </div>
 
-          {/* Supported formats guidance */}
-          <div
-            className={`mt-6 flex flex-wrap items-center justify-center gap-2 text-[11px] ${
-              theme === 'dark' ? 'text-slate-500' : 'text-slate-500'
-            }`}
-          >
-            <span className="flex items-center gap-1">
-              <FileCheck
-                className={`w-3.5 h-3.5 ${
-                  theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
-                }`}
-              />
-              <span>Supports {acceptedFormats.join(', ')}</span>
+          {/* Privacy & format specs */}
+          <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] text-[#6E6E73] dark:text-[#86868B]">
+            <span className="font-semibold text-emerald-500 flex items-center gap-1">
+              <FileCheck className="w-3.5 h-3.5" /> 100% In-Browser Memory
             </span>
             <span>·</span>
-            <span>Up to {maxSizeMB} MB</span>
+            <span>Formats: {acceptedFormats.join(', ')}</span>
             <span>·</span>
-            <span className="text-emerald-500 font-medium">100% Private (In-Browser)</span>
+            <span>Up to {maxSizeMB} MB</span>
           </div>
         </div>
-      </div>
 
-      {/* Error alert */}
-      {errorMsg && (
-        <div className="mt-4 p-3.5 rounded-xl bg-rose-950/60 border border-rose-800/60 text-xs text-rose-300 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
+        {errorMsg && (
+          <div className="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold flex items-center justify-center gap-2 max-w-md mx-auto">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

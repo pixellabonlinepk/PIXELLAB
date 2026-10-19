@@ -1,7 +1,6 @@
 import React from 'react';
 import { CATEGORIES } from '../data/tools';
 import { ToolCategory } from '../types';
-import { useTheme } from '../context/ThemeContext';
 
 interface CategoryFiltersProps {
   activeCategory: ToolCategory;
@@ -12,39 +11,27 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
   activeCategory,
   onSelectCategory,
 }) => {
-  const { theme } = useTheme();
-
   return (
     <div className="w-full max-w-full overflow-x-auto pb-2 scrollbar-none min-w-0">
-      <div
-        className={`inline-flex items-center gap-1.5 p-1.5 border rounded-2xl min-w-max transition-colors ${
-          theme === 'dark'
-            ? 'bg-slate-900/70 backdrop-blur-md border-indigo-500/20 shadow-md shadow-black/20'
-            : 'bg-white border-slate-200 shadow-xs'
-        }`}
-      >
+      <div className="inline-flex items-center gap-1.5 p-1.5 apple-segmented rounded-full glass-panel min-w-max shadow-sm">
         {CATEGORIES.map((cat) => {
           const isActive = activeCategory === cat.id;
           return (
             <button
               key={cat.id}
               onClick={() => onSelectCategory(cat.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap shrink-0 ${
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-full transition-all whitespace-nowrap shrink-0 active:scale-95 ${
                 isActive
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : theme === 'dark'
-                  ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-[#6E6E73] dark:text-[#86868B] hover:text-[#1D1D1F] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'
               }`}
             >
               <span>{cat.label}</span>
               <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
                   isActive
                     ? 'bg-white/20 text-white'
-                    : theme === 'dark'
-                    ? 'bg-slate-800 text-slate-400'
-                    : 'bg-slate-100 text-slate-600'
+                    : 'bg-black/5 dark:bg-white/10 text-[#6E6E73] dark:text-[#86868B]'
                 }`}
               >
                 {cat.count}

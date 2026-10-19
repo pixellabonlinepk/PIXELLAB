@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Search, ArrowRight, Zap, CheckCircle2, Shield, Sliders } from 'lucide-react';
+import { Search, ArrowRight, ShieldCheck, Zap, Lock, Sparkles } from 'lucide-react';
 import { ToolMetadata } from '../types';
 import { TOOLS } from '../data/tools';
-import { useTheme } from '../context/ThemeContext';
 
 interface HeroSectionProps {
   onExploreClick: () => void;
@@ -15,7 +14,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onSelectTool,
   onSearchQueryChange,
 }) => {
-  const { theme } = useTheme();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<ToolMetadata[]>([]);
 
@@ -30,224 +28,145 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           t.name.toLowerCase().includes(val.toLowerCase()) ||
           t.description.toLowerCase().includes(val.toLowerCase()) ||
           t.categoryLabel.toLowerCase().includes(val.toLowerCase())
-      ).slice(0, 5);
+      ).slice(0, 6);
       setSuggestions(matched);
     } else {
       setSuggestions([]);
     }
   };
 
+  const QUICK_CATEGORY_GLASS_PILLS = [
+    { label: 'Compress Image', id: 'image-compressor', icon: '⚡' },
+    { label: 'Passport Photo', id: 'passport-photo-resizer', icon: '🪪' },
+    { label: 'Image to PDF', id: 'image-to-pdf-converter', icon: '📄' },
+    { label: 'Squad DP Collage', id: 'photo-collage-dp-maker', icon: '👥' },
+  ];
+
   return (
-    <section
-      className={`relative overflow-hidden pt-10 pb-16 lg:pt-20 lg:pb-28 transition-colors duration-200 ${
-        theme === 'dark'
-          ? 'bg-gradient-to-b from-[#060913] via-[#0b1024] to-[#060913]'
-          : 'bg-gradient-to-b from-white via-slate-50/80 to-slate-100/70'
-      }`}
-    >
-      {/* Soft blue-violet ambient glow effects */}
-      {theme === 'dark' ? (
-        <>
-          {/* Luminous aura behind heading */}
-          <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[650px] max-w-full h-[320px] bg-gradient-to-tr from-indigo-600/25 via-violet-600/20 to-blue-500/20 rounded-full blur-[90px] pointer-events-none" />
+    <section className="relative pt-12 pb-16 lg:pt-20 lg:pb-24 overflow-hidden">
+      {/* Luminous Apple Atmospheric Background */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[450px] bg-gradient-to-b from-indigo-500/10 via-sky-400/5 to-transparent blur-3xl pointer-events-none" />
 
-          {/* Focused electric glow behind search bar */}
-          <div className="absolute top-[320px] left-1/2 -translate-x-1/2 w-[520px] max-w-full h-[140px] bg-gradient-to-r from-blue-500/20 via-cyan-400/15 to-indigo-500/20 rounded-full blur-[60px] pointer-events-none" />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
+        {/* Subtle Eyebrow Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-black/5 dark:bg-white/10 text-[#6E6E73] dark:text-[#86868B] border border-black/5 dark:border-white/10 mb-6 backdrop-blur-md">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+          <span>Client-Side Architecture · 100% Private</span>
+        </div>
 
-          {/* Flanking atmospheric orbs */}
-          <div className="absolute -top-10 left-10 w-96 h-96 bg-indigo-500/12 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute top-24 right-10 w-96 h-96 bg-blue-600/12 rounded-full blur-[100px] pointer-events-none" />
-        </>
-      ) : (
-        <>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-indigo-500/10 via-blue-500/5 to-transparent blur-3xl pointer-events-none" />
-          <div className="absolute -top-24 left-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-32 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-        </>
-      )}
+        {/* Apple Display Headline */}
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight font-display text-[#1D1D1F] dark:text-[#F5F5F7] mb-5 [text-wrap:balance]">
+          Every Image.{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-400">
+            More Possibilities.
+          </span>
+        </h1>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center max-w-4xl mx-auto">
-          {/* Brand Tagline Badge */}
-          <div
-            className={`inline-flex max-w-full items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-medium shadow-sm mb-6 backdrop-blur-md border transition-all ${
-              theme === 'dark'
-                ? 'bg-slate-900/80 border-indigo-500/30 text-slate-300 shadow-[0_0_15px_rgba(99,102,241,0.15)]'
-                : 'bg-white/90 border-slate-200 text-slate-600 shadow-xs'
-            }`}
-          >
-            <span className="flex h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.8)] shrink-0" />
-            <span
-              className={`font-semibold tracking-wide shrink-0 ${
-                theme === 'dark' ? 'text-slate-100' : 'text-slate-800'
-              }`}
-            >
-              PIXAL LAB
-            </span>
-            <span className="text-slate-400">·</span>
-            <span className={`truncate ${theme === 'dark' ? 'text-slate-300' : 'text-slate-500'}`}>
-              Every Image. More Possibilities.
-            </span>
-          </div>
+        {/* Subtitle */}
+        <p className="text-base sm:text-xl max-w-2xl mx-auto text-[#6E6E73] dark:text-[#86868B] font-normal leading-relaxed mb-10">
+          {TOOLS.length} professional, client-side image utilities. Zero server uploads. Free forever.
+        </p>
 
-          {/* Main Headline */}
-          <h1
-            className={`text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 sm:mb-6 font-display break-words [text-wrap:balance] ${
-              theme === 'dark' ? 'text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]' : 'text-slate-900'
-            }`}
-          >
-            Make Every Image{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300 drop-shadow-[0_0_35px_rgba(99,102,241,0.4)]">
-              Look Its Best.
-            </span>
-          </h1>
-
-          {/* Supporting Description */}
-          <p
-            className={`text-sm sm:text-lg lg:text-xl max-w-2xl mx-auto mb-8 sm:mb-9 font-normal leading-relaxed px-2 ${
-              theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-            }`}
-          >
-            Resize, compress, edit, convert, and enhance your images with simple, powerful tools in one place. 100% private in your browser with zero upload limits.
-          </p>
-
-          {/* Search bar inside Hero (Centered Main Search Bar - Preserved exactly as requested) */}
-          <div className="max-w-xl mx-auto relative mb-8 w-full">
-            <div
-              className={`relative flex items-center rounded-2xl p-1.5 border transition-all duration-200 w-full min-w-0 ${
-                theme === 'dark'
-                  ? 'bg-slate-900/85 backdrop-blur-xl border-indigo-500/30 hover:border-indigo-400/50 shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_20px_rgba(99,102,241,0.18)] focus-within:border-cyan-400/80 focus-within:ring-2 focus-within:ring-cyan-500/20 focus-within:shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_30px_rgba(56,189,248,0.25)]'
-                  : 'bg-white border-slate-300 shadow-xl shadow-slate-200/70 focus-within:border-indigo-600 focus-within:ring-2 focus-within:ring-indigo-500/20'
-              }`}
-            >
-              <div className="pl-3 sm:pl-3.5 text-slate-400 shrink-0">
-                <Search className={`w-4 h-4 sm:w-5 sm:h-5 ${theme === 'dark' ? 'text-indigo-400' : 'text-slate-400'}`} />
-              </div>
-              <input
-                type="text"
-                value={query}
-                onChange={handleInputChange}
-                placeholder="Find a tool (e.g. Collage & DP, Compressor)..."
-                className={`flex-1 min-w-0 bg-transparent px-2.5 sm:px-3 py-2 text-xs sm:text-sm focus:outline-none ${
-                  theme === 'dark'
-                    ? 'text-white placeholder-slate-400'
-                    : 'text-slate-900 placeholder-slate-400'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={onExploreClick}
-                className="shrink-0 px-3 sm:px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 rounded-xl transition-all shadow-md shadow-indigo-600/20"
-              >
-                Browse All
-              </button>
+        {/* Apple Liquid Glass Search Bar */}
+        <div className="max-w-2xl mx-auto relative mb-6">
+          <div className="relative flex items-center glass-panel rounded-2xl p-2.5 transition-all focus-within:ring-2 focus-within:ring-indigo-500/30">
+            <div className="pl-3.5 pr-2 text-[#6E6E73] dark:text-[#86868B] shrink-0">
+              <Search className="w-5 h-5" />
             </div>
-
-            {/* Live Search Suggestions Dropdown */}
-            {suggestions.length > 0 && (
-              <div
-                className={`absolute left-0 right-0 top-full mt-2 rounded-2xl shadow-2xl p-2 z-30 text-left border ${
-                  theme === 'dark'
-                    ? 'bg-slate-900/95 backdrop-blur-xl border-slate-700/80 text-white shadow-black/80'
-                    : 'bg-white border-slate-200 text-slate-900 shadow-slate-200'
-                }`}
-              >
-                {suggestions.map((tool) => (
-                  <button
-                    key={tool.id}
-                    onClick={() => onSelectTool(tool.id)}
-                    className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-colors group ${
-                      theme === 'dark' ? 'hover:bg-slate-800/80' : 'hover:bg-slate-50'
-                    }`}
-                  >
-                    <div>
-                      <div
-                        className={`text-xs font-semibold group-hover:text-cyan-400 transition-colors ${
-                          theme === 'dark' ? 'text-white' : 'text-slate-900'
-                        }`}
-                      >
-                        {tool.name}
-                      </div>
-                      <div
-                        className={`text-[11px] ${
-                          theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
-                        }`}
-                      >
-                        {tool.tagline}
-                      </div>
-                    </div>
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-md border ${
-                        theme === 'dark'
-                          ? 'text-indigo-300 bg-indigo-950/80 border-indigo-700/50'
-                          : 'text-indigo-600 bg-indigo-50 border-indigo-200'
-                      }`}
-                    >
-                      Open Tool →
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-12 w-full">
+            <input
+              type="text"
+              value={query}
+              onChange={handleInputChange}
+              placeholder="Search tools (e.g. Compress, Resize, Passport, PDF, Collage)..."
+              className="flex-1 min-w-0 bg-transparent px-2 py-1.5 text-sm sm:text-base text-[#1D1D1F] dark:text-[#F5F5F7] placeholder-[#6E6E73] dark:placeholder-[#86868B] focus:outline-none"
+            />
+            <div className="hidden sm:flex items-center gap-1.5 pr-2">
+              <kbd className="px-2 py-0.5 text-[11px] font-mono text-[#6E6E73] dark:text-[#86868B] bg-black/5 dark:bg-white/10 rounded-md border border-black/5 dark:border-white/10">
+                ⌘K
+              </kbd>
+            </div>
             <button
+              type="button"
               onClick={onExploreClick}
-              className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 group hover:scale-[1.02] active:scale-[0.98]"
+              className="shrink-0 px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition-all shadow-sm active:scale-95"
             >
-              <span>Explore All {TOOLS.length} Tools</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button
-              onClick={() => onSelectTool('image-compressor')}
-              className={`w-full sm:w-auto px-6 py-3 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 border ${
-                theme === 'dark'
-                  ? 'text-slate-200 bg-slate-900/70 hover:bg-slate-800/90 border-indigo-500/25 hover:border-indigo-400/50 backdrop-blur-md shadow-sm'
-                  : 'text-slate-700 bg-white hover:bg-slate-50 border-slate-200 shadow-xs'
-              }`}
-            >
-              <Sliders className="w-4 h-4 text-indigo-400" />
-              <span>Start Editing</span>
+              Browse All
             </button>
           </div>
 
-          {/* Key Value Propositions */}
-          <div
-            className={`grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 max-w-3xl mx-auto pt-6 border-t ${
-              theme === 'dark' ? 'border-slate-800/60' : 'border-slate-200'
-            }`}
-          >
-            <div
-              className={`flex items-center justify-center sm:justify-start gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs border transition-all ${
-                theme === 'dark'
-                  ? 'bg-slate-900/60 backdrop-blur-md border-indigo-500/15 text-slate-300 shadow-sm'
-                  : 'bg-white border-slate-200/80 text-slate-700 shadow-xs'
-              }`}
-            >
-              <Zap className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="truncate">Zero Wait · Instant In-Browser</span>
+          {/* Instant Dropdown Suggestions */}
+          {suggestions.length > 0 && (
+            <div className="absolute left-0 right-0 top-full mt-2 rounded-2xl glass-panel p-2 z-30 text-left shadow-2xl max-h-80 overflow-y-auto">
+              <div className="px-3 py-1.5 text-[11px] font-semibold text-[#6E6E73] dark:text-[#86868B] uppercase tracking-wider">
+                Matching Tools ({suggestions.length})
+              </div>
+              {suggestions.map((tool) => (
+                <button
+                  key={tool.id}
+                  onClick={() => onSelectTool(tool.id)}
+                  className="w-full flex items-center justify-between p-3 rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/10 text-left group"
+                >
+                  <div className="min-w-0 pr-2">
+                    <div className="text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7] group-hover:text-indigo-500 transition-colors">
+                      {tool.name}
+                    </div>
+                    <div className="text-xs text-[#6E6E73] dark:text-[#86868B] truncate">
+                      {tool.tagline}
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-indigo-500 shrink-0">
+                    Open →
+                  </span>
+                </button>
+              ))}
             </div>
-            <div
-              className={`flex items-center justify-center sm:justify-start gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs border transition-all ${
-                theme === 'dark'
-                  ? 'bg-slate-900/60 backdrop-blur-md border-indigo-500/15 text-slate-300 shadow-sm'
-                  : 'bg-white border-slate-200/80 text-slate-700 shadow-xs'
-              }`}
+          )}
+        </div>
+
+        {/* 4 Quick Category Glass Pills */}
+        <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto mb-12">
+          {QUICK_CATEGORY_GLASS_PILLS.map((pill) => (
+            <button
+              key={pill.id}
+              type="button"
+              onClick={() => onSelectTool(pill.id)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold glass-panel glass-panel-interactive text-[#1D1D1F] dark:text-[#F5F5F7] transition-all active:scale-95"
             >
-              <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="truncate">100% Private · Zero Server Uploads</span>
+              <span className="text-sm">{pill.icon}</span>
+              <span>{pill.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Three Apple Trust Features */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto pt-8 border-t border-black/5 dark:border-white/10 text-left">
+          <div className="glass-panel rounded-2xl p-4 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4" />
             </div>
-            <div
-              className={`flex items-center justify-center sm:justify-start gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs border transition-all ${
-                theme === 'dark'
-                  ? 'bg-slate-900/60 backdrop-blur-md border-indigo-500/15 text-slate-300 shadow-sm'
-                  : 'bg-white border-slate-200/80 text-slate-700 shadow-xs'
-              }`}
-            >
-              <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span className="truncate">{TOOLS.length} Working Image Tools</span>
+            <div>
+              <div className="text-xs font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">Real-Time Processing</div>
+              <div className="text-[11px] text-[#6E6E73] dark:text-[#86868B] leading-relaxed">Browser-native speed with zero server queues</div>
+            </div>
+          </div>
+
+          <div className="glass-panel rounded-2xl p-4 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+              <Lock className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">True In-Browser Privacy</div>
+              <div className="text-[11px] text-[#6E6E73] dark:text-[#86868B] leading-relaxed">Photos never leave your device memory</div>
+            </div>
+          </div>
+
+          <div className="glass-panel rounded-2xl p-4 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">{TOOLS.length} Focused Tools</div>
+              <div className="text-[11px] text-[#6E6E73] dark:text-[#86868B] leading-relaxed">No bloat, no subscription walls, no ads</div>
             </div>
           </div>
         </div>

@@ -8,147 +8,75 @@ interface AboutPageProps {
 }
 
 export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
-  const { theme } = useTheme();
-
   return (
-    <div className="py-12 sm:py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-12 sm:py-16 max-w-5xl mx-auto px-4 sm:px-6">
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto mb-16">
-        <div
-          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-4 border ${
-            theme === 'dark'
-              ? 'bg-slate-900 border-slate-800 text-cyan-300'
-              : 'bg-white border-slate-200 text-cyan-700 shadow-xs'
-          }`}
-        >
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-4 glass-panel text-indigo-500">
           <Sparkles className="w-3.5 h-3.5" />
           <span>About Pixal Lab</span>
         </div>
-        <h1
-          className={`text-3xl sm:text-4xl font-extrabold font-display mb-4 ${
-            theme === 'dark' ? 'text-white' : 'text-slate-900'
-          }`}
-        >
+        <h1 className="text-3xl sm:text-5xl font-extrabold font-display mb-4 text-[#1D1D1F] dark:text-[#F5F5F7] tracking-tight">
           Every Image. More Possibilities.
         </h1>
-        <p
-          className={`text-sm sm:text-base leading-relaxed ${
-            theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-          }`}
-        >
-          Pixal Lab is a professional suite of {TOOLS.length} image processing and graphic creation tools designed from the ground up to run entirely inside your web browser without expensive server subscriptions or invasive data collection.
+        <p className="text-sm sm:text-base leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
+          Pixal Lab is a curated suite of {TOOLS.length} high-impact image processing utilities engineered from first principles to execute entirely inside your web browser. No cloud queues, no account signups, and zero remote data harvesting.
         </p>
       </div>
 
       {/* Pillars */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-        <div
-          className={`p-6 rounded-2xl border space-y-3 transition-colors ${
-            theme === 'dark'
-              ? 'bg-slate-900/60 border-slate-800'
-              : 'bg-white border-slate-200/90 shadow-sm'
-          }`}
-        >
-          <div className="w-12 h-12 rounded-xl bg-blue-600/20 text-blue-500 flex items-center justify-center">
-            <Lock className="w-6 h-6" />
+        <div className="glass-panel rounded-3xl p-6 space-y-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+            <Lock className="w-5 h-5" />
           </div>
-          <h3
-            className={`text-base font-bold font-display ${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
-            }`}
-          >
+          <h3 className="text-base font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7]">
             100% Privacy by Design
           </h3>
-          <p
-            className={`text-xs leading-relaxed ${
-              theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-            }`}
-          >
-            Most image converters upload your personal photos to remote cloud servers. Pixal Lab runs client-side JavaScript, Web Workers, and HTML5 Canvas directly on your computer or phone. Your photos never leave your device.
+          <p className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
+            Unlike legacy online converters that transmit private photos to unknown remote servers, Pixal Lab processes your files locally using client-side Web APIs and HTML5 Canvas. Your photos never leave your device.
           </p>
         </div>
 
-        <div
-          className={`p-6 rounded-2xl border space-y-3 transition-colors ${
-            theme === 'dark'
-              ? 'bg-slate-900/60 border-slate-800'
-              : 'bg-white border-slate-200/90 shadow-sm'
-          }`}
-        >
-          <div className="w-12 h-12 rounded-xl bg-emerald-600/20 text-emerald-500 flex items-center justify-center">
-            <Zap className="w-6 h-6" />
+        <div className="glass-panel rounded-3xl p-6 space-y-3">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+            <Zap className="w-5 h-5" />
           </div>
-          <h3
-            className={`text-base font-bold font-display ${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
-            }`}
-          >
+          <h3 className="text-base font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7]">
             Zero-Budget Architecture
           </h3>
-          <p
-            className={`text-xs leading-relaxed ${
-              theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-            }`}
-          >
-            Built without costly third-party API dependencies. Every filter, convolution matrix, quantization algorithm, and crop engine leverages free web standards for instant response times and zero monthly fees for users.
+          <p className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
+            Built with zero external commercial API dependencies. Every compression algorithm, pixel resizer, and document compiler runs on your hardware, eliminating monthly fees for creators.
           </p>
         </div>
 
-        <div
-          className={`p-6 rounded-2xl border space-y-3 transition-colors ${
-            theme === 'dark'
-              ? 'bg-slate-900/60 border-slate-800'
-              : 'bg-white border-slate-200/90 shadow-sm'
-          }`}
-        >
-          <div className="w-12 h-12 rounded-xl bg-violet-600/20 text-violet-500 flex items-center justify-center">
-            <Cpu className="w-6 h-6" />
+        <div className="glass-panel rounded-3xl p-6 space-y-3">
+          <div className="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-500 flex items-center justify-center">
+            <Cpu className="w-5 h-5" />
           </div>
-          <h3
-            className={`text-base font-bold font-display ${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
-            }`}
-          >
-            {TOOLS.length} Essential Tools
+          <h3 className="text-base font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7]">
+            Top {TOOLS.length} Power Tools
           </h3>
-          <p
-            className={`text-xs leading-relaxed ${
-              theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-            }`}
-          >
-            From everyday resizing and compressing to artistic filters, sharpening, watermarking, YouTube thumbnail creation, QR code generation, and PDF workflows — everything you need is available in one clean interface.
+          <p className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
+            Consolidated to deliver only high-impact, high-utility tools: from high-volume batch resizing to official Pakistan CNIC passport standards, squad DP collages, and permanent QR matrices.
           </p>
         </div>
       </div>
 
       {/* Philosophy */}
-      <div
-        className={`p-8 rounded-3xl border space-y-4 mb-12 transition-colors ${
-          theme === 'dark'
-            ? 'bg-gradient-to-r from-blue-950/40 via-indigo-950/40 to-slate-900 border-slate-800'
-            : 'bg-gradient-to-r from-blue-50/70 via-indigo-50/70 to-slate-50 border-slate-200 shadow-sm'
-        }`}
-      >
-        <h2
-          className={`text-xl font-bold font-display ${
-            theme === 'dark' ? 'text-white' : 'text-slate-900'
-          }`}
-        >
+      <div className="glass-panel rounded-3xl p-8 space-y-4 mb-12">
+        <h2 className="text-xl font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7]">
           Our Commitment to Creators
         </h2>
-        <p
-          className={`text-xs sm:text-sm leading-relaxed ${
-            theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-          }`}
-        >
-          We believe that basic image utilities should not require creating accounts, solving captchas, watching full-screen advertisements, or waiting in line for remote cloud render queues. Pixal Lab empowers photographers, content creators, students, and developers with blazing-fast, honest tools.
+        <p className="text-xs sm:text-sm leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
+          We believe basic photo and document utilities should not require watching full-screen advertisements, waiting in cloud render queues, or signing up for recurring monthly subscriptions. Pixal Lab provides fast, honest, and completely private browser software.
         </p>
         <div className="pt-2">
           <button
             onClick={onExploreTools}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-colors shadow-sm"
+            className="px-6 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all shadow-md active:scale-95"
           >
-            Explore All {TOOLS.length} Tools →
+            Explore Top {TOOLS.length} Tools →
           </button>
         </div>
       </div>

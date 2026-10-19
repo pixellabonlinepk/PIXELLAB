@@ -35,7 +35,7 @@ export const HOMEPAGE_FAQS = [
   {
     question: 'Are all tools on Pixal Lab free to use without an account?',
     answer:
-      'Yes! Every single tool in our 31+ image utility collection is completely free forever. You never have to create an account, enter credit card details, pay subscription fees, or deal with rate limits.',
+      'Yes! Every single tool in our 24 professional image utility collection is completely free forever. You never have to create an account, enter credit card details, pay subscription fees, or deal with rate limits.',
   },
   {
     question: 'Can I use Pixal Lab on my iPhone, Android, or tablet?',
@@ -316,13 +316,13 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col w-full max-w-full overflow-x-hidden transition-colors duration-200 ${
+      className={`min-h-screen flex flex-col w-full max-w-full overflow-x-hidden transition-colors duration-250 ${
         theme === 'dark'
-          ? 'dark-studio-bg text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200'
-          : 'light-studio-bg text-slate-900 selection:bg-blue-500/30 selection:text-blue-900'
+          ? 'liquid-bg-dark text-[#F5F5F7]'
+          : 'liquid-bg-light text-[#1D1D1F]'
       }`}
     >
-      {/* Brand Header */}
+      {/* Floating Apple Liquid Dynamic Island Header */}
       <Header currentView={currentView} onNavigate={navigateTo} />
 
       {/* MAIN VIEW CONTROLLER */}
@@ -340,35 +340,18 @@ export default function App() {
             />
 
             {/* Tools Gallery Anchor Section */}
-            <section id="tools-gallery" className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-hidden">
-              {/* Subtle ambient light accents behind tool cards */}
-              {theme === 'dark' && (
-                <>
-                  <div className="absolute top-1/4 -left-12 sm:-left-32 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-600/10 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none" />
-                  <div className="absolute top-2/3 -right-12 sm:-right-32 w-72 sm:w-96 h-72 sm:h-96 bg-cyan-500/10 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none" />
-                  <div className="absolute bottom-10 left-1/3 w-80 h-80 bg-violet-600/10 rounded-full blur-[100px] pointer-events-none" />
-                </>
-              )}
-
-              <div className="relative z-10 mb-8">
+            <section id="tools-gallery" className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12">
+              <div className="relative z-10 mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-cyan-400 mb-1 tracking-wide uppercase">
-                    <Compass className="w-4 h-4" />
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-500 mb-1 tracking-wide uppercase">
+                    <Compass className="w-3.5 h-3.5" />
                     <span>Tool Explorer</span>
                   </div>
-                  <h2
-                    className={`text-2xl sm:text-3xl font-extrabold font-display ${
-                      theme === 'dark' ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    All {TOOLS.length} Image Tools
+                  <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#1D1D1F] dark:text-[#F5F5F7]">
+                    Top 12 Power Tools
                   </h2>
-                  <p
-                    className={`text-xs sm:text-sm mt-1 max-w-xl ${
-                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-                    }`}
-                  >
-                    High-performance client-side image editing, resizing, filters, format conversions, QR codes, and PDF tools.
+                  <p className="text-xs sm:text-sm mt-1 max-w-xl text-[#6E6E73] dark:text-[#86868B]">
+                    High-performance client-side photo utilities. Compress, resize, crop, convert, and craft with zero server uploads.
                   </p>
                 </div>
               </div>
@@ -396,110 +379,51 @@ export default function App() {
             </section>
 
             {/* Feature Highlights Banner */}
-            <section
-              className={`border-t py-16 transition-colors duration-200 relative overflow-hidden ${
-                theme === 'dark'
-                  ? 'bg-gradient-to-b from-[#090e1f]/80 via-[#060913] to-[#060913] border-slate-800/80'
-                  : 'bg-gradient-to-b from-slate-100/90 to-slate-50 border-slate-200'
-              }`}
-            >
-              {theme === 'dark' && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-              )}
-              <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center max-w-3xl mx-auto mb-12">
-                  <h2
-                    className={`text-2xl sm:text-3xl font-bold font-display mb-3 ${
-                      theme === 'dark' ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
+            <section className="border-t border-black/5 dark:border-white/10 py-16 relative overflow-hidden">
+              <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+                <div className="text-center max-w-2xl mx-auto mb-12">
+                  <h2 className="text-2xl sm:text-3xl font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7] mb-2">
                     Why Creators Choose Pixal Lab
                   </h2>
-                  <p
-                    className={`text-xs sm:text-sm ${
-                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-                    }`}
-                  >
+                  <p className="text-xs sm:text-sm text-[#6E6E73] dark:text-[#86868B]">
                     Engineered with modern Web APIs for maximum privacy, zero bandwidth limits, and instant exports.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div
-                    className={`p-6 rounded-2xl border space-y-3 transition-all duration-300 ${
-                      theme === 'dark'
-                        ? 'bg-slate-900/60 backdrop-blur-md border-indigo-500/20 shadow-lg shadow-black/30 hover:border-indigo-400/40 hover:-translate-y-1'
-                        : 'bg-white border-slate-200/90 shadow-sm hover:shadow-md hover:-translate-y-1'
-                    }`}
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold">
+                  <div className="glass-panel rounded-3xl p-6 space-y-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-xs">
                       01
                     </div>
-                    <h3
-                      className={`text-base font-bold ${
-                        theme === 'dark' ? 'text-white' : 'text-slate-900'
-                      }`}
-                    >
+                    <h3 className="text-base font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">
                       Zero Server Uploads
                     </h3>
-                    <p
-                      className={`text-xs leading-relaxed ${
-                        theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-                      }`}
-                    >
+                    <p className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
                       Your images are processed directly in your browser with HTML5 Canvas. We never transmit, store, or view your photos.
                     </p>
                   </div>
 
-                  <div
-                    className={`p-6 rounded-2xl border space-y-3 transition-all duration-300 ${
-                      theme === 'dark'
-                        ? 'bg-slate-900/60 backdrop-blur-md border-indigo-500/20 shadow-lg shadow-black/30 hover:border-indigo-400/40 hover:-translate-y-1'
-                        : 'bg-white border-slate-200/90 shadow-sm hover:shadow-md hover:-translate-y-1'
-                    }`}
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-cyan-600/20 text-cyan-400 flex items-center justify-center font-bold">
+                  <div className="glass-panel rounded-3xl p-6 space-y-3">
+                    <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold text-xs">
                       02
                     </div>
-                    <h3
-                      className={`text-base font-bold ${
-                        theme === 'dark' ? 'text-white' : 'text-slate-900'
-                      }`}
-                    >
-                      Unlimited Usage & No Accounts
+                    <h3 className="text-base font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                      Unlimited & Free Forever
                     </h3>
-                    <p
-                      className={`text-xs leading-relaxed ${
-                        theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-                      }`}
-                    >
-                      Convert and edit as many images as you need with no subscriptions, credits, signups, or rate limits.
+                    <p className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
+                      Convert and edit as many images as you need with no subscriptions, credits, signups, or artificial rate limits.
                     </p>
                   </div>
 
-                  <div
-                    className={`p-6 rounded-2xl border space-y-3 transition-all duration-300 ${
-                      theme === 'dark'
-                        ? 'bg-slate-900/60 backdrop-blur-md border-indigo-500/20 shadow-lg shadow-black/30 hover:border-indigo-400/40 hover:-translate-y-1'
-                        : 'bg-white border-slate-200/90 shadow-sm hover:shadow-md hover:-translate-y-1'
-                    }`}
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold">
+                  <div className="glass-panel rounded-3xl p-6 space-y-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold text-xs">
                       03
                     </div>
-                    <h3
-                      className={`text-base font-bold ${
-                        theme === 'dark' ? 'text-white' : 'text-slate-900'
-                      }`}
-                    >
-                      Full {TOOLS.length}-Tool Suite
+                    <h3 className="text-base font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                      12 Essential Utilities
                     </h3>
-                    <p
-                      className={`text-xs leading-relaxed ${
-                        theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-                      }`}
-                    >
-                      Everything from simple rotations and crops to watermarking, multi-photo collages, YouTube thumbnails, and PDF workflows.
+                    <p className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
+                      Everything from intelligent compression and resizing to Pakistan CNIC passport photos, group collages, and PDF conversions.
                     </p>
                   </div>
                 </div>
@@ -507,32 +431,18 @@ export default function App() {
             </section>
 
             {/* HOMEPAGE FREQUENTLY ASKED QUESTIONS SECTION (AdSense & High-Value Content) */}
-            <section
-              className={`py-16 border-t transition-colors duration-200 ${
-                theme === 'dark'
-                  ? 'bg-slate-950/70 border-slate-800/80'
-                  : 'bg-white border-slate-200'
-              }`}
-            >
-              <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section className="py-16 border-t border-black/5 dark:border-white/10">
+              <div className="max-w-3xl mx-auto px-4 sm:px-6">
                 <div className="text-center mb-10">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-3">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-500 mb-3">
                     <HelpCircle className="w-3.5 h-3.5" />
                     <span>Common Questions</span>
                   </div>
-                  <h2
-                    className={`text-2xl sm:text-3xl font-extrabold font-display mb-3 ${
-                      theme === 'dark' ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    Frequently Asked Questions about Pixal Lab
+                  <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#1D1D1F] dark:text-[#F5F5F7] mb-2">
+                    Frequently Asked Questions
                   </h2>
-                  <p
-                    className={`text-xs sm:text-sm max-w-xl mx-auto ${
-                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-                    }`}
-                  >
-                    Everything you need to know about our 100% private in-browser image editing suite, data privacy guarantees, and free tools.
+                  <p className="text-xs sm:text-sm max-w-xl mx-auto text-[#6E6E73] dark:text-[#86868B]">
+                    Everything you need to know about our in-browser image suite, data privacy guarantees, and free tools.
                   </p>
                 </div>
 
@@ -542,40 +452,26 @@ export default function App() {
                     return (
                       <div
                         key={idx}
-                        className={`rounded-2xl border transition-all ${
-                          theme === 'dark'
-                            ? 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700'
-                            : 'bg-slate-50 border-slate-200 hover:border-indigo-300'
-                        }`}
+                        className="glass-panel rounded-2xl overflow-hidden transition-all"
                       >
                         <button
                           type="button"
                           onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
                           className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4"
                         >
-                          <span
-                            className={`text-sm sm:text-base font-bold ${
-                              theme === 'dark' ? 'text-white' : 'text-slate-900'
-                            }`}
-                          >
+                          <span className="text-xs sm:text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                             {faq.question}
                           </span>
-                          <span className="p-1 rounded-lg text-slate-400 shrink-0">
+                          <span className="text-[#6E6E73] dark:text-[#86868B] shrink-0">
                             {isOpen ? (
-                              <ChevronUp className="w-5 h-5 text-cyan-400" />
+                              <ChevronUp className="w-4 h-4 text-indigo-500" />
                             ) : (
-                              <ChevronDown className="w-5 h-5" />
+                              <ChevronDown className="w-4 h-4" />
                             )}
                           </span>
                         </button>
                         {isOpen && (
-                          <div
-                            className={`px-4 pb-5 sm:px-5 sm:pb-6 pt-0 text-xs sm:text-sm leading-relaxed border-t ${
-                              theme === 'dark'
-                                ? 'text-slate-400 border-slate-800/60'
-                                : 'text-slate-600 border-slate-200/80'
-                            }`}
-                          >
+                          <div className="px-4 pb-5 sm:px-5 sm:pb-6 pt-0 text-xs sm:text-sm leading-relaxed border-t border-black/5 dark:border-white/10 text-[#6E6E73] dark:text-[#86868B] pt-3">
                             {faq.answer}
                           </div>
                         )}

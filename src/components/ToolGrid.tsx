@@ -21,18 +21,8 @@ export const ToolGrid: React.FC<ToolGridProps> = ({
 
   if (tools.length === 0) {
     return (
-      <div
-        className={`text-center py-16 px-4 rounded-3xl border max-w-xl mx-auto my-8 transition-colors ${
-          theme === 'dark'
-            ? 'bg-slate-900/40 border-slate-800/80'
-            : 'bg-white border-slate-200 shadow-sm'
-        }`}
-      >
-        <div
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
-            theme === 'dark' ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'
-          }`}
-        >
+      <div className="text-center py-16 px-4 rounded-3xl glass-panel max-w-xl mx-auto my-8">
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-indigo-500/10 text-indigo-500">
           <Sparkles className="w-6 h-6" />
         </div>
         <h3

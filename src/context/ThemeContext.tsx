@@ -14,13 +14,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setThemeState] = useState<Theme>(() => {
     try {
       const saved = localStorage.getItem('pixellab_theme');
-      if (saved === 'light' || saved === 'dark') {
-        return saved;
+      if (saved === 'dark') {
+        return 'dark';
       }
-      // If no saved preference, default to dark to preserve Pixal Lab's signature dark navy style
-      return 'dark';
+      return 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 

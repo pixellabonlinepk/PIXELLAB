@@ -10,20 +10,18 @@ import {
   Sparkles,
   ArrowLeft,
   Eye,
-  FileImage,
-  ExternalLink,
   Lock,
   Unlock,
-  AlertTriangle,
-  ZoomIn,
-  Share2,
-  Link2,
   HelpCircle,
-  BookOpen,
   ShieldCheck,
   ChevronDown,
   ChevronUp,
-  CheckCircle2,
+  Pipette,
+  Square,
+  EyeOff,
+  Sun,
+  ExternalLink,
+  FileImage,
 } from 'lucide-react';
 import { ToolMetadata } from '../../types';
 import { getToolGuide } from '../../data/toolGuides';
@@ -36,34 +34,31 @@ import {
   resizeImage,
   cropImage,
   convertFormat,
-  rotateImage,
-  flipImage,
-  applyFilter,
-  adjustBrightnessContrast,
-  applyBlur,
-  applySharpen,
-  applyWatermark,
-  applyBorder,
-  applyRoundCorners,
-  generateCollage,
   generateWhatsAppDP,
   generatePassportPhoto,
   generateYouTubeThumbnail,
   generateMeme,
-  getPixelColor,
-  extractColorPalette,
-  generateFaviconPack,
   generateQrCodeUrl,
-  readQrCodeFromImage,
   convertImagesToPdf,
   renderPdfToImage,
+  generateFaviconPack,
+  applyWatermark,
+  applyFilter,
+  adjustBrightnessContrast,
+  applySharpen,
+  applyBlur,
+  applyBorder,
+  applyRoundCorners,
+  readQrCodeFromImage,
+  getPixelColor,
+  extractColorPalette,
 } from '../../utils/imageProcessing';
-import { createSamplePortrait, createSampleLandscape } from '../../utils/sampleImages';
 import { BatchImageResizer } from './BatchImageResizer';
+import { PhotoCollageDPMaker } from './PhotoCollageDPMaker';
 import { ImageSplitter } from './ImageSplitter';
 import { ImageJoiner } from './ImageJoiner';
 import { SignatureMaker } from './SignatureMaker';
-import { PhotoCollageDPMaker } from './PhotoCollageDPMaker';
+import JSZip from 'jszip';
 
 interface ToolWorkspaceProps {
   tool: ToolMetadata;
@@ -76,6 +71,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   onBack,
   onSelectRelatedTool,
 }) => {
+  // Delegate specialized multi-item / canvas studios
   if (tool.id === 'photo-collage-dp-maker') {
     return <PhotoCollageDPMaker tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />;
   }
@@ -121,8 +117,8 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   const [compFormat, setCompFormat] = useState<string>('image/jpeg');
 
   // 2. Resizer
-  const [resizeW, setResizeW] = useState<number>(800);
-  const [resizeH, setResizeH] = useState<number>(600);
+  const [resizeW, setResizeW] = useState<number>(1280);
+  const [resizeH, setResizeH] = useState<number>(720);
   const [lockAspect, setLockAspect] = useState<boolean>(true);
 
   // 3. Cropper
@@ -132,141 +128,121 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   // 4. Converter
   const [targetMime, setTargetMime] = useState<'image/jpeg' | 'image/png' | 'image/webp'>('image/webp');
 
-  // 5. Rotator
-  const [rotAngle, setRotAngle] = useState<number>(90);
-
-  // 6. Flipper
-  const [flipH, setFlipH] = useState<boolean>(true);
-  const [flipV, setFlipV] = useState<boolean>(false);
-
-  // 7. Filters
-  const [activeFilter, setActiveFilter] = useState<string>('vintage');
-  const [filterIntensity, setFilterIntensity] = useState<number>(1.0);
-
-  // 8. Brightness / Contrast
-  const [brightnessVal, setBrightnessVal] = useState<number>(20);
-  const [contrastVal, setContrastVal] = useState<number>(25);
-
-  // 9. Blur / Sharpen
-  const [blurRadius, setBlurRadius] = useState<number>(8);
-  const [sharpenAmount, setSharpenAmount] = useState<number>(2);
-
-  // 10. Watermark
-  const [wmText, setWmText] = useState<string>('PIXAL LAB');
-  const [wmSize, setWmSize] = useState<number>(36);
-  const [wmColor, setWmColor] = useState<string>('#ffffff');
-  const [wmOpacity, setWmOpacity] = useState<number>(0.7);
-  const [wmPos, setWmPos] = useState<'bottom-right' | 'center' | 'top-left' | 'tiled'>('bottom-right');
-  const [wmRot, setWmRot] = useState<number>(0);
-
-  // 11. Border & Corner
-  const [borderWidth, setBorderWidth] = useState<number>(24);
-  const [borderColor, setBorderColor] = useState<string>('#ffffff');
-  const [borderPadding, setBorderPadding] = useState<number>(0);
-  const [cornerRadius, setCornerRadius] = useState<number>(40);
-
-  // 12. Collage
-  const [collageImages, setCollageImages] = useState<HTMLImageElement[]>([]);
-  const [collageLayout, setCollageLayout] = useState<'2-horizontal' | '2-vertical' | '3-triad' | '4-grid'>('4-grid');
-  const [collageGap, setCollageGap] = useState<number>(16);
-
-  // 13. WhatsApp DP
+  // 5. WhatsApp DP
   const [dpShape, setDpShape] = useState<'circle' | 'square'>('circle');
   const [dpRing, setDpRing] = useState<boolean>(true);
   const [dpRingColor, setDpRingColor] = useState<string>('#3b82f6');
 
-  // 14. Passport
+  // 6. Passport
   const [passportPreset, setPassportPreset] = useState<
     'pakistan-passport' | 'us-passport' | 'schengen' | 'uk-passport' | 'india-passport'
   >('pakistan-passport');
 
-  // 15. YouTube Thumbnail
+  // 7. YouTube Thumbnail
   const [ytTitle, setYtTitle] = useState<string>('HOW TO EDIT LIKE A PRO');
   const [ytSubtitle, setYtSubtitle] = useState<string>('Pixal Lab Masterclass 2026');
   const [ytBadge, setYtBadge] = useState<string>('NEW GUIDE');
   const [ytGradient, setYtGradient] = useState<'blue-violet' | 'emerald-cyan' | 'amber-rose' | 'dark-scrim'>('blue-violet');
 
-  // 16. Meme
-  const [memeTop, setMemeTop] = useState<string>('WHEN THE CLIENT SAYS');
-  const [memeBottom, setMemeBottom] = useState<string>('MAKE THE LOGO BIGGER');
-  const [memeSize, setMemeSize] = useState<number>(48);
+  // 8. Meme
+  const [memeTop, setMemeTop] = useState<string>('ONE DOES NOT SIMPLY');
+  const [memeBottom, setMemeBottom] = useState<string>('PROCESS IMAGES ON THE SERVER');
+  const [memeSize, setMemeSize] = useState<number>(38);
 
-  // 17. Color Picker & Palette
-  const [pickedColor, setPickedColor] = useState<{ hex: string; rgb: string; hsl: string } | null>(null);
-  const [extractedPalette, setExtractedPalette] = useState<{ hex: string; rgb: string; percentage: number }[]>([]);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  // 18. QR Code Generator
-  const [qrText, setQrText] = useState<string>('https://pixallab.app');
+  // 9. QR Code Generator
+  const [qrText, setQrText] = useState<string>('https://pixallab.online');
   const [qrDarkColor, setQrDarkColor] = useState<string>('#000000');
   const [qrLightColor, setQrLightColor] = useState<string>('#ffffff');
 
-  // 19. QR Code Reader
-  const [decodedQr, setDecodedQr] = useState<string | null>(null);
-
-  // 20. Favicon
-  const [favicons, setFavicons] = useState<{ size: number; label: string; blob: Blob; url: string }[]>([]);
-
-  // 21. PDF Tools
-  const [pdfMargin, setPdfMargin] = useState<number>(10);
+  // 10. Image to PDF
   const [pdfOrientation, setPdfOrientation] = useState<'portrait' | 'landscape'>('portrait');
+  const [pdfMargin, setPdfMargin] = useState<number>(10);
   const [pdfImages, setPdfImages] = useState<{ img: HTMLImageElement; filename: string }[]>([]);
-  const [pdfPages, setPdfPages] = useState<{ pageNumber: number; blob: Blob; url: string }[]>([]);
 
-  // Handle image selection
-  const handleImageSelected = async (fileOrUrl: File | string, filename = 'image.png') => {
+  // 11. PDF to Image
+  const [pdfPage, setPdfPage] = useState<number>(1);
+  const [pdfTargetFormat, setPdfTargetFormat] = useState<'image/png' | 'image/jpeg'>('image/png');
+
+  // 12. Watermark Maker
+  const [wmText, setWmText] = useState<string>('© PIXAL LAB');
+  const [wmOpacity, setWmOpacity] = useState<number>(0.35);
+  const [wmFontSize, setWmFontSize] = useState<number>(36);
+  const [wmColor, setWmColor] = useState<string>('#ffffff');
+  const [wmPattern, setWmPattern] = useState<'single' | 'tiled'>('tiled');
+
+  // 13. Cinematic Filters
+  const [activeFilter, setActiveFilter] = useState<'vintage' | 'noir' | 'cyberpunk' | 'warm' | 'sepia' | 'cool'>('vintage');
+  const [filterIntensity, setFilterIntensity] = useState<number>(85);
+
+  // 14. Brightness, Contrast & Sharpen
+  const [toolBrightness, setToolBrightness] = useState<number>(10);
+  const [toolContrast, setToolContrast] = useState<number>(15);
+  const [toolSharpen, setToolSharpen] = useState<number>(20);
+
+  // 15. Blur Tool
+  const [blurRadius, setBlurRadius] = useState<number>(8);
+
+  // 16. Border & Corner Studio
+  const [frameBorderWidth, setFrameBorderWidth] = useState<number>(16);
+  const [frameBorderColor, setFrameBorderColor] = useState<string>('#4F46E5');
+  const [frameCornerRadius, setFrameCornerRadius] = useState<number>(36);
+
+  // 17. QR Code Scanner / Reader
+  const [decodedQrResult, setDecodedQrResult] = useState<string | null>(null);
+
+  // 18. Color Picker & Palette
+  const [pickedColor, setPickedColor] = useState<{ hex: string; rgb: string }>({ hex: '#4F46E5', rgb: 'rgb(79, 70, 229)' });
+  const [paletteColors, setPaletteColors] = useState<string[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Handle image upload
+  const handleImageSelected = async (fileOrUrl: File | string, filename?: string) => {
     setIsProcessing(true);
     setErrorMessage(null);
     try {
-      let url: string;
-      let size = 0;
-      let fileObj: File | null = null;
-
       if (typeof fileOrUrl === 'string') {
-        url = fileOrUrl;
-        const res = await fetch(fileOrUrl);
-        const b = await res.blob();
-        size = b.size;
+        const img = await loadImage(fileOrUrl);
+        setSourceImg(img);
+        setSourceUrl(fileOrUrl);
+        setSourceFilename(filename || 'image.png');
+        setOriginalSize(0);
+        setResizeW(img.naturalWidth);
+        setResizeH(img.naturalHeight);
+        setCropRect({
+          x: 0,
+          y: 0,
+          w: Math.min(img.naturalWidth, 800),
+          h: Math.min(img.naturalHeight, 800),
+        });
       } else {
-        fileObj = fileOrUrl;
-        url = URL.createObjectURL(fileOrUrl);
-        size = fileOrUrl.size;
-      }
+        setSourceFile(fileOrUrl);
+        setSourceFilename(fileOrUrl.name);
+        setOriginalSize(fileOrUrl.size);
 
-      const img = await loadImage(url);
-      setSourceImg(img);
-      setSourceFile(fileObj);
-      setSourceUrl(url);
-      setSourceFilename(filename);
-      setOriginalSize(size);
-
-      // Initialize dimensions
-      setResizeW(img.naturalWidth || img.width);
-      setResizeH(img.naturalHeight || img.height);
-      setCropRect({
-        x: 0,
-        y: 0,
-        w: Math.round((img.naturalWidth || img.width) * 0.8),
-        h: Math.round((img.naturalHeight || img.height) * 0.8),
-      });
-
-      // Special initializations
-      if (tool.id === 'color-palette-extractor') {
-        const palette = extractColorPalette(img, 8);
-        setExtractedPalette(palette);
-      } else if (tool.id === 'qr-code-reader') {
-        const result = await readQrCodeFromImage(img);
-        if (result.found && result.data) {
-          setDecodedQr(result.data);
-        } else {
-          setErrorMessage(result.error || 'No readable QR code found in this image.');
+        if (tool.id === 'pdf-to-image-converter' || fileOrUrl.type === 'application/pdf') {
+          // Process PDF directly
+          const pdfRes = await renderPdfToImage(fileOrUrl);
+          if (pdfRes.pages.length > 0) {
+            setResultBlob(pdfRes.pages[0].blob);
+            setResultUrl(pdfRes.pages[0].url);
+            setResultSize(pdfRes.pages[0].blob.size);
+          }
+          setIsProcessing(false);
+          return;
         }
-      } else if (tool.id === 'favicon-generator') {
-        const pack = await generateFaviconPack(img);
-        setFavicons(pack);
-      } else if (tool.id === 'pdf-to-image-converter' && fileObj) {
-        const rendered = await renderPdfToImage(fileObj);
-        setPdfPages(rendered.pages);
+
+        const img = await loadImage(fileOrUrl);
+        const url = URL.createObjectURL(fileOrUrl);
+        setSourceImg(img);
+        setSourceUrl(url);
+        setResizeW(img.naturalWidth);
+        setResizeH(img.naturalHeight);
+        setCropRect({
+          x: 0,
+          y: 0,
+          w: Math.min(img.naturalWidth, 800),
+          h: Math.min(img.naturalHeight, 800),
+        });
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to load image';
@@ -276,24 +252,26 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
     }
   };
 
-  // Multiple files selection (for collage or image to PDF)
+  // Multiple files for PDF conversion
   const handleMultipleFiles = async (files: File[]) => {
+    if (files.length === 0) return;
+    setIsProcessing(true);
+    setErrorMessage(null);
     try {
-      setIsProcessing(true);
       const loaded = await Promise.all(
         files.map(async (f) => ({
           img: await loadImage(f),
           filename: f.name,
         }))
       );
-      if (tool.id === 'photo-collage-maker') {
-        setCollageImages(loaded.map((item) => item.img));
-      } else if (tool.id === 'image-to-pdf-converter') {
-        setPdfImages(loaded);
+      setPdfImages(loaded);
+      if (loaded.length > 0) {
+        setSourceImg(loaded[0].img);
+        setSourceUrl(URL.createObjectURL(files[0]));
+        setSourceFilename(files[0].name);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error loading multiple images';
-      setErrorMessage(msg);
+      setErrorMessage('Failed to load multiple files');
     } finally {
       setIsProcessing(false);
     }
@@ -301,7 +279,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
   // Trigger processing whenever settings change
   const executeProcessing = async () => {
-    if (!sourceImg && tool.id !== 'qr-code-generator' && tool.id !== 'photo-collage-maker' && tool.id !== 'image-to-pdf-converter') {
+    if (!sourceImg && tool.id !== 'qr-code-generator' && tool.id !== 'image-to-pdf-converter') {
       return;
     }
 
@@ -327,63 +305,6 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
         case 'image-format-converter':
           if (sourceImg) res = await convertFormat(sourceImg, targetMime);
           break;
-
-        case 'image-rotator':
-          if (sourceImg) res = await rotateImage(sourceImg, rotAngle);
-          break;
-
-        case 'image-flipper':
-          if (sourceImg) res = await flipImage(sourceImg, flipH, flipV);
-          break;
-
-        case 'image-filters':
-          if (sourceImg) res = await applyFilter(sourceImg, activeFilter, filterIntensity);
-          break;
-
-        case 'brightness-adjuster':
-          if (sourceImg) res = await adjustBrightnessContrast(sourceImg, brightnessVal, 0);
-          break;
-
-        case 'contrast-adjuster':
-          if (sourceImg) res = await adjustBrightnessContrast(sourceImg, 0, contrastVal);
-          break;
-
-        case 'image-blur-tool':
-          if (sourceImg) res = await applyBlur(sourceImg, blurRadius);
-          break;
-
-        case 'image-sharpen-tool':
-          if (sourceImg) res = await applySharpen(sourceImg, sharpenAmount);
-          break;
-
-        case 'image-watermark-maker':
-          if (sourceImg)
-            res = await applyWatermark(sourceImg, {
-              text: wmText,
-              fontSize: wmSize,
-              fontFamily: 'Outfit, sans-serif',
-              color: wmColor,
-              opacity: wmOpacity,
-              position: wmPos,
-              rotation: wmRot,
-            });
-          break;
-
-        case 'image-border-maker':
-          if (sourceImg) res = await applyBorder(sourceImg, borderWidth, borderColor, borderPadding);
-          break;
-
-        case 'round-corner-maker':
-          if (sourceImg) res = await applyRoundCorners(sourceImg, cornerRadius);
-          break;
-
-        case 'photo-collage-maker': {
-          const imgsToCollage = collageImages.length > 0 ? collageImages : sourceImg ? [sourceImg, sourceImg, sourceImg, sourceImg] : [];
-          if (imgsToCollage.length > 0) {
-            res = await generateCollage(imgsToCollage, collageLayout, collageGap);
-          }
-          break;
-        }
 
         case 'whatsapp-dp-maker':
           if (sourceImg)
@@ -435,12 +356,116 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
           }
           break;
         }
+
+        case 'pdf-to-image-converter': {
+          if (sourceFile) {
+            const pdfRes = await renderPdfToImage(sourceFile);
+            if (pdfRes.pages.length > 0) {
+              res = {
+                blob: pdfRes.pages[0].blob,
+                url: pdfRes.pages[0].url,
+                size: pdfRes.pages[0].blob.size,
+              };
+            }
+          }
+          break;
+        }
+
+        case 'favicon-generator': {
+          if (sourceImg) {
+            const pack = await generateFaviconPack(sourceImg);
+            const zip = new JSZip();
+            for (const item of pack) {
+              zip.file(`favicon-${item.size}x${item.size}.png`, item.blob);
+            }
+            zip.file(
+              'favicon-instructions.html',
+              `<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">\n<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">\n<link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png">`
+            );
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            res = {
+              blob: zipBlob,
+              url: pack[pack.length - 1].url,
+              size: zipBlob.size,
+            };
+          }
+          break;
+        }
+
+        case 'image-watermark-maker': {
+          if (sourceImg) {
+            res = await applyWatermark(sourceImg, {
+              text: wmText,
+              fontSize: wmFontSize,
+              fontFamily: 'Outfit, sans-serif',
+              color: wmColor,
+              opacity: wmOpacity,
+              position: wmPattern === 'tiled' ? 'tiled' : 'center',
+              rotation: wmPattern === 'tiled' ? -30 : 0,
+            });
+          }
+          break;
+        }
+
+        case 'image-filters': {
+          if (sourceImg) {
+            res = await applyFilter(sourceImg, activeFilter, filterIntensity / 100);
+          }
+          break;
+        }
+
+        case 'brightness-contrast-tool': {
+          if (sourceImg) {
+            const baseRes = await adjustBrightnessContrast(sourceImg, toolBrightness, toolContrast);
+            if (toolSharpen > 0) {
+              const sharpImg = await loadImage(baseRes.url);
+              res = await applySharpen(sharpImg, toolSharpen);
+            } else {
+              res = baseRes;
+            }
+          }
+          break;
+        }
+
+        case 'image-blur-tool': {
+          if (sourceImg) {
+            res = await applyBlur(sourceImg, blurRadius);
+          }
+          break;
+        }
+
+        case 'border-corner-maker': {
+          if (sourceImg) {
+            const borderRes = await applyBorder(sourceImg, frameBorderWidth, frameBorderColor);
+            const borderImg = await loadImage(borderRes.url);
+            res = await applyRoundCorners(borderImg, frameCornerRadius);
+          }
+          break;
+        }
+
+        case 'qr-code-reader': {
+          if (sourceImg) {
+            const decodeRes = await readQrCodeFromImage(sourceImg);
+            setDecodedQrResult(decodeRes.data);
+            res = { blob: new Blob([]), url: sourceUrl || '' };
+          }
+          break;
+        }
+
+        case 'color-picker-palette': {
+          if (sourceImg) {
+            const palette = extractColorPalette(sourceImg, 6);
+            setPaletteColors(palette.map((p) => p.hex));
+            res = { blob: new Blob([]), url: sourceUrl || '' };
+          }
+          break;
+        }
       }
 
       if (res) {
         setResultBlob(res.blob);
         setResultUrl(res.url);
-        setResultSize(res.blob.size);
+        setResultSize(res.blob.size || 0);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Processing failed';
@@ -450,7 +475,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
     }
   };
 
-  // Re-run execution whenever key controls change
+  // Re-run execution on parameter changes
   useEffect(() => {
     executeProcessing();
   }, [
@@ -461,28 +486,6 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
     resizeH,
     cropRect,
     targetMime,
-    rotAngle,
-    flipH,
-    flipV,
-    activeFilter,
-    filterIntensity,
-    brightnessVal,
-    contrastVal,
-    blurRadius,
-    sharpenAmount,
-    wmText,
-    wmSize,
-    wmColor,
-    wmOpacity,
-    wmPos,
-    wmRot,
-    borderWidth,
-    borderColor,
-    borderPadding,
-    cornerRadius,
-    collageLayout,
-    collageGap,
-    collageImages,
     dpShape,
     dpRing,
     dpRingColor,
@@ -500,277 +503,148 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
     pdfMargin,
     pdfOrientation,
     pdfImages,
+    pdfPage,
+    pdfTargetFormat,
+    wmText,
+    wmOpacity,
+    wmFontSize,
+    wmColor,
+    wmPattern,
+    activeFilter,
+    filterIntensity,
+    toolBrightness,
+    toolContrast,
+    toolSharpen,
+    blurRadius,
+    frameBorderWidth,
+    frameBorderColor,
+    frameCornerRadius,
   ]);
 
-  // Color picker canvas hover/click listener
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      const color = getPixelColor(ctx, x, y);
-      setPickedColor(color);
+  // Handle Resize aspect ratio
+  const handleWidthChange = (w: number) => {
+    setResizeW(w);
+    if (lockAspect && sourceImg && sourceImg.naturalWidth) {
+      const ratio = sourceImg.naturalHeight / sourceImg.naturalWidth;
+      setResizeH(Math.round(w * ratio));
+    }
+  };
+
+  const handleHeightChange = (h: number) => {
+    setResizeH(h);
+    if (lockAspect && sourceImg && sourceImg.naturalHeight) {
+      const ratio = sourceImg.naturalWidth / sourceImg.naturalHeight;
+      setResizeW(Math.round(h * ratio));
     }
   };
 
   // Download handler
   const handleDownload = () => {
-    if (!resultBlob) return;
-    let ext = 'png';
-    if (tool.id === 'image-compressor' && compFormat === 'image/jpeg') ext = 'jpg';
-    if (tool.id === 'image-format-converter') {
-      ext = targetMime === 'image/jpeg' ? 'jpg' : targetMime === 'image/webp' ? 'webp' : 'png';
+    if (!resultBlob && tool.id !== 'qr-code-generator') return;
+
+    let filename = `pixallab-${tool.id}-${Date.now()}`;
+    if (tool.id === 'image-to-pdf-converter') filename += '.pdf';
+    else if (tool.id === 'favicon-generator') filename = `pixallab-favicon-pack-${Date.now()}.zip`;
+    else if (tool.id === 'image-format-converter') filename += `.${targetMime.replace('image/', '')}`;
+    else if (compFormat === 'image/webp') filename += '.webp';
+    else if (compFormat === 'image/png') filename += '.png';
+    else filename += '.jpg';
+
+    if (resultBlob) {
+      downloadBlob(resultBlob, filename);
+    } else if (resultUrl && tool.id === 'qr-code-generator') {
+      const a = document.createElement('a');
+      a.href = resultUrl;
+      a.download = `${filename}.png`;
+      a.click();
     }
-    if (tool.id === 'image-to-pdf-converter') ext = 'pdf';
-    const nameWithoutExt = sourceFilename.replace(/\.[^/.]+$/, '');
-    downloadBlob(resultBlob, `${nameWithoutExt}-${tool.id}.${ext}`);
-    // Notify application that a tool was successfully used
-    window.dispatchEvent(new CustomEvent('pixellab:tool-completed', { detail: { toolId: tool.id, toolName: tool.name } }));
+
+    // Trigger feedback event
+    window.dispatchEvent(
+      new CustomEvent('pixellab:tool-completed', {
+        detail: { toolId: tool.id, toolName: tool.name },
+      })
+    );
   };
 
-  const handleCopy = (text: string) => {
+  // Copy helper
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedText(text);
     setTimeout(() => setCopiedText(null), 2000);
   };
 
-  const handleResetImage = () => {
-    setSourceImg(null);
-    setSourceFile(null);
-    setSourceUrl(null);
-    setResultBlob(null);
-    setResultUrl(null);
-    setErrorMessage(null);
-  };
-
-  const { theme } = useTheme();
-
   return (
-    <div
-      className={`min-h-screen pb-20 pt-6 w-full max-w-full overflow-x-hidden transition-colors duration-200 ${
-        theme === 'dark' ? 'dark-studio-bg text-slate-100' : 'light-studio-bg text-slate-900'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full min-w-0">
-        {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between mb-6">
-          <div
-            className={`flex items-center gap-2 text-xs ${
-              theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-            }`}
+    <div className="w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Top Navigation & Tool Header */}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-xl border border-black/10 dark:border-white/10 glass-panel text-theme-secondary hover:text-theme-primary transition-all active:scale-95 shadow-xs"
           >
-            <button
-              onClick={onBack}
-              className={`flex items-center gap-1.5 transition-colors ${
-                theme === 'dark' ? 'hover:text-white' : 'hover:text-slate-900'
-              }`}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Tools</span>
-            </button>
-            <span>/</span>
-            <span className={theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}>
-              {tool.categoryLabel}
-            </span>
-            <span>/</span>
-            <span
-              className={`font-semibold ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              }`}
-            >
-              {tool.name}
-            </span>
-          </div>
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Tools</span>
+          </button>
 
           <div className="flex items-center gap-2">
-            <span
-              className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
-                theme === 'dark'
-                  ? 'bg-slate-900 border-slate-800 text-cyan-400'
-                  : 'bg-white border-slate-200 text-cyan-700 shadow-xs'
-              }`}
-            >
-              {tool.badge}
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>100% Client-Side Processing</span>
             </span>
           </div>
         </div>
 
-        {/* Tool Header */}
-        <div className="mb-8">
-          <h1
-            className={`text-2xl sm:text-3xl font-extrabold font-display mb-2 ${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
-            }`}
-          >
+        {/* Centered Title & Tagline */}
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <h1 className="text-2xl sm:text-4xl font-extrabold font-display text-theme-primary mb-2.5 [text-wrap:balance]">
             {tool.name}
           </h1>
-          <p
-            className={`text-sm max-w-3xl leading-relaxed ${
-              theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-            }`}
-          >
+          <p className="text-xs sm:text-sm text-theme-secondary leading-relaxed">
             {tool.description}
           </p>
         </div>
 
-        {/* 1-2-3 Step Progress Indicator for Common Users */}
-        <div className="mb-8">
-          <div
-            className={`p-3 sm:p-4 rounded-2xl border transition-all ${
-              theme === 'dark'
-                ? 'bg-slate-900/60 border-slate-800 backdrop-blur-md'
-                : 'bg-white border-slate-200 shadow-xs'
-            }`}
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Step 1 */}
-              <div
-                className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${
-                  sourceImg || tool.id === 'qr-code-generator'
-                    ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
-                    : 'bg-indigo-950/40 border-indigo-500/60 text-indigo-200 ring-2 ring-indigo-500/20'
-                }`}
-              >
-                <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-                    sourceImg || tool.id === 'qr-code-generator'
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-indigo-600 text-white animate-pulse'
-                  }`}
-                >
-                  {sourceImg || tool.id === 'qr-code-generator' ? <Check className="w-4 h-4" /> : '1'}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold truncate">Step 1: Select Image</div>
-                  <div className="text-[10px] text-slate-400 truncate">
-                    {sourceImg ? 'Photo loaded' : 'Drop or upload photo'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 2 */}
-              <div
-                className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${
-                  resultBlob
-                    ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
-                    : sourceImg || tool.id === 'qr-code-generator'
-                    ? 'bg-cyan-950/40 border-cyan-500/60 text-cyan-200 ring-2 ring-cyan-500/20'
-                    : 'bg-slate-950/40 border-slate-800 text-slate-500 opacity-60'
-                }`}
-              >
-                <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-                    resultBlob
-                      ? 'bg-emerald-500 text-white'
-                      : sourceImg || tool.id === 'qr-code-generator'
-                      ? 'bg-cyan-500 text-white animate-pulse'
-                      : 'bg-slate-800 text-slate-400'
-                  }`}
-                >
-                  {resultBlob ? <Check className="w-4 h-4" /> : '2'}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold truncate">Step 2: Customize Settings</div>
-                  <div className="text-[10px] text-slate-400 truncate">
-                    {sourceImg ? 'Adjust sliders & presets' : 'Waiting for photo'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div
-                className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${
-                  resultBlob
-                    ? 'bg-blue-950/40 border-blue-500/60 text-blue-200 ring-2 ring-blue-500/20'
-                    : 'bg-slate-950/40 border-slate-800 text-slate-500 opacity-60'
-                }`}
-              >
-                <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-                    resultBlob ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white' : 'bg-slate-800 text-slate-400'
-                  }`}
-                >
-                  3
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold truncate">Step 3: Instant Download</div>
-                  <div className="text-[10px] text-slate-400 truncate">
-                    {resultBlob ? 'Ready to save (100% private)' : 'Finish edits to export'}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* WORKBENCH CONTENT */}
+        {/* UPLOADER / WORKSPACE AREA */}
         {!sourceImg && tool.id !== 'qr-code-generator' ? (
-          /* Empty / Upload View */
-          <div className="max-w-3xl mx-auto my-6">
+          <div className="max-w-3xl mx-auto">
             <ImageUploader
               onImageSelected={handleImageSelected}
               acceptedFormats={tool.acceptedFormats}
               maxSizeMB={tool.maxFileSizeMB}
-              multiple={tool.id === 'photo-collage-maker' || tool.id === 'image-to-pdf-converter'}
+              multiple={tool.id === 'image-to-pdf-converter'}
               onMultipleImagesSelected={handleMultipleFiles}
               acceptPdf={tool.id === 'pdf-to-image-converter'}
             />
           </div>
         ) : (
           /* Active Editor 2-Column Split */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* LEFT COLUMN: INTERACTIVE PREVIEW CANVAS */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* LEFT COLUMN: LIVE CANVAS VIEWER */}
             <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
-              <div
-                className={`rounded-2xl p-4 sm:p-6 shadow-xl relative transition-colors ${
-                  theme === 'dark'
-                    ? 'bg-slate-900/90 border border-slate-800 text-white'
-                    : 'bg-white border border-slate-200 text-slate-900 shadow-slate-200/50'
-                }`}
-              >
-                {/* Preview Toolbar */}
-                <div
-                  className={`flex items-center justify-between pb-4 mb-4 border-b ${
-                    theme === 'dark' ? 'border-slate-800/80' : 'border-slate-100'
-                  }`}
-                >
+              <div className="glass-panel rounded-3xl p-5 shadow-xl relative">
+                {/* Floating Preview Toolbar */}
+                <div className="flex flex-wrap items-center justify-between pb-3 mb-4 border-b border-black/5 dark:border-white/10 gap-2">
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`text-xs font-bold flex items-center gap-1.5 ${
-                        theme === 'dark' ? 'text-white' : 'text-slate-900'
-                      }`}
-                    >
-                      <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-xs font-bold flex items-center gap-1.5 text-theme-primary">
+                      <Eye className="w-3.5 h-3.5 text-indigo-500" />
                       Live Canvas
                     </span>
                     {isProcessing && (
-                      <span className="flex items-center gap-1 text-[11px] text-amber-400 animate-pulse font-mono">
-                        <Sparkles className="w-3 h-3" /> Processing...
+                      <span className="text-[10px] font-mono text-indigo-500 animate-pulse">
+                        Processing...
                       </span>
                     )}
                   </div>
 
-                  {/* Mode Toggles */}
-                  <div
-                    className={`flex items-center gap-1 p-1 rounded-xl border text-xs ${
-                      theme === 'dark'
-                        ? 'bg-slate-950 border-slate-800'
-                        : 'bg-slate-100 border-slate-200'
-                    }`}
-                  >
+                  {/* Mode Toggles: After, Before, Split */}
+                  <div className="flex items-center apple-segmented p-1 rounded-full">
                     <button
                       onClick={() => setCompareMode('after')}
-                      className={`px-2.5 py-1 rounded-lg transition-colors ${
+                      className={`px-3 py-1 rounded-full text-xs transition-all ${
                         compareMode === 'after'
-                          ? 'bg-indigo-600 text-white font-semibold'
-                          : theme === 'dark'
-                          ? 'text-slate-400 hover:text-white'
-                          : 'text-slate-600 hover:text-slate-900'
+                          ? 'bg-white dark:bg-white/20 text-theme-primary font-semibold shadow-xs'
+                          : 'text-theme-muted'
                       }`}
                     >
                       Output
@@ -778,12 +652,10 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                     {sourceUrl && (
                       <button
                         onClick={() => setCompareMode('before')}
-                        className={`px-2.5 py-1 rounded-lg transition-colors ${
+                        className={`px-3 py-1 rounded-full text-xs transition-all ${
                           compareMode === 'before'
-                            ? 'bg-indigo-600 text-white font-semibold'
-                            : theme === 'dark'
-                            ? 'text-slate-400 hover:text-white'
-                            : 'text-slate-600 hover:text-slate-900'
+                            ? 'bg-white dark:bg-white/20 text-theme-primary font-semibold shadow-xs'
+                            : 'text-theme-muted'
                         }`}
                       >
                         Original
@@ -792,1339 +664,945 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                     {sourceUrl && resultUrl && (
                       <button
                         onClick={() => setCompareMode('split')}
-                        className={`px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 ${
+                        className={`px-3 py-1 rounded-full text-xs transition-all ${
                           compareMode === 'split'
-                            ? 'bg-indigo-600 text-white font-semibold'
-                            : theme === 'dark'
-                            ? 'text-slate-400 hover:text-white'
-                            : 'text-slate-600 hover:text-slate-900'
+                            ? 'bg-white dark:bg-white/20 text-theme-primary font-semibold shadow-xs'
+                            : 'text-theme-muted'
                         }`}
                       >
-                        <span>Split View</span>
+                        Split View
                       </button>
                     )}
                   </div>
                 </div>
 
-                {/* The Canvas / Image Viewer */}
-                <div className="w-full min-h-[360px] max-h-[560px] rounded-xl bg-checkerboard flex items-center justify-center p-3 relative overflow-hidden border border-slate-800 select-none">
-                  {/* Color Picker Interactive Canvas */}
-                  {tool.id === 'color-picker-image' && sourceImg ? (
-                    <div className="relative">
-                      <canvas
-                        ref={canvasRef}
-                        width={sourceImg.naturalWidth || sourceImg.width}
-                        height={sourceImg.naturalHeight || sourceImg.height}
-                        onMouseMove={handleCanvasMouseMove}
-                        className="max-h-[500px] w-auto max-w-full object-contain cursor-crosshair rounded-lg"
-                      />
-                      {pickedColor && (
-                        <div className="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-700 shadow-xl flex items-center gap-3">
-                          <div
-                            className="w-8 h-8 rounded-lg shadow-inner border border-white/20"
-                            style={{ backgroundColor: pickedColor.hex }}
-                          />
-                          <div className="text-xs font-mono">
-                            <div className="font-bold text-white">{pickedColor.hex}</div>
-                            <div className="text-slate-400 text-[10px]">{pickedColor.rgb}</div>
-                          </div>
-                          <button
-                            onClick={() => handleCopy(pickedColor.hex)}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300"
-                            title="Copy HEX"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ) : compareMode === 'split' && sourceUrl && resultUrl ? (
-                    /* Interactive Before / After Split Slider */
-                    <div
-                      className="relative w-full max-h-[500px] flex items-center justify-center cursor-ew-resize overflow-hidden rounded-lg"
-                      onMouseDown={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const updateSplit = (clientX: number) => {
-                          const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
-                          setSplitPos(Math.round((x / rect.width) * 100));
-                        };
-                        updateSplit(e.clientX);
-                        const handleMouseMove = (moveEv: MouseEvent) => updateSplit(moveEv.clientX);
-                        const handleMouseUp = () => {
-                          window.removeEventListener('mousemove', handleMouseMove);
-                          window.removeEventListener('mouseup', handleMouseUp);
-                        };
-                        window.addEventListener('mousemove', handleMouseMove);
-                        window.addEventListener('mouseup', handleMouseUp);
-                      }}
-                      onTouchMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const touch = e.touches[0];
-                        if (touch) {
-                          const x = Math.max(0, Math.min(rect.width, touch.clientX - rect.left));
-                          setSplitPos(Math.round((x / rect.width) * 100));
-                        }
-                      }}
-                    >
-                      {/* Underlying Output (Result) Image */}
+                {/* Canvas/Image Viewer Area */}
+                <div className="w-full min-h-[380px] max-h-[560px] rounded-2xl bg-checkerboard flex items-center justify-center p-4 relative overflow-hidden border border-black/5 dark:border-white/10">
+                  {/* Split Comparison View */}
+                  {compareMode === 'split' && sourceUrl && resultUrl ? (
+                    <div className="relative w-full h-full max-h-[500px] flex items-center justify-center overflow-hidden select-none">
                       <img
                         src={resultUrl}
-                        alt="Output"
-                        className="max-h-[500px] max-w-full object-contain pointer-events-none rounded-lg"
+                        alt="Output comparison"
+                        className="max-h-[480px] max-w-full object-contain pointer-events-none"
                       />
-
-                      {/* Clipped Original (Source) Image */}
                       <div
                         className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center"
                         style={{ clipPath: `inset(0 ${100 - splitPos}% 0 0)` }}
                       >
                         <img
                           src={sourceUrl}
-                          alt="Original"
-                          className="max-h-[500px] max-w-full object-contain rounded-lg"
+                          alt="Original comparison"
+                          className="max-h-[480px] max-w-full object-contain"
                         />
                       </div>
-
-                      {/* Draggable Vertical Divider Line & Handle */}
                       <div
-                        className="absolute top-0 bottom-0 w-0.5 bg-white cursor-ew-resize shadow-[0_0_8px_rgba(0,0,0,0.6)] z-20 pointer-events-none"
+                        className="absolute top-0 bottom-0 w-0.5 bg-indigo-500 shadow-md cursor-ew-resize z-20"
                         style={{ left: `${splitPos}%` }}
                       >
-                        <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-xl border-2 border-white text-xs font-bold tracking-tighter">
+                        <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full liquid-dock border border-indigo-500 flex items-center justify-center shadow-lg text-indigo-500 font-bold text-xs">
                           ⇄
                         </div>
                       </div>
-
-                      {/* Overlay Labels */}
-                      <span className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-white text-[10px] font-bold tracking-wider pointer-events-none z-10 border border-white/10">
-                        ORIGINAL ({splitPos}%)
-                      </span>
-                      <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-indigo-600/90 backdrop-blur-md text-white text-[10px] font-bold tracking-wider pointer-events-none z-10 border border-white/20">
-                        OUTPUT ({100 - splitPos}%)
-                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={splitPos}
+                        onChange={(e) => setSplitPos(Number(e.target.value))}
+                        className="absolute inset-0 opacity-0 cursor-ew-resize z-30 w-full h-full"
+                        aria-label="Split position slider"
+                      />
                     </div>
                   ) : compareMode === 'before' && sourceUrl ? (
                     <img
                       src={sourceUrl}
-                      alt="Source"
-                      className="max-h-[500px] max-w-full object-contain rounded-lg shadow-lg"
+                      alt="Original view"
+                      className="max-h-[500px] max-w-full object-contain rounded-lg"
                     />
                   ) : resultUrl ? (
                     <img
                       src={resultUrl}
-                      alt="Result"
-                      className="max-h-[500px] max-w-full object-contain rounded-lg shadow-lg"
+                      alt="Processed output"
+                      className="max-h-[500px] max-w-full object-contain rounded-lg"
+                    />
+                  ) : sourceUrl ? (
+                    <img
+                      src={sourceUrl}
+                      alt="Preview"
+                      className="max-h-[500px] max-w-full object-contain rounded-lg"
                     />
                   ) : (
-                    <div className="text-center text-slate-500 text-xs">
-                      Ready for processing
+                    <div className="text-center text-xs text-theme-muted">
+                      No active canvas
                     </div>
                   )}
                 </div>
 
-                {/* Slider bar control when in Split mode */}
-                {compareMode === 'split' && sourceUrl && resultUrl && (
-                  <div className="mt-3 px-2">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-                      <span>Original</span>
-                      <span className="font-mono text-cyan-400 font-bold">{splitPos}% / {100 - splitPos}%</span>
-                      <span>Output</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={splitPos}
-                      onChange={(e) => setSplitPos(Number(e.target.value))}
-                      className="w-full accent-indigo-500 cursor-ew-resize"
-                    />
-                  </div>
-                )}
-
-                {/* Footer specs inside preview card */}
-                <div
-                  className={`mt-4 flex flex-wrap items-center justify-between gap-3 text-xs pt-2 border-t ${
-                    theme === 'dark'
-                      ? 'text-slate-400 border-slate-800/80'
-                      : 'text-slate-500 border-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {sourceImg && (
-                      <span>
-                        Original: {sourceImg.naturalWidth || sourceImg.width} ×{' '}
-                        {sourceImg.naturalHeight || sourceImg.height} px
-                      </span>
+                {/* Bottom Canvas Stats Bar */}
+                <div className="flex flex-wrap items-center justify-between pt-3 mt-3 border-t border-black/5 dark:border-white/10 text-xs text-theme-secondary gap-2">
+                  <div className="flex items-center gap-4">
+                    {originalSize > 0 && (
+                      <div>
+                        <span className="text-theme-muted">Original: </span>
+                        <span className="font-mono font-semibold text-theme-primary">{formatBytes(originalSize)}</span>
+                      </div>
                     )}
-                    {originalSize > 0 && <span>· {formatBytes(originalSize)}</span>}
+                    {resultSize > 0 && (
+                      <div>
+                        <span className="text-theme-muted">Result: </span>
+                        <span className="font-mono font-semibold text-emerald-500">{formatBytes(resultSize)}</span>
+                        {originalSize > 0 && resultSize < originalSize && (
+                          <span className="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500">
+                            -{Math.round((1 - resultSize / originalSize) * 100)}%
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  {resultSize > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-emerald-500 font-semibold font-mono">
-                        Output: {formatBytes(resultSize)}
-                      </span>
-                      {originalSize > 0 && originalSize > resultSize && (
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] border ${
-                            theme === 'dark'
-                              ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          }`}
-                        >
-                          -
-                          {Math.round(
-                            ((originalSize - resultSize) / originalSize) * 100
-                          )}
-                          %
-                        </span>
-                      )}
-                    </div>
+                  {sourceUrl && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSourceImg(null);
+                        setSourceUrl(null);
+                        setResultUrl(null);
+                        setResultBlob(null);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/5 dark:border-white/10 text-xs text-theme-secondary hover:text-theme-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Replace Photo</span>
+                    </button>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* RIGHT COLUMN: CONTROLS & SETTINGS */}
-            <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-5">
-              <div
-                className={`rounded-2xl p-6 shadow-xl transition-colors ${
-                  theme === 'dark'
-                    ? 'bg-slate-900/90 border border-slate-800 text-white'
-                    : 'bg-white border border-slate-200 text-slate-900 shadow-slate-200/50'
-                }`}
-              >
-                <div
-                  className={`flex items-center justify-between pb-4 mb-5 border-b ${
-                    theme === 'dark' ? 'border-slate-800' : 'border-slate-100'
-                  }`}
-                >
-                  <h3
-                    className={`text-sm font-bold flex items-center gap-2 ${
-                      theme === 'dark' ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    <Sliders className="w-4 h-4 text-cyan-400" />
-                    Tool Settings
-                  </h3>
-                  <button
-                    onClick={handleResetImage}
-                    className={`text-xs flex items-center gap-1 transition-colors ${
-                      theme === 'dark'
-                        ? 'text-slate-400 hover:text-white'
-                        : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Replace Image</span>
-                  </button>
+            {/* RIGHT COLUMN: CONTROLS PANEL */}
+            <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+              <div className="glass-panel rounded-3xl p-6 shadow-xl space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/10">
+                  <div className="flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-indigo-500" />
+                    <span className="text-sm font-bold text-theme-primary">
+                      Settings & Presets
+                    </span>
+                  </div>
                 </div>
 
-                {/* TOOL SPECIFIC CONTROLS */}
-                <div className="space-y-5">
-                  {/* Image Compressor */}
-                  {tool.id === 'image-compressor' && (
-                    <div className="space-y-4">
-                      {/* 1-Click Quick Presets for Common Users */}
-                      <div>
-                        <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                          1-Click Quick Presets
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[
-                            { label: 'WhatsApp / Email', quality: 0.6, format: 'image/jpeg', tag: 'Fast send' },
-                            { label: 'Best Web Quality', quality: 0.8, format: 'image/webp', tag: 'Recommended' },
-                            { label: 'Extreme 80% Shrink', quality: 0.35, format: 'image/jpeg', tag: 'Smallest size' },
-                            { label: 'Lossless Clarity', quality: 0.95, format: 'image/png', tag: 'Max quality' },
-                          ].map((p) => (
-                            <button
-                              key={p.label}
-                              type="button"
-                              onClick={() => {
-                                setCompQuality(p.quality);
-                                setCompFormat(p.format);
-                              }}
-                              className={`p-2 rounded-xl text-left border transition-all ${
-                                Math.abs(compQuality - p.quality) < 0.05 && compFormat === p.format
-                                  ? 'bg-cyan-950/80 border-cyan-500 text-cyan-200'
-                                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                              }`}
-                            >
-                              <div className="font-semibold text-[11px] text-white">{p.label}</div>
-                              <div className="text-[10px] text-cyan-400 font-mono mt-0.5">
-                                {Math.round(p.quality * 100)}% · {p.tag}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-xs text-slate-300 mb-1.5">
-                          <span>Manual Quality Slider</span>
-                          <span className="font-mono text-cyan-400 font-bold">
-                            {Math.round(compQuality * 100)}%
-                          </span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0.1"
-                          max="1.0"
-                          step="0.05"
-                          value={compQuality}
-                          onChange={(e) => setCompQuality(Number(e.target.value))}
-                          className="w-full accent-cyan-400"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-semibold text-slate-300 block mb-2">
-                          Output Format
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {['image/jpeg', 'image/webp', 'image/png'].map((fmt) => (
-                            <button
-                              key={fmt}
-                              onClick={() => setCompFormat(fmt)}
-                              className={`py-2 rounded-xl text-xs font-medium border ${
-                                compFormat === fmt
-                                  ? 'bg-indigo-600 border-indigo-400 text-white'
-                                  : 'bg-slate-950 border-slate-800 text-slate-400'
-                              }`}
-                            >
-                              {fmt.split('/')[1].toUpperCase()}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 6. Image Resizer */}
-                  {tool.id === 'image-resizer' && (
-                    <div className="space-y-4">
-                      {/* 1-Click Popular Resolution Presets */}
-                      <div>
-                        <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                          1-Click Social & Screen Presets
-                        </label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                          {[
-                            { label: 'Full HD', w: 1920, h: 1080 },
-                            { label: 'Instagram Post', w: 1080, h: 1080 },
-                            { label: 'WhatsApp DP', w: 500, h: 500 },
-                            { label: 'Social Banner', w: 1200, h: 630 },
-                            { label: 'Story / Reel', w: 1080, h: 1920 },
-                            { label: '4K Ultra HD', w: 3840, h: 2160 },
-                          ].map((p) => (
-                            <button
-                              key={p.label}
-                              type="button"
-                              onClick={() => {
-                                setResizeW(p.w);
-                                setResizeH(p.h);
-                                setLockAspect(false);
-                              }}
-                              className={`p-2 rounded-xl text-left border transition-all ${
-                                resizeW === p.w && resizeH === p.h
-                                  ? 'bg-blue-950/80 border-blue-500 text-blue-200'
-                                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                              }`}
-                            >
-                              <div className="font-semibold text-[11px] text-white">{p.label}</div>
-                              <div className="text-[10px] text-blue-400 font-mono mt-0.5">{p.w}×{p.h}</div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs text-slate-400 block mb-1">
-                            Width (px)
-                          </label>
-                          <input
-                            type="number"
-                            value={resizeW}
-                            onChange={(e) => {
-                              const w = Number(e.target.value);
-                              setResizeW(w);
-                              if (lockAspect && sourceImg) {
-                                const ratio =
-                                  (sourceImg.naturalHeight || sourceImg.height) /
-                                  (sourceImg.naturalWidth || sourceImg.width);
-                                setResizeH(Math.round(w * ratio));
-                              }
-                            }}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs text-slate-400 block mb-1">
-                            Height (px)
-                          </label>
-                          <input
-                            type="number"
-                            value={resizeH}
-                            onChange={(e) => {
-                              const h = Number(e.target.value);
-                              setResizeH(h);
-                              if (lockAspect && sourceImg) {
-                                const ratio =
-                                  (sourceImg.naturalWidth || sourceImg.width) /
-                                  (sourceImg.naturalHeight || sourceImg.height);
-                                setResizeW(Math.round(h * ratio));
-                              }
-                            }}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                          />
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => setLockAspect(!lockAspect)}
-                        className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl border w-full ${
-                          lockAspect
-                            ? 'bg-slate-800 border-slate-700 text-cyan-300'
-                            : 'bg-slate-950 border-slate-800 text-slate-400'
-                        }`}
-                      >
-                        {lockAspect ? (
-                          <Lock className="w-3.5 h-3.5" />
-                        ) : (
-                          <Unlock className="w-3.5 h-3.5" />
-                        )}
-                        <span>
-                          {lockAspect ? 'Aspect Ratio Locked' : 'Aspect Ratio Unlocked'}
-                        </span>
-                      </button>
-                    </div>
-                  )}
-
-                  {/* 7. Image Cropper */}
-                  {tool.id === 'image-cropper' && (
-                    <div className="space-y-4">
-                      <label className="text-xs font-semibold text-slate-300 block">
-                        Crop Presets
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(['free', '1:1', '16:9', '4:3', '9:16'] as const).map((asp) => (
-                          <button
-                            key={asp}
-                            onClick={() => {
-                              setCropAspect(asp);
-                              if (!sourceImg) return;
-                              const origW = sourceImg.naturalWidth || sourceImg.width;
-                              const origH = sourceImg.naturalHeight || sourceImg.height;
-                              if (asp === '1:1') {
-                                const dim = Math.min(origW, origH);
-                                setCropRect({ x: 0, y: 0, w: dim, h: dim });
-                              } else if (asp === '16:9') {
-                                const w = origW;
-                                const h = Math.round((w * 9) / 16);
-                                setCropRect({ x: 0, y: 0, w, h: Math.min(h, origH) });
-                              } else if (asp === '4:3') {
-                                const w = origW;
-                                const h = Math.round((w * 3) / 4);
-                                setCropRect({ x: 0, y: 0, w, h: Math.min(h, origH) });
-                              }
-                            }}
-                            className={`py-2 rounded-xl text-xs font-medium border ${
-                              cropAspect === asp
-                                ? 'bg-pink-600 border-pink-400 text-white'
-                                : 'bg-slate-950 border-slate-800 text-slate-400'
-                            }`}
-                          >
-                            {asp}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 8. Format Converter */}
-                  {tool.id === 'image-format-converter' && (
-                    <div className="space-y-4">
-                      <label className="text-xs font-semibold text-slate-300 block">
-                        Target File Format
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { label: 'WEBP (Recommended)', mime: 'image/webp' },
-                          { label: 'PNG (Lossless)', mime: 'image/png' },
-                          { label: 'JPG (Universal)', mime: 'image/jpeg' },
-                        ].map((f) => (
-                          <button
-                            key={f.mime}
-                            onClick={() => setTargetMime(f.mime as any)}
-                            className={`p-3 rounded-xl text-xs font-semibold border text-center transition-all ${
-                              targetMime === f.mime
-                                ? 'bg-violet-600 border-violet-400 text-white'
-                                : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                            }`}
-                          >
-                            {f.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 9. Rotator */}
-                  {tool.id === 'image-rotator' && (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          onClick={() => setRotAngle((a) => (a + 90) % 360)}
-                          className="py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-white hover:bg-slate-800"
-                        >
-                          +90° Right
-                        </button>
-                        <button
-                          onClick={() => setRotAngle((a) => (a - 90 + 360) % 360)}
-                          className="py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-white hover:bg-slate-800"
-                        >
-                          -90° Left
-                        </button>
-                        <button
-                          onClick={() => setRotAngle(180)}
-                          className="py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-white hover:bg-slate-800"
-                        >
-                          180° Flip
-                        </button>
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-xs text-slate-300 mb-1">
-                          <span>Custom Angle</span>
-                          <span className="font-mono text-cyan-400">{rotAngle}°</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="360"
-                          value={rotAngle}
-                          onChange={(e) => setRotAngle(Number(e.target.value))}
-                          className="w-full accent-cyan-400"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 10. Flipper */}
-                  {tool.id === 'image-flipper' && (
-                    <div className="space-y-3">
-                      <button
-                        onClick={() => setFlipH(!flipH)}
-                        className={`w-full py-3 rounded-xl border text-xs font-semibold ${
-                          flipH
-                            ? 'bg-blue-600 border-blue-400 text-white'
-                            : 'bg-slate-950 border-slate-800 text-slate-400'
-                        }`}
-                      >
-                        Flip Horizontal (Mirror)
-                      </button>
-                      <button
-                        onClick={() => setFlipV(!flipV)}
-                        className={`w-full py-3 rounded-xl border text-xs font-semibold ${
-                          flipV
-                            ? 'bg-blue-600 border-blue-400 text-white'
-                            : 'bg-slate-950 border-slate-800 text-slate-400'
-                        }`}
-                      >
-                        Flip Vertical (Upside Down)
-                      </button>
-                    </div>
-                  )}
-
-                  {/* 11. Filters */}
-                  {tool.id === 'image-filters' && (
-                    <div className="space-y-4">
-                      <label className="text-xs font-semibold text-slate-300 block">
-                        Preset Style
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          'vintage',
-                          'noir',
-                          'sepia',
-                          'cold',
-                          'warm',
-                          'cyberpunk',
-                          'emerald',
-                          'grayscale',
-                          'invert',
-                        ].map((f) => (
-                          <button
-                            key={f}
-                            onClick={() => setActiveFilter(f)}
-                            className={`py-2 rounded-xl text-xs font-medium capitalize border ${
-                              activeFilter === f
-                                ? 'bg-pink-600 border-pink-400 text-white'
-                                : 'bg-slate-950 border-slate-800 text-slate-400'
-                            }`}
-                          >
-                            {f}
-                          </button>
-                        ))}
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-xs text-slate-300 mb-1">
-                          <span>Filter Intensity</span>
-                          <span className="font-mono text-pink-400">
-                            {Math.round(filterIntensity * 100)}%
-                          </span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0.1"
-                          max="1.0"
-                          step="0.05"
-                          value={filterIntensity}
-                          onChange={(e) => setFilterIntensity(Number(e.target.value))}
-                          className="w-full accent-pink-400"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 12. Brightness / Contrast */}
-                  {(tool.id === 'brightness-adjuster' || tool.id === 'contrast-adjuster') && (
-                    <div className="space-y-4">
-                      {tool.id === 'brightness-adjuster' ? (
-                        <div>
-                          <div className="flex justify-between text-xs text-slate-300 mb-1">
-                            <span>Brightness</span>
-                            <span className="font-mono text-amber-400">
-                              {brightnessVal > 0 ? `+${brightnessVal}` : brightnessVal}
-                            </span>
-                          </div>
-                          <input
-                            type="range"
-                            min="-100"
-                            max="100"
-                            value={brightnessVal}
-                            onChange={(e) => setBrightnessVal(Number(e.target.value))}
-                            className="w-full accent-amber-400"
-                          />
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="flex justify-between text-xs text-slate-300 mb-1">
-                            <span>Contrast</span>
-                            <span className="font-mono text-rose-400">
-                              {contrastVal > 0 ? `+${contrastVal}` : contrastVal}
-                            </span>
-                          </div>
-                          <input
-                            type="range"
-                            min="-100"
-                            max="100"
-                            value={contrastVal}
-                            onChange={(e) => setContrastVal(Number(e.target.value))}
-                            className="w-full accent-rose-400"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* 13. Blur / Sharpen */}
-                  {tool.id === 'image-blur-tool' && (
+                {/* 1. Image Compressor Controls */}
+                {tool.id === 'image-compressor' && (
+                  <div className="space-y-4">
                     <div>
-                      <div className="flex justify-between text-xs text-slate-300 mb-1">
+                      <span className="text-[11px] font-semibold text-theme-secondary block mb-2">
+                        1-Click Quick Presets
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { label: 'WhatsApp / Email', quality: 0.6, format: 'image/jpeg' },
+                          { label: 'Best Web Quality', quality: 0.8, format: 'image/webp' },
+                          { label: 'Extreme 80% Shrink', quality: 0.4, format: 'image/jpeg' },
+                          { label: 'Lossless Clarity', quality: 0.95, format: 'image/png' },
+                        ].map((preset, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setCompQuality(preset.quality);
+                              setCompFormat(preset.format);
+                            }}
+                            className={`p-2 rounded-xl text-left text-xs font-semibold border transition-all ${
+                              compQuality === preset.quality && compFormat === preset.format
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary hover:border-indigo-500/30'
+                            }`}
+                          >
+                            <div>{preset.label}</div>
+                            <div className="text-[10px] text-theme-muted font-mono">
+                              {Math.round(preset.quality * 100)}% quality
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs text-theme-primary mb-1.5">
+                        <span>Quality Level</span>
+                        <span className="font-mono font-bold text-indigo-500">
+                          {Math.round(compQuality * 100)}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.1"
+                        max="1.0"
+                        step="0.05"
+                        value={compQuality}
+                        onChange={(e) => setCompQuality(Number(e.target.value))}
+                        className="w-full accent-indigo-500 cursor-pointer"
+                      />
+                    </div>
+
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1.5">
+                        Output Format
+                      </span>
+                      <select
+                        value={compFormat}
+                        onChange={(e) => setCompFormat(e.target.value)}
+                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-theme-primary focus:ring-2 focus:ring-indigo-500/30 focus:outline-none"
+                      >
+                        <option value="image/jpeg">JPEG (Fast, widely compatible)</option>
+                        <option value="image/webp">WebP (Modern, 30% smaller)</option>
+                        <option value="image/png">PNG (Preserves transparency)</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Image Resizer Controls */}
+                {tool.id === 'image-resizer' && (
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-[11px] font-semibold text-theme-secondary block mb-2">
+                        1-Click Resolution Presets
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { label: 'Instagram Post (1:1)', w: 1080, h: 1080 },
+                          { label: 'Story / Reels (9:16)', w: 1080, h: 1920 },
+                          { label: 'Full HD 1080p', w: 1920, h: 1080 },
+                          { label: 'Passport Photo (35x45)', w: 413, h: 531 },
+                        ].map((preset, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setLockAspect(false);
+                              setResizeW(preset.w);
+                              setResizeH(preset.h);
+                            }}
+                            className={`p-2 rounded-xl text-left text-xs font-semibold border transition-all ${
+                              resizeW === preset.w && resizeH === preset.h
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary hover:border-indigo-500/30'
+                            }`}
+                          >
+                            <div>{preset.label}</div>
+                            <div className="text-[10px] text-theme-muted font-mono">
+                              {preset.w} × {preset.h}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-theme-secondary block mb-1">
+                          Width (px)
+                        </label>
+                        <input
+                          type="number"
+                          value={resizeW}
+                          onChange={(e) => handleWidthChange(Number(e.target.value))}
+                          className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-theme-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-theme-secondary block mb-1">
+                          Height (px)
+                        </label>
+                        <input
+                          type="number"
+                          value={resizeH}
+                          onChange={(e) => handleHeightChange(Number(e.target.value))}
+                          className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-theme-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setLockAspect(!lockAspect)}
+                      className={`w-full py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-2 transition-all ${
+                        lockAspect
+                          ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                          : 'border-black/10 dark:border-white/10 text-theme-muted'
+                      }`}
+                    >
+                      {lockAspect ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                      <span>{lockAspect ? 'Aspect Ratio Locked' : 'Aspect Ratio Unlocked'}</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* 3. Image Cropper Controls */}
+                {tool.id === 'image-cropper' && (
+                  <div className="space-y-4">
+                    <span className="text-xs text-theme-secondary block mb-1">
+                      Aspect Ratio
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['free', '1:1', '16:9', '4:3', '9:16'] as const).map((asp) => (
+                        <button
+                          key={asp}
+                          onClick={() => {
+                            setCropAspect(asp);
+                            if (sourceImg) {
+                              const nw = sourceImg.naturalWidth;
+                              const nh = sourceImg.naturalHeight;
+                              let w = Math.floor(nw * 0.8);
+                              let h = Math.floor(nh * 0.8);
+                              if (asp === '1:1') {
+                                const s = Math.min(w, h);
+                                w = s;
+                                h = s;
+                              } else if (asp === '16:9') {
+                                h = Math.floor((w * 9) / 16);
+                              } else if (asp === '4:3') {
+                                h = Math.floor((w * 3) / 4);
+                              } else if (asp === '9:16') {
+                                w = Math.floor((h * 9) / 16);
+                              }
+                              setCropRect({ x: Math.floor((nw - w) / 2), y: Math.floor((nh - h) / 2), w, h });
+                            }
+                          }}
+                          className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                            cropAspect === asp
+                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                              : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                          }`}
+                        >
+                          {asp === 'free' ? 'Free Form' : asp}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Format Converter Controls */}
+                {tool.id === 'image-format-converter' && (
+                  <div className="space-y-4">
+                    <span className="text-xs text-theme-secondary block mb-1">
+                      Target Format
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['image/webp', 'image/png', 'image/jpeg'] as const).map((fmt) => (
+                        <button
+                          key={fmt}
+                          onClick={() => setTargetMime(fmt)}
+                          className={`py-2.5 rounded-xl text-xs font-bold font-mono border transition-all ${
+                            targetMime === fmt
+                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                              : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                          }`}
+                        >
+                          {fmt.replace('image/', '').toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. WhatsApp DP Maker Controls */}
+                {tool.id === 'whatsapp-dp-maker' && (
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1">
+                        Crop Shape
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(['circle', 'square'] as const).map((sh) => (
+                          <button
+                            key={sh}
+                            onClick={() => setDpShape(sh)}
+                            className={`py-2 rounded-xl text-xs font-semibold capitalize border transition-all ${
+                              dpShape === sh
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                            }`}
+                          >
+                            {sh}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-theme-primary">Outer Ring Accent</span>
+                      <input
+                        type="checkbox"
+                        checked={dpRing}
+                        onChange={(e) => setDpRing(e.target.checked)}
+                        className="w-4 h-4 accent-indigo-500 rounded cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. Passport Photo Resizer Controls */}
+                {tool.id === 'passport-photo-resizer' && (
+                  <div className="space-y-4">
+                    <span className="text-xs text-theme-secondary block mb-1">
+                      Official Specification
+                    </span>
+                    <div className="space-y-2">
+                      {[
+                        { id: 'pakistan-passport', label: 'Pakistan Passport & CNIC (35x45 mm)', spec: 'NADRA & Visa Standard' },
+                        { id: 'us-passport', label: 'United States Passport (2x2 inch)', spec: '600x600 px Standard' },
+                        { id: 'schengen', label: 'Schengen Visa (35x45 mm)', spec: 'European Union Standard' },
+                        { id: 'uk-passport', label: 'United Kingdom Passport (35x45 mm)', spec: 'HM Passport Office' },
+                        { id: 'india-passport', label: 'India Passport & Visa (2x2 inch)', spec: 'Government of India' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setPassportPreset(item.id as any)}
+                          className={`w-full p-2.5 rounded-xl text-left border transition-all ${
+                            passportPreset === item.id
+                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                              : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                          }`}
+                        >
+                          <div className="text-xs font-bold">{item.label}</div>
+                          <div className="text-[10px] text-theme-muted">{item.spec}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 7. YouTube Thumbnail Maker */}
+                {tool.id === 'youtube-thumbnail-maker' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs text-theme-secondary block mb-1">
+                        Main Title
+                      </label>
+                      <input
+                        type="text"
+                        value={ytTitle}
+                        onChange={(e) => setYtTitle(e.target.value)}
+                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-theme-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-theme-secondary block mb-1">
+                        Subtitle
+                      </label>
+                      <input
+                        type="text"
+                        value={ytSubtitle}
+                        onChange={(e) => setYtSubtitle(e.target.value)}
+                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-theme-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-theme-secondary block mb-1">
+                        Badge Text
+                      </label>
+                      <input
+                        type="text"
+                        value={ytBadge}
+                        onChange={(e) => setYtBadge(e.target.value)}
+                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-theme-primary"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 8. Meme Generator */}
+                {tool.id === 'meme-generator' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs text-theme-secondary block mb-1">
+                        Top Caption
+                      </label>
+                      <input
+                        type="text"
+                        value={memeTop}
+                        onChange={(e) => setMemeTop(e.target.value)}
+                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs uppercase font-bold text-theme-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-theme-secondary block mb-1">
+                        Bottom Caption
+                      </label>
+                      <input
+                        type="text"
+                        value={memeBottom}
+                        onChange={(e) => setMemeBottom(e.target.value)}
+                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs uppercase font-bold text-theme-primary"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 9. QR Code Generator */}
+                {tool.id === 'qr-code-generator' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs text-theme-secondary block mb-1">
+                        URL or Content
+                      </label>
+                      <input
+                        type="text"
+                        value={qrText}
+                        onChange={(e) => setQrText(e.target.value)}
+                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-theme-primary"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 10. Image to PDF Converter */}
+                {tool.id === 'image-to-pdf-converter' && (
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1">
+                        Page Orientation
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(['portrait', 'landscape'] as const).map((orient) => (
+                          <button
+                            key={orient}
+                            onClick={() => setPdfOrientation(orient)}
+                            className={`py-2 rounded-xl text-xs font-semibold capitalize border transition-all ${
+                              pdfOrientation === orient
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                            }`}
+                          >
+                            {orient}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 11. PDF to Image Converter */}
+                {tool.id === 'pdf-to-image-converter' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs text-theme-secondary block mb-1">
+                        Page Number
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={pdfPage}
+                        onChange={(e) => setPdfPage(Math.max(1, Number(e.target.value)))}
+                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-theme-primary"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1">
+                        Export Format
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(['image/png', 'image/jpeg'] as const).map((fmt) => (
+                          <button
+                            key={fmt}
+                            onClick={() => setPdfTargetFormat(fmt)}
+                            className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                              pdfTargetFormat === fmt
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                            }`}
+                          >
+                            {fmt === 'image/png' ? 'PNG Image' : 'JPG Image'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 12. Favicon Generator */}
+                {tool.id === 'favicon-generator' && (
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-theme-primary">
+                      <span className="font-bold block mb-1">Complete Icon Suite Included:</span>
+                      <span className="text-theme-secondary text-[11px] leading-relaxed">
+                        favicon-16x16, 32x32, 48x48, apple-touch-icon 180x180, android-chrome 192x192, and ready HTML code.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 13. Image Watermark Maker */}
+                {tool.id === 'image-watermark-maker' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs text-theme-secondary block mb-1">
+                        Watermark Text
+                      </label>
+                      <input
+                        type="text"
+                        value={wmText}
+                        onChange={(e) => setWmText(e.target.value)}
+                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-theme-primary font-semibold"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs text-theme-primary mb-1">
+                        <span>Opacity</span>
+                        <span className="font-mono text-indigo-500">{Math.round(wmOpacity * 100)}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.1"
+                        max="1.0"
+                        step="0.05"
+                        value={wmOpacity}
+                        onChange={(e) => setWmOpacity(Number(e.target.value))}
+                        className="w-full accent-indigo-500 cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1">
+                        Watermark Layout
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(['tiled', 'single'] as const).map((pat) => (
+                          <button
+                            key={pat}
+                            onClick={() => setWmPattern(pat)}
+                            className={`py-2 rounded-xl text-xs font-semibold capitalize border transition-all ${
+                              wmPattern === pat
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                            }`}
+                          >
+                            {pat === 'tiled' ? 'Tiled Grid (45°)' : 'Single Center'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 14. Cinematic Photo Filters */}
+                {tool.id === 'image-filters' && (
+                  <div className="space-y-4">
+                    <span className="text-xs text-theme-secondary block mb-1">
+                      Filter Presets
+                    </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: 'vintage', label: 'Vintage Warm' },
+                        { id: 'noir', label: 'B&W Noir' },
+                        { id: 'cyberpunk', label: 'Cyberpunk' },
+                        { id: 'warm', label: 'Golden Hour' },
+                        { id: 'sepia', label: 'Classic Sepia' },
+                        { id: 'cool', label: 'Nordic Frost' },
+                      ].map((f) => (
+                        <button
+                          key={f.id}
+                          onClick={() => setActiveFilter(f.id as any)}
+                          className={`py-2.5 rounded-xl text-xs font-semibold border transition-all ${
+                            activeFilter === f.id
+                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                              : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                          }`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs text-theme-primary mb-1">
+                        <span>Intensity</span>
+                        <span className="font-mono text-indigo-500">{filterIntensity}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="10"
+                        max="100"
+                        value={filterIntensity}
+                        onChange={(e) => setFilterIntensity(Number(e.target.value))}
+                        className="w-full accent-indigo-500 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 15. Brightness, Contrast & Sharpen Studio */}
+                {tool.id === 'brightness-contrast-tool' && (
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-xs text-theme-primary mb-1">
+                        <span>Brightness</span>
+                        <span className="font-mono text-indigo-500">{toolBrightness > 0 ? `+${toolBrightness}` : toolBrightness}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-100"
+                        max="100"
+                        value={toolBrightness}
+                        onChange={(e) => setToolBrightness(Number(e.target.value))}
+                        className="w-full accent-indigo-500 cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs text-theme-primary mb-1">
+                        <span>Contrast</span>
+                        <span className="font-mono text-indigo-500">{toolContrast > 0 ? `+${toolContrast}` : toolContrast}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-100"
+                        max="100"
+                        value={toolContrast}
+                        onChange={(e) => setToolContrast(Number(e.target.value))}
+                        className="w-full accent-indigo-500 cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs text-theme-primary mb-1">
+                        <span>Sharpen Detail</span>
+                        <span className="font-mono text-indigo-500">{toolSharpen}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={toolSharpen}
+                        onChange={(e) => setToolSharpen(Number(e.target.value))}
+                        className="w-full accent-indigo-500 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 16. Background & Privacy Blur Tool */}
+                {tool.id === 'image-blur-tool' && (
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-xs text-theme-primary mb-1">
                         <span>Blur Radius</span>
-                        <span className="font-mono text-teal-400">{blurRadius}px</span>
+                        <span className="font-mono text-indigo-500">{blurRadius}px</span>
                       </div>
                       <input
                         type="range"
                         min="1"
-                        max="30"
+                        max="50"
                         value={blurRadius}
                         onChange={(e) => setBlurRadius(Number(e.target.value))}
-                        className="w-full accent-teal-400"
+                        className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {tool.id === 'image-sharpen-tool' && (
+                {/* 17. Image Frame & Round Corner Studio */}
+                {tool.id === 'border-corner-maker' && (
+                  <div className="space-y-4">
                     <div>
-                      <div className="flex justify-between text-xs text-slate-300 mb-1">
-                        <span>Sharpen Strength</span>
-                        <span className="font-mono text-emerald-400">{sharpenAmount}</span>
+                      <div className="flex justify-between text-xs text-theme-primary mb-1">
+                        <span>Corner Roundness</span>
+                        <span className="font-mono text-indigo-500">{frameCornerRadius}px</span>
                       </div>
                       <input
                         type="range"
-                        min="1"
-                        max="5"
-                        value={sharpenAmount}
-                        onChange={(e) => setSharpenAmount(Number(e.target.value))}
-                        className="w-full accent-emerald-400"
+                        min="0"
+                        max="120"
+                        value={frameCornerRadius}
+                        onChange={(e) => setFrameCornerRadius(Number(e.target.value))}
+                        className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
-                  )}
-
-                  {/* 14. Watermark Maker */}
-                  {tool.id === 'image-watermark-maker' && (
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs text-slate-400 block mb-1">
-                          Watermark Text
-                        </label>
-                        <input
-                          type="text"
-                          value={wmText}
-                          onChange={(e) => setWmText(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs text-slate-400 block mb-1">
-                            Text Color
-                          </label>
-                          <input
-                            type="color"
-                            value={wmColor}
-                            onChange={(e) => setWmColor(e.target.value)}
-                            className="w-full h-9 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs text-slate-400 block mb-1">
-                            Position
-                          </label>
-                          <select
-                            value={wmPos}
-                            onChange={(e) => setWmPos(e.target.value as any)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                          >
-                            <option value="bottom-right">Bottom Right</option>
-                            <option value="center">Center</option>
-                            <option value="top-left">Top Left</option>
-                            <option value="tiled">Tiled / Repeat</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 15. Border & Round Corner Maker */}
-                  {tool.id === 'image-border-maker' && (
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-xs text-slate-300 mb-1">
-                          <span>Border Width</span>
-                          <span className="font-mono text-indigo-400">{borderWidth}px</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="4"
-                          max="80"
-                          value={borderWidth}
-                          onChange={(e) => setBorderWidth(Number(e.target.value))}
-                          className="w-full accent-indigo-400"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-400 block mb-1">
-                          Border Color
-                        </label>
-                        <input
-                          type="color"
-                          value={borderColor}
-                          onChange={(e) => setBorderColor(e.target.value)}
-                          className="w-full h-9 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {tool.id === 'round-corner-maker' && (
                     <div>
-                      <div className="flex justify-between text-xs text-slate-300 mb-1">
-                        <span>Corner Radius</span>
-                        <span className="font-mono text-cyan-400">{cornerRadius}px</span>
+                      <div className="flex justify-between text-xs text-theme-primary mb-1">
+                        <span>Frame Border Width</span>
+                        <span className="font-mono text-indigo-500">{frameBorderWidth}px</span>
                       </div>
                       <input
                         type="range"
-                        min="5"
-                        max="200"
-                        value={cornerRadius}
-                        onChange={(e) => setCornerRadius(Number(e.target.value))}
-                        className="w-full accent-cyan-400"
+                        min="0"
+                        max="60"
+                        value={frameBorderWidth}
+                        onChange={(e) => setFrameBorderWidth(Number(e.target.value))}
+                        className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
-                  )}
-
-                  {/* 16. WhatsApp DP Maker */}
-                  {tool.id === 'whatsapp-dp-maker' && (
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setDpShape('circle')}
-                          className={`flex-1 py-2.5 rounded-xl text-xs font-semibold border ${
-                            dpShape === 'circle'
-                              ? 'bg-emerald-600 border-emerald-400 text-white'
-                              : 'bg-slate-950 border-slate-800 text-slate-400'
-                          }`}
-                        >
-                          Circle Avatar
-                        </button>
-                        <button
-                          onClick={() => setDpShape('square')}
-                          className={`flex-1 py-2.5 rounded-xl text-xs font-semibold border ${
-                            dpShape === 'square'
-                              ? 'bg-emerald-600 border-emerald-400 text-white'
-                              : 'bg-slate-950 border-slate-800 text-slate-400'
-                          }`}
-                        >
-                          Square
-                        </button>
-                      </div>
-
-                      <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={dpRing}
-                          onChange={(e) => setDpRing(e.target.checked)}
-                          className="rounded text-emerald-500 focus:ring-0"
-                        />
-                        <span>Add Highlight Border Ring</span>
-                      </label>
-                    </div>
-                  )}
-
-                  {/* 17. Passport Photo Resizer */}
-                  {tool.id === 'passport-photo-resizer' && (
-                    <div className="space-y-4">
-                      <label className="text-xs font-semibold text-slate-300 block">
-                        Select Standard Dimension
-                      </label>
-                      <div className="space-y-2">
-                        {[
-                          {
-                            id: 'pakistan-passport',
-                            label: 'Pakistan Passport & CNIC (35×45 mm)',
-                            spec: '413×531 px @ 300 DPI (Official NADRA / Visa Standard)',
-                          },
-                          {
-                            id: 'us-passport',
-                            label: 'United States (2×2 in / 51×51 mm)',
-                            spec: '600×600 px @ 300 DPI',
-                          },
-                          {
-                            id: 'schengen',
-                            label: 'Schengen / Europe (35×45 mm)',
-                            spec: '413×531 px @ 300 DPI',
-                          },
-                          {
-                            id: 'uk-passport',
-                            label: 'United Kingdom (35×45 mm)',
-                            spec: '413×531 px @ 300 DPI',
-                          },
-                          {
-                            id: 'india-passport',
-                            label: 'India Passport / OCI (35×35 mm)',
-                            spec: '413×413 px @ 300 DPI',
-                          },
-                        ].map((p) => (
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1.5">
+                        Border Color
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {['#4F46E5', '#2563EB', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#FFFFFF', '#000000'].map((col) => (
                           <button
-                            key={p.id}
-                            onClick={() => setPassportPreset(p.id as any)}
-                            className={`w-full p-3 rounded-xl text-left border transition-all ${
-                              passportPreset === p.id
-                                ? 'bg-blue-950/60 border-blue-500 text-white'
-                                : 'bg-slate-950 border-slate-800 text-slate-400'
+                            key={col}
+                            onClick={() => setFrameBorderColor(col)}
+                            className={`w-6 h-6 rounded-full border-2 transition-transform ${
+                              frameBorderColor === col ? 'scale-125 border-indigo-500 shadow-sm' : 'border-black/20'
                             }`}
+                            style={{ backgroundColor: col }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 18. QR Code Scanner & Decoder */}
+                {tool.id === 'qr-code-reader' && (
+                  <div className="space-y-4">
+                    <span className="text-xs text-theme-secondary block mb-1">
+                      Decoded Content
+                    </span>
+                    {decodedQrResult ? (
+                      <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-mono break-all space-y-3">
+                        <div>{decodedQrResult}</div>
+                        <div className="flex items-center gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(decodedQrResult)}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-sans text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95"
                           >
-                            <div className="text-xs font-bold text-white">{p.label}</div>
-                            <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                              {p.spec}
-                            </div>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>{copiedText === decodedQrResult ? 'Copied!' : 'Copy Text'}</span>
                           </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 18. YouTube Thumbnail Maker */}
-                  {tool.id === 'youtube-thumbnail-maker' && (
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs text-slate-400 block mb-1">
-                          Bold Title
-                        </label>
-                        <input
-                          type="text"
-                          value={ytTitle}
-                          onChange={(e) => setYtTitle(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-bold"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-400 block mb-1">
-                          Subtitle
-                        </label>
-                        <input
-                          type="text"
-                          value={ytSubtitle}
-                          onChange={(e) => setYtSubtitle(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs text-slate-400 block mb-1">
-                            Badge Tag
-                          </label>
-                          <input
-                            type="text"
-                            value={ytBadge}
-                            onChange={(e) => setYtBadge(e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs text-slate-400 block mb-1">
-                            Theme
-                          </label>
-                          <select
-                            value={ytGradient}
-                            onChange={(e) => setYtGradient(e.target.value as any)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                          >
-                            <option value="blue-violet">Blue & Violet</option>
-                            <option value="emerald-cyan">Emerald & Cyan</option>
-                            <option value="amber-rose">Amber & Rose</option>
-                            <option value="dark-scrim">Cinematic Dark</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 19. Meme Generator */}
-                  {tool.id === 'meme-generator' && (
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs text-slate-400 block mb-1">
-                          Top Text
-                        </label>
-                        <input
-                          type="text"
-                          value={memeTop}
-                          onChange={(e) => setMemeTop(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-400 block mb-1">
-                          Bottom Text
-                        </label>
-                        <input
-                          type="text"
-                          value={memeBottom}
-                          onChange={(e) => setMemeBottom(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-xs text-slate-300 mb-1">
-                          <span>Font Size</span>
-                          <span className="font-mono text-amber-400">{memeSize}px</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="24"
-                          max="80"
-                          value={memeSize}
-                          onChange={(e) => setMemeSize(Number(e.target.value))}
-                          className="w-full accent-amber-400"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 20. QR Code Generator */}
-                  {tool.id === 'qr-code-generator' && (
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs text-slate-400 block mb-1">
-                          URL or Content
-                        </label>
-                        <input
-                          type="text"
-                          value={qrText}
-                          onChange={(e) => setQrText(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs text-slate-400 block mb-1">
-                            QR Color
-                          </label>
-                          <input
-                            type="color"
-                            value={qrDarkColor}
-                            onChange={(e) => setQrDarkColor(e.target.value)}
-                            className="w-full h-9 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs text-slate-400 block mb-1">
-                            Background
-                          </label>
-                          <input
-                            type="color"
-                            value={qrLightColor}
-                            onChange={(e) => setQrLightColor(e.target.value)}
-                            className="w-full h-9 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 21. QR Code Reader Display */}
-                  {tool.id === 'qr-code-reader' && decodedQr && (
-                    <div className="p-4 rounded-xl bg-slate-950 border border-cyan-800/60 space-y-3">
-                      <div className="text-xs text-cyan-400 font-bold">
-                        Decoded Content:
-                      </div>
-                      <div className="text-xs font-mono text-white bg-slate-900 p-2.5 rounded-lg break-all">
-                        {decodedQr}
-                      </div>
-                      <button
-                        onClick={() => handleCopy(decodedQr)}
-                        className="w-full py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-xs font-semibold text-white flex items-center justify-center gap-1.5"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copy Decoded Text</span>
-                      </button>
-                    </div>
-                  )}
-
-                  {/* 22. Color Palette Extractor Display */}
-                  {tool.id === 'color-palette-extractor' && extractedPalette.length > 0 && (
-                    <div className="space-y-3">
-                      <label className="text-xs font-semibold text-slate-300 block">
-                        Extracted Dominant Palette
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {extractedPalette.map((col) => (
-                          <div
-                            key={col.hex}
-                            onClick={() => handleCopy(col.hex)}
-                            className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 flex items-center justify-between cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span
-                                className="w-5 h-5 rounded-md border border-white/20"
-                                style={{ backgroundColor: col.hex }}
-                              />
-                              <span className="text-xs font-mono text-slate-200">
-                                {col.hex}
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-slate-500 group-hover:text-cyan-400">
-                              {col.percentage}%
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 23. Favicon Generator Display */}
-                  {tool.id === 'favicon-generator' && favicons.length > 0 && (
-                    <div className="space-y-3">
-                      <label className="text-xs font-semibold text-slate-300 block">
-                        Generated Favicon Icons
-                      </label>
-                      <div className="space-y-2">
-                        {favicons.map((fav) => (
-                          <div
-                            key={fav.size}
-                            className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between"
-                          >
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={fav.url}
-                                alt={fav.label}
-                                className="w-6 h-6 rounded bg-white p-0.5 object-contain"
-                              />
-                              <span className="text-xs text-slate-300 font-medium">
-                                {fav.label}
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => downloadBlob(fav.blob, `favicon-${fav.size}x${fav.size}.png`)}
-                              className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-cyan-300"
+                          {decodedQrResult.startsWith('http') && (
+                            <a
+                              href={decodedQrResult}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3 py-1.5 rounded-xl border border-emerald-500/30 text-emerald-500 font-sans text-xs font-semibold flex items-center gap-1.5"
                             >
-                              Download
-                            </button>
-                          </div>
-                        ))}
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              <span>Open URL</span>
+                            </a>
+                          )}
+                        </div>
                       </div>
+                    ) : (
+                      <div className="p-3 rounded-xl bg-black/5 dark:bg-white/5 text-xs text-theme-muted">
+                        Upload an image containing a QR code to extract its link or text.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 19. Color Picker & Palette Extractor */}
+                {tool.id === 'color-picker-palette' && (
+                  <div className="space-y-4">
+                    <span className="text-xs text-theme-secondary block mb-1">
+                      Dominant Harmonic Palette
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {paletteColors.map((col, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => copyToClipboard(col)}
+                          className="p-2 rounded-xl border border-black/5 dark:border-white/10 flex flex-col items-center gap-1.5 hover:scale-105 transition-transform"
+                        >
+                          <span className="w-full h-8 rounded-lg shadow-inner" style={{ backgroundColor: col }} />
+                          <span className="text-[10px] font-mono font-bold text-theme-primary">
+                            {copiedText === col ? 'Copied!' : col}
+                          </span>
+                        </button>
+                      ))}
                     </div>
-                  )}
-                </div>
-
-                {/* Copied Alert */}
-                {copiedText && (
-                  <div className="mt-4 p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-xs flex items-center gap-2">
-                    <Check className="w-4 h-4" />
-                    <span>Copied &quot;{copiedText}&quot; to clipboard!</span>
                   </div>
                 )}
 
-                {/* Error Banner */}
-                {errorMessage && (
-                  <div className="mt-4 p-3 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-300 text-xs flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>{errorMessage}</span>
-                  </div>
-                )}
-
-                {/* PRIMARY ACTION: DOWNLOAD RESULT BUTTON */}
-                <div className="mt-8 pt-5 border-t border-slate-800">
+                {/* Primary Action Button */}
+                <div className="pt-2">
                   <button
                     onClick={handleDownload}
-                    disabled={!resultBlob || isProcessing}
-                    className="w-full py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
+                    disabled={(!resultBlob && tool.id !== 'qr-code-generator') || isProcessing}
+                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-500 hover:to-blue-500 disabled:opacity-40 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all active:scale-95"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Download Processed Image</span>
+                    <span>Download Finished File</span>
                   </button>
-                  <p className="text-[11px] text-center text-slate-500 mt-2">
-                    Processed safely in your browser. Never uploaded to servers.
-                  </p>
-
-                  {/* Social Share Bar */}
-                  <div className="mt-4 pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <span className="text-slate-400 font-medium text-[11px]">Share this tool:</span>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-                            `Check out this free 100% private ${tool.name} on Pixal Lab: https://pixallab.online/#/tool/${tool.id}`
-                          )}`;
-                          window.open(url, '_blank', 'noopener,noreferrer');
-                        }}
-                        className="p-1.5 px-2.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-800/60 text-emerald-300 flex items-center gap-1 text-[11px] transition-colors"
-                        title="Share on WhatsApp"
-                      >
-                        <Share2 className="w-3 h-3" />
-                        <span>WhatsApp</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                            `Free 100% private in-browser ${tool.name} without any server uploads — Pixal Lab`
-                          )}&url=${encodeURIComponent(`https://pixallab.online/#/tool/${tool.id}`)}`;
-                          window.open(url, '_blank', 'noopener,noreferrer');
-                        }}
-                        className="p-1.5 px-2.5 rounded-lg bg-sky-950/60 hover:bg-sky-900 border border-sky-800/60 text-sky-300 flex items-center gap-1 text-[11px] transition-colors"
-                        title="Share on X / Twitter"
-                      >
-                        <span>X / Twitter</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard.writeText(`https://pixallab.online/#/tool/${tool.id}`);
-                          setCopiedText(`Link copied!`);
-                          setTimeout(() => setCopiedText(null), 2500);
-                        }}
-                        className="p-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 flex items-center gap-1 text-[11px] transition-colors"
-                        title="Copy Link"
-                      >
-                        <Link2 className="w-3 h-3" />
-                        <span>Copy Link</span>
-                      </button>
-                    </div>
-                  </div>
                 </div>
+
+                {errorMessage && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold">
+                    {errorMessage}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
 
-        {/* HIGH-VALUE SEO & EDUCATIONAL ARTICLE SECTION (AdSense & Search Optimization) */}
-        <section
-          className={`mt-16 rounded-3xl p-6 sm:p-10 border transition-all ${
-            theme === 'dark'
-              ? 'bg-slate-900/60 border-slate-800/90 shadow-2xl backdrop-blur-md'
-              : 'bg-white border-slate-200 shadow-md'
-          }`}
-        >
-          {/* Article Header */}
-          <div className="max-w-3xl mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-3">
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>User Guide & Reference</span>
-            </div>
-            <h2
-              className={`text-2xl sm:text-3xl font-extrabold font-display mb-3 ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              }`}
-            >
-              How to Use {tool.name} Online
+        {/* HIGH-VALUE SEO EDUCATIONAL SECTION */}
+        <section className="mt-16 pt-12 border-t border-black/5 dark:border-white/10">
+          <div className="mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold font-display text-theme-primary mb-2">
+              How to Use {tool.name}
             </h2>
-            <p
-              className={`text-sm leading-relaxed ${
-                theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-              }`}
-            >
-              Learn how Pixal Lab executes instantaneous, client-side {tool.name.toLowerCase()} directly within your browser, ensuring enterprise-grade data privacy and zero quality loss.
+            <p className="text-xs sm:text-sm text-theme-secondary">
+              Step-by-step guidance for optimal results, zero compression artifacts, and privacy guarantees.
             </p>
           </div>
 
-          {/* 3 Step Guide Cards */}
-          <div className="mb-12">
-            <h3
-              className={`text-base font-bold mb-4 flex items-center gap-2 ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              }`}
-            >
-              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
-              <span>Quick 3-Step Walkthrough</span>
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {guide.steps.map((st) => (
-                <div
-                  key={st.step}
-                  className={`p-5 rounded-2xl border transition-all ${
-                    theme === 'dark'
-                      ? 'bg-slate-950/80 border-slate-800 hover:border-slate-700'
-                      : 'bg-slate-50 border-slate-200 hover:border-indigo-300'
-                  }`}
-                >
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-white flex items-center justify-center font-bold text-sm mb-3 shadow-md">
-                    0{st.step}
-                  </div>
-                  <h4
-                    className={`text-sm font-bold mb-1.5 ${
-                      theme === 'dark' ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    {st.title}
-                  </h4>
-                  <p
-                    className={`text-xs leading-relaxed ${
-                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-                    }`}
-                  >
-                    {st.desc}
-                  </p>
+          {/* 3 Steps Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+            {guide.steps.map((st) => (
+              <div key={st.step} className="glass-panel rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-xs mb-3">
+                  0{st.step}
                 </div>
-              ))}
-            </div>
+                <h3 className="text-sm font-bold text-theme-primary mb-1">
+                  {st.title}
+                </h3>
+                <p className="text-xs text-theme-secondary leading-relaxed">
+                  {st.desc}
+                </p>
+              </div>
+            ))}
           </div>
 
-          {/* How It Works Deep Dive */}
-          <div className="mb-12">
-            <h3
-              className={`text-base font-bold mb-3 flex items-center gap-2 ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>How It Works & Architectural Security</span>
-            </h3>
-            <div
-              className={`p-6 rounded-2xl border leading-relaxed text-xs sm:text-sm ${
-                theme === 'dark'
-                  ? 'bg-slate-950/60 border-slate-800/80 text-slate-300'
-                  : 'bg-slate-50/80 border-slate-200 text-slate-700'
-              }`}
-            >
-              <p>{guide.howItWorks}</p>
+          {/* How It Works & Architecture */}
+          <div className="glass-panel rounded-2xl p-6 mb-10">
+            <div className="flex items-center gap-2 mb-3">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <h3 className="text-sm font-bold text-theme-primary">
+                How It Works & Client-Side Privacy
+              </h3>
             </div>
+            <p className="text-xs sm:text-sm text-theme-secondary leading-relaxed">
+              {guide.howItWorks}
+            </p>
           </div>
 
-          {/* Key Advantages Grid */}
-          <div className="mb-12">
-            <h3
-              className={`text-base font-bold mb-4 flex items-center gap-2 ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              }`}
-            >
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <span>Key Benefits & Advantages</span>
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {guide.benefits.map((b, idx) => (
-                <div
-                  key={idx}
-                  className={`p-3.5 rounded-xl border flex items-start gap-3 ${
-                    theme === 'dark'
-                      ? 'bg-slate-950/60 border-slate-800/80 text-slate-300'
-                      : 'bg-white border-slate-200 text-slate-700'
-                  }`}
-                >
-                  <Check className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                  <span className="text-xs sm:text-[13px]">{b}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Frequently Asked Questions Accordion */}
+          {/* FAQ Accordion */}
           <div>
-            <h3
-              className={`text-base font-bold mb-4 flex items-center gap-2 ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              }`}
-            >
-              <HelpCircle className="w-4 h-4 text-indigo-400" />
-              <span>Frequently Asked Questions ({guide.faqs.length})</span>
-            </h3>
+            <div className="flex items-center gap-2 mb-4">
+              <HelpCircle className="w-4 h-4 text-indigo-500" />
+              <h3 className="text-base font-bold text-theme-primary">
+                Frequently Asked Questions ({guide.faqs.length})
+              </h3>
+            </div>
             <div className="space-y-3">
               {guide.faqs.map((faq, idx) => {
                 const isOpen = openToolFaq === idx;
                 return (
-                  <div
-                    key={idx}
-                    className={`rounded-2xl border transition-all ${
-                      theme === 'dark'
-                        ? 'bg-slate-950/70 border-slate-800/80 hover:border-slate-700'
-                        : 'bg-slate-50 border-slate-200 hover:border-indigo-300'
-                    }`}
-                  >
+                  <div key={idx} className="glass-panel rounded-2xl overflow-hidden transition-all">
                     <button
                       type="button"
                       onClick={() => setOpenToolFaq(isOpen ? null : idx)}
                       className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4"
                     >
-                      <span
-                        className={`text-xs sm:text-sm font-semibold ${
-                          theme === 'dark' ? 'text-slate-200' : 'text-slate-900'
-                        }`}
-                      >
+                      <span className="text-xs sm:text-sm font-semibold text-theme-primary">
                         {faq.question}
                       </span>
-                      <span className="p-1 rounded-lg text-slate-400 shrink-0">
-                        {isOpen ? (
-                          <ChevronUp className="w-4 h-4 text-indigo-400" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4" />
-                        )}
+                      <span className="text-theme-muted shrink-0">
+                        {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </span>
                     </button>
                     {isOpen && (
-                      <div
-                        className={`px-4 pb-4 sm:px-5 sm:pb-5 pt-0 text-xs sm:text-sm leading-relaxed border-t ${
-                          theme === 'dark'
-                            ? 'text-slate-400 border-slate-800/60'
-                            : 'text-slate-600 border-slate-200/80'
-                        }`}
-                      >
+                      <div className="px-4 pb-4 sm:px-5 sm:pb-5 text-xs sm:text-sm text-theme-secondary leading-relaxed border-t border-black/5 dark:border-white/10 pt-3">
                         {faq.answer}
                       </div>
                     )}
@@ -2135,48 +1613,28 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
           </div>
         </section>
 
-        {/* RELATED TOOLS SECTION */}
-        <div
-          className={`mt-16 pt-10 border-t ${
-            theme === 'dark' ? 'border-slate-800' : 'border-slate-200'
-          }`}
-        >
-          <h2
-            className={`text-lg font-bold font-display mb-4 ${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
-            }`}
-          >
+        {/* RELATED TOOLS */}
+        <div className="mt-16 pt-10 border-t border-black/5 dark:border-white/10">
+          <h3 className="text-lg font-bold font-display text-theme-primary mb-4">
             Related Creative Tools
-          </h2>
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { id: 'image-compressor', name: 'Image Compressor', desc: 'Shrink file size up to 90%' },
-              { id: 'image-resizer', name: 'Image Resizer', desc: 'Resize width & height in pixels' },
-              { id: 'image-filters', name: 'Image Filters', desc: 'Artistic color filters & presets' },
-              { id: 'qr-code-generator', name: 'QR Code Generator', desc: 'Scannable QR codes for links' },
-            ].map((related) => (
+              { id: 'image-resizer', name: 'Image Resizer', desc: 'Exact pixel dimensions & aspect ratio' },
+              { id: 'signature-maker', name: 'Digital Signature Maker', desc: 'Draw smooth transparent signatures' },
+              { id: 'qr-code-generator', name: 'QR Code Generator', desc: 'Permanent scannable QR matrices' },
+            ].map((rel) => (
               <button
-                key={related.id}
-                onClick={() => onSelectRelatedTool(related.id)}
-                className={`p-4 rounded-xl border text-left transition-all ${
-                  theme === 'dark'
-                    ? 'bg-slate-900 border-slate-800 hover:border-slate-700 hover:bg-slate-850'
-                    : 'bg-white border-slate-200 hover:border-indigo-300 hover:shadow-md'
-                }`}
+                key={rel.id}
+                onClick={() => onSelectRelatedTool(rel.id)}
+                className="glass-panel glass-panel-interactive rounded-2xl p-4 text-left transition-all"
               >
-                <div
-                  className={`text-xs font-bold mb-1 ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
-                  }`}
-                >
-                  {related.name}
+                <div className="text-xs font-bold text-theme-primary mb-1">
+                  {rel.name}
                 </div>
-                <div
-                  className={`text-[11px] ${
-                    theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
-                  }`}
-                >
-                  {related.desc}
+                <div className="text-[11px] text-theme-muted">
+                  {rel.desc}
                 </div>
               </button>
             ))}
