@@ -98,9 +98,17 @@ const renderIcon = (name: string, className = 'w-4 h-4') => {
 
 export const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
   return (
-    <div
-      onClick={() => onSelect(tool.id)}
-      className="glass-panel glass-panel-interactive rounded-3xl p-5 flex flex-col justify-between group cursor-pointer transition-all duration-300 relative overflow-hidden"
+    <a
+      href={`/tool/${tool.id}`}
+      onClick={(e) => {
+        // Allow ctrl/cmd + click to open in new tab naturally
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+          e.preventDefault();
+          onSelect(tool.id);
+        }
+      }}
+      className="glass-panel glass-panel-interactive rounded-3xl p-5 flex flex-col justify-between group cursor-pointer transition-all duration-300 relative overflow-hidden block text-left no-underline"
+      aria-label={`Open ${tool.name}: ${tool.tagline}`}
     >
       <div>
         {/* Apple Canvas Preview Window */}
@@ -137,18 +145,11 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
 
       {/* Apple-Style "Open Tool →" Glass Button */}
       <div className="pt-3 border-t border-black/5 dark:border-white/10 mt-auto">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect(tool.id);
-          }}
-          className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-theme-primary group-hover:text-white bg-black/5 dark:bg-white/10 group-hover:bg-indigo-600 transition-all flex items-center justify-center gap-1.5 shadow-xs"
-        >
+        <div className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-theme-primary group-hover:text-white bg-black/5 dark:bg-white/10 group-hover:bg-indigo-600 transition-all flex items-center justify-center gap-1.5 shadow-xs">
           <span>Open Tool</span>
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-        </button>
+        </div>
       </div>
-    </div>
+    </a>
   );
 };

@@ -1,6 +1,6 @@
 # Pixal Lab Robots.txt
-# https://pixallab.online
+# Official Domain: https://www.pixallab.online/
 User-agent: *
 Allow: /
 
-Sitemap: https://pixallab.online/sitemap.xml
+Sitemap: https://www.pixallab.online/sitemap.xml

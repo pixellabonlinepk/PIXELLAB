@@ -90,37 +90,71 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
           </div>
 
           {/* ZONE 2: CENTER APPLE PILL NAVIGATION (Desktop Only) */}
-          <nav className="hidden md:flex items-center apple-segmented p-1 rounded-full">
-            <button
-              onClick={() => onNavigate('home')}
-              className={`px-4 py-1.5 rounded-full text-xs transition-all whitespace-nowrap ${
+          <nav aria-label="Main Navigation" className="hidden md:flex items-center apple-segmented p-1 rounded-full">
+            <a
+              href="/"
+              onClick={(e) => {
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                  e.preventDefault();
+                  onNavigate('home');
+                }
+              }}
+              className={`px-3.5 py-1.5 rounded-full text-xs transition-all whitespace-nowrap ${
                 currentView === 'home'
                   ? 'bg-white dark:bg-white/15 text-[#1D1D1F] dark:text-white font-semibold shadow-xs'
                   : 'text-[#6E6E73] dark:text-[#86868B] hover:text-[#1D1D1F] dark:hover:text-white font-medium'
               }`}
             >
               Home
-            </button>
-            <button
-              onClick={() => onNavigate('all-tools')}
-              className={`px-4 py-1.5 rounded-full text-xs transition-all whitespace-nowrap ${
+            </a>
+            <a
+              href="/all-tools"
+              onClick={(e) => {
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                  e.preventDefault();
+                  onNavigate('all-tools');
+                }
+              }}
+              className={`px-3.5 py-1.5 rounded-full text-xs transition-all whitespace-nowrap ${
                 currentView === 'all-tools'
                   ? 'bg-white dark:bg-white/15 text-[#1D1D1F] dark:text-white font-semibold shadow-xs'
                   : 'text-[#6E6E73] dark:text-[#86868B] hover:text-[#1D1D1F] dark:hover:text-white font-medium'
               }`}
             >
               Tools
-            </button>
-            <button
-              onClick={() => onNavigate('about')}
-              className={`px-4 py-1.5 rounded-full text-xs transition-all whitespace-nowrap ${
+            </a>
+            <a
+              href="/guides"
+              onClick={(e) => {
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                  e.preventDefault();
+                  onNavigate('guides');
+                }
+              }}
+              className={`px-3.5 py-1.5 rounded-full text-xs transition-all whitespace-nowrap ${
+                currentView === 'guides' || currentView === 'guide'
+                  ? 'bg-white dark:bg-white/15 text-[#1D1D1F] dark:text-white font-semibold shadow-xs'
+                  : 'text-[#6E6E73] dark:text-[#86868B] hover:text-[#1D1D1F] dark:hover:text-white font-medium'
+              }`}
+            >
+              Guides
+            </a>
+            <a
+              href="/about"
+              onClick={(e) => {
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                  e.preventDefault();
+                  onNavigate('about');
+                }
+              }}
+              className={`px-3.5 py-1.5 rounded-full text-xs transition-all whitespace-nowrap ${
                 currentView === 'about'
                   ? 'bg-white dark:bg-white/15 text-[#1D1D1F] dark:text-white font-semibold shadow-xs'
                   : 'text-[#6E6E73] dark:text-[#86868B] hover:text-[#1D1D1F] dark:hover:text-white font-medium'
               }`}
             >
               About
-            </button>
+            </a>
           </nav>
 
           {/* ZONE 3: ACTIONS & THEME TOGGLE */}
@@ -299,6 +333,17 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
                           {TOOLS.length}
                         </span>
                       </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => handleNavClick('guides')}
+                      className={`w-full px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
+                        currentView === 'guides' || currentView === 'guide'
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'text-theme-primary hover:bg-black/5 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      <span>How-To Guides</span>
                       <ChevronRight className="w-3.5 h-3.5 opacity-60" />
                     </button>
                     <button

@@ -28,31 +28,58 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="canonical" id="canonical-tag" href="https://pixallab.online/" />
-    <meta name="robots" content="index, follow" />
-    <title>Pixal Lab — Every Image. More Possibilities.</title>
-    <meta name="description" content="Every Image. More Possibilities. Resize, compress, edit, convert, and enhance your images with simple, powerful browser-based tools in one place." />
-    <meta property="og:title" content="Pixal Lab — Every Image. More Possibilities." />
-    <meta property="og:description" content="Every Image. More Possibilities. Resize, compress, edit, convert, and enhance your images with simple, powerful browser-based tools in one place." />
-    <meta property="og:url" content="https://pixallab.online/" />
-    <meta property="og:site_name" content="Pixal Lab" />
+    <link rel="canonical" id="canonical-tag" href="https://www.pixallab.online/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <title>PIXAL LAB — Free Online Image Tools | Every Image. More Possibilities.</title>
+    <meta name="description" content="Use free online image tools with PIXAL LAB. Resize, compress, crop, convert, edit, and enhance images using simple browser-based tools with zero server uploads." />
+    <meta property="og:title" content="PIXAL LAB — Free Online Image Tools" />
+    <meta property="og:description" content="Use free online image tools with PIXAL LAB. Resize, compress, crop, convert, and enhance images with simple browser-based tools." />
+    <meta property="og:url" content="https://www.pixallab.online/" />
+    <meta property="og:site_name" content="PIXAL LAB" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Pixal Lab — Every Image. More Possibilities." />
-    <meta name="twitter:description" content="Every Image. More Possibilities. Resize, compress, edit, convert, and enhance your images with simple, powerful browser-based tools in one place." />
+    <meta name="twitter:title" content="PIXAL LAB — Free Online Image Tools" />
+    <meta name="twitter:description" content="Use free online image tools with PIXAL LAB. Resize, compress, crop, convert, and enhance images with simple browser-based tools." />
+    <script>
+      // Single Page Application clean URL restoration from 404 redirect
+      (function() {
+        var query = window.location.search;
+        if (query.indexOf('p=') !== -1) {
+          var match = query.match(/[?&]p=([^&]*)/);
+          if (match && match[1]) {
+            var decoded = decodeURIComponent(match[1]);
+            window.history.replaceState(null, '', '/' + decoded + window.location.hash);
+          }
+        }
+      })();
+    </script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Pixal Lab",
-      "applicationCategory": "DesignApplication",
-      "operatingSystem": "All",
-      "description": "Every Image. More Possibilities. Resize, compress, edit, convert, and enhance your images with simple, powerful browser-based tools in one place.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://www.pixallab.online/#website",
+          "url": "https://www.pixallab.online/",
+          "name": "PIXAL LAB",
+          "description": "Every Image. More Possibilities. Free in-browser image tools to compress, resize, edit, and convert photos with zero server uploads.",
+          "inLanguage": "en-US",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.pixallab.online/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://www.pixallab.online/#organization",
+          "name": "PIXAL LAB",
+          "url": "https://www.pixallab.online/",
+          "email": "pixellab.online.pk@gmail.com",
+          "description": "Independent provider of free, client-side browser image editing and document conversion utilities."
+        }
+      ]
     }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

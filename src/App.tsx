@@ -9,9 +9,13 @@ import { AboutPage } from './components/pages/AboutPage';
 import { PrivacyPage } from './components/pages/PrivacyPage';
 import { TermsPage } from './components/pages/TermsPage';
 import { ContactPage } from './components/pages/ContactPage';
+import { GuidesIndexPage } from './components/pages/GuidesIndexPage';
+import { GuideDetailPage } from './components/pages/GuideDetailPage';
 import { RatingWidget } from './components/RatingWidget';
 import { TOOLS } from './data/tools';
 import { getToolGuide } from './data/toolGuides';
+import { TOOL_SEO_CONFIG } from './data/toolSeoConfig';
+import { EDUCATIONAL_GUIDES } from './data/guidesData';
 import { ToolCategory } from './types';
 import { useTheme } from './context/ThemeContext';
 import {
@@ -58,6 +62,7 @@ export default function App() {
   const { theme } = useTheme();
   const [currentView, setCurrentView] = useState<string>('home');
   const [selectedToolId, setSelectedToolId] = useState<string>('image-compressor');
+  const [selectedGuideSlug, setSelectedGuideSlug] = useState<string>('how-to-make-a-youtube-thumbnail');
   const [activeCategory, setActiveCategory] = useState<ToolCategory>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -90,10 +95,43 @@ export default function App() {
     };
   }, []);
 
-  // Sync with browser URL hash for direct links and browser back/forward
+  // Sync with browser URL clean pathname and hash fallback for direct links & back/forward navigation
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleUrlChange = () => {
+      const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '');
       const hash = window.location.hash.replace('#/', '').replace('#', '');
+
+      // 1. Check clean path first (e.g. /tool/signature-maker, /guide/how-to-make-a-youtube-thumbnail)
+      if (pathname.startsWith('tool/') || pathname.startsWith('tools/')) {
+        const id = pathname.replace(/^tools?\//, '');
+        if (TOOLS.some((t) => t.id === id)) {
+          setSelectedToolId(id);
+          setCurrentView('tool');
+          return;
+        }
+      }
+
+      if (pathname.startsWith('guide/') || pathname.startsWith('guides/')) {
+        const slug = pathname.replace(/^guides?\//, '');
+        const found = EDUCATIONAL_GUIDES.find((g) => g.slug === slug);
+        if (found) {
+          setSelectedGuideSlug(found.slug);
+          setCurrentView('guide');
+          return;
+        }
+      }
+
+      if (pathname === 'guides') {
+        setCurrentView('guides');
+        return;
+      }
+
+      if (['all-tools', 'about', 'privacy', 'terms', 'contact'].includes(pathname)) {
+        setCurrentView(pathname);
+        return;
+      }
+
+      // 2. Check hash fallback for legacy bookmarks (e.g. #/tool/signature-maker)
       if (hash.startsWith('tool/')) {
         const id = hash.replace('tool/', '');
         if (TOOLS.some((t) => t.id === id)) {
@@ -102,54 +140,100 @@ export default function App() {
           return;
         }
       }
+
+      if (hash.startsWith('guide/')) {
+        const slug = hash.replace('guide/', '');
+        const found = EDUCATIONAL_GUIDES.find((g) => g.slug === slug);
+        if (found) {
+          setSelectedGuideSlug(found.slug);
+          setCurrentView('guide');
+          return;
+        }
+      }
+
+      if (hash === 'guides') {
+        setCurrentView('guides');
+        return;
+      }
+
       if (['home', 'all-tools', 'about', 'privacy', 'terms', 'contact'].includes(hash)) {
         setCurrentView(hash);
+        return;
+      }
+
+      // Default to home if on root path without hash
+      if (!pathname && !hash) {
+        setCurrentView('home');
       }
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange();
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    handleUrlChange();
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
   }, []);
 
-  // DYNAMIC SEO & META ENGINE: updates title, description, canonical link, open graph, and injects JSON-LD schema
+  // DYNAMIC SEO & META ENGINE: updates title, description, canonical link, open graph, and injects verified JSON-LD schema
   useEffect(() => {
-    let pageTitle = 'Pixal Lab — Every Image. More Possibilities.';
+    const DOMAIN = 'https://www.pixallab.online';
+    let pageTitle = 'PIXAL LAB — Free Online Image Tools | Every Image. More Possibilities.';
     let pageDesc =
-      'Every Image. More Possibilities. Resize, compress, edit, convert, and enhance your images with simple, powerful browser-based tools in one place.';
-    let canonicalUrl = 'https://pixallab.online/';
+      'Use free online image tools with PIXAL LAB. Resize, compress, crop, convert, edit, and enhance images using simple browser-based tools with zero server uploads.';
+    let canonicalUrl = `${DOMAIN}/`;
     let jsonLdData: any = null;
 
     if (currentView === 'tool') {
       const activeTool = TOOLS.find((t) => t.id === selectedToolId) || TOOLS[0];
+      const seoData = TOOL_SEO_CONFIG[activeTool.id];
       const guide = getToolGuide(activeTool.id, activeTool.name, activeTool.categoryLabel);
 
-      pageTitle = `${activeTool.name} Online — Free & 100% Private | Pixal Lab`;
-      pageDesc = `${activeTool.description} Fast, secure in-browser processing with zero server uploads and instant export.`;
-      canonicalUrl = `https://pixallab.online/#/tool/${activeTool.id}`;
+      pageTitle = seoData ? seoData.seoTitle : `${activeTool.name} | PIXAL LAB`;
+      pageDesc = seoData ? seoData.metaDescription : `${activeTool.description} Free, browser-based tool with zero server uploads.`;
+      canonicalUrl = `${DOMAIN}/tool/${activeTool.id}`;
 
       jsonLdData = [
         {
           '@context': 'https://schema.org',
-          '@type': 'SoftwareApplication',
-          name: `${activeTool.name} — Pixal Lab`,
+          '@type': 'WebApplication',
+          name: `${activeTool.name} — PIXAL LAB`,
           applicationCategory: 'DesignApplication',
           operatingSystem: 'All',
-          description: activeTool.description,
+          browserRequirements: 'Requires modern browser with HTML5 Canvas support',
+          description: seoData ? seoData.introParagraph : activeTool.description,
           url: canonicalUrl,
           offers: {
             '@type': 'Offer',
             price: '0',
             priceCurrency: 'USD',
           },
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: '4.9',
-            ratingCount: '1280',
-            bestRating: '5',
-            worstRating: '1',
-          },
           featureList: activeTool.features.join(', '),
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: `${DOMAIN}/`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'All Tools',
+              item: `${DOMAIN}/all-tools`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: activeTool.name,
+              item: canonicalUrl,
+            },
+          ],
         },
         {
           '@context': 'https://schema.org',
@@ -164,32 +248,104 @@ export default function App() {
           })),
         },
       ];
-    } else if (currentView === 'home') {
-      pageTitle = 'Pixal Lab — Every Image. More Possibilities.';
-      pageDesc =
-        'Every Image. More Possibilities. Resize, compress, edit, convert, and enhance your images with simple, powerful browser-based tools in one place.';
-      canonicalUrl = 'https://pixallab.online/';
+    } else if (currentView === 'guide') {
+      const activeGuide = EDUCATIONAL_GUIDES.find((g) => g.slug === selectedGuideSlug) || EDUCATIONAL_GUIDES[0];
+      pageTitle = activeGuide.seoTitle;
+      pageDesc = activeGuide.metaDescription;
+      canonicalUrl = `${DOMAIN}/guide/${activeGuide.slug}`;
 
       jsonLdData = [
         {
           '@context': 'https://schema.org',
-          '@type': 'WebApplication',
-          name: 'Pixal Lab',
-          applicationCategory: 'DesignApplication',
-          operatingSystem: 'All',
-          url: 'https://pixallab.online/',
+          '@type': 'HowTo',
+          name: activeGuide.h1,
+          description: activeGuide.summary,
+          step: activeGuide.steps.map((s) => ({
+            '@type': 'HowToStep',
+            position: s.number,
+            name: s.title,
+            text: s.description,
+          })),
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: `${DOMAIN}/`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Guides',
+              item: `${DOMAIN}/guides`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: activeGuide.title,
+              item: canonicalUrl,
+            },
+          ],
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: activeGuide.faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: faq.answer,
+            },
+          })),
+        },
+      ];
+    } else if (currentView === 'guides') {
+      pageTitle = 'Free Image Guides & How-To Tutorials | PIXAL LAB';
+      pageDesc = 'Learn how to resize images, make YouTube thumbnails, create transparent digital signatures, split Instagram grids, and prepare WhatsApp DPs.';
+      canonicalUrl = `${DOMAIN}/guides`;
+
+      jsonLdData = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: `${DOMAIN}/`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Guides',
+              item: canonicalUrl,
+            },
+          ],
+        },
+      ];
+    } else if (currentView === 'home') {
+      pageTitle = 'PIXAL LAB — Free Online Image Tools | Every Image. More Possibilities.';
+      pageDesc =
+        'Use free online image tools with PIXAL LAB. Resize, compress, crop, convert, edit, and enhance images using simple browser-based tools with zero server uploads.';
+      canonicalUrl = `${DOMAIN}/`;
+
+      jsonLdData = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'PIXAL LAB',
+          url: `${DOMAIN}/`,
           description: pageDesc,
-          offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'USD',
-          },
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: '4.9',
-            ratingCount: '2450',
-            bestRating: '5',
-            worstRating: '1',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: `${DOMAIN}/?q={search_term_string}`,
+            'query-input': 'required name=search_term_string',
           },
         },
         {
@@ -206,28 +362,28 @@ export default function App() {
         },
       ];
     } else if (currentView === 'all-tools') {
-      pageTitle = `All ${TOOLS.length} Image Tools — Free Online Editor Suite | Pixal Lab`;
-      pageDesc = `Explore all ${TOOLS.length} high-performance image manipulation utilities in Pixal Lab. Compress, resize, crop, filter, convert, and create with zero server uploads.`;
-      canonicalUrl = 'https://pixallab.online/#/all-tools';
+      pageTitle = `All ${TOOLS.length} Free Image Tools — Online Editor Suite | PIXAL LAB`;
+      pageDesc = `Explore all ${TOOLS.length} high-performance image manipulation utilities in PIXAL LAB. Compress, resize, crop, filter, convert, and create with zero server uploads.`;
+      canonicalUrl = `${DOMAIN}/all-tools`;
     } else if (currentView === 'about') {
-      pageTitle = 'About Pixal Lab — 100% In-Browser Image Studio';
+      pageTitle = 'About PIXAL LAB — 100% In-Browser Image Studio';
       pageDesc =
-        'Learn how Pixal Lab delivers free, secure client-side image processing tools without subscriptions or invasive data tracking.';
-      canonicalUrl = 'https://pixallab.online/#/about';
+        'Learn how PIXAL LAB delivers free, secure client-side image processing tools without subscriptions or invasive data tracking.';
+      canonicalUrl = `${DOMAIN}/about`;
     } else if (currentView === 'privacy') {
-      pageTitle = 'Privacy Policy & Cookie Policy | Pixal Lab';
+      pageTitle = 'Privacy Policy & Cookie Policy | PIXAL LAB';
       pageDesc =
-        'Read our transparent privacy policy. Pixal Lab runs 100% in your browser with zero image uploads, zero remote storage, and standard Google Analytics disclosure.';
-      canonicalUrl = 'https://pixallab.online/#/privacy';
+        'Read our transparent privacy policy. PIXAL LAB runs 100% in your browser with zero image uploads, zero remote storage, and standard Google Analytics disclosure.';
+      canonicalUrl = `${DOMAIN}/privacy`;
     } else if (currentView === 'terms') {
-      pageTitle = 'Terms of Service | Pixal Lab';
-      pageDesc = 'Terms of Service and usage conditions for Pixal Lab client-side image processing utilities.';
-      canonicalUrl = 'https://pixallab.online/#/terms';
+      pageTitle = 'Terms of Service | PIXAL LAB';
+      pageDesc = 'Terms of Service and usage conditions for PIXAL LAB client-side image processing utilities.';
+      canonicalUrl = `${DOMAIN}/terms`;
     } else if (currentView === 'contact') {
-      pageTitle = 'Contact & Support | Pixal Lab';
+      pageTitle = 'Contact & Support | PIXAL LAB';
       pageDesc =
-        'Get in touch with the Pixal Lab engineering and support team for feedback, feature requests, or business inquiries.';
-      canonicalUrl = 'https://pixallab.online/#/contact';
+        'Get in touch with the PIXAL LAB engineering and support team for feedback, feature requests, or questions.';
+      canonicalUrl = `${DOMAIN}/contact`;
     }
 
     // 1. Update document title
@@ -255,7 +411,7 @@ export default function App() {
       canonical.setAttribute('href', canonicalUrl);
     }
 
-    // 5. Inject Dynamic JSON-LD Schema
+    // 5. Inject Dynamic JSON-LD Schema (free of fabricated ratings)
     const existingScript = document.getElementById('pixal-dynamic-jsonld');
     if (existingScript) {
       existingScript.remove();
@@ -273,22 +429,40 @@ export default function App() {
     if (typeof (window as any).gtag === 'function') {
       (window as any).gtag('event', 'page_view', {
         page_title: pageTitle,
-        page_location: window.location.href,
-        page_path: window.location.pathname + window.location.hash,
+        page_location: canonicalUrl,
+        page_path: window.location.pathname,
         send_to: 'G-ZBTVJ487QP',
       });
     }
-  }, [currentView, selectedToolId]);
+  }, [currentView, selectedToolId, selectedGuideSlug]);
 
-  const navigateTo = (view: string, toolId?: string) => {
+  const navigateTo = (view: string, toolId?: string, guideSlug?: string) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    let cleanPath = '/';
     if (view === 'tool' && toolId) {
       setSelectedToolId(toolId);
       setCurrentView('tool');
-      window.location.hash = `#/tool/${toolId}`;
+      cleanPath = `/tool/${toolId}`;
+    } else if (view === 'guide' && guideSlug) {
+      setSelectedGuideSlug(guideSlug);
+      setCurrentView('guide');
+      cleanPath = `/guide/${guideSlug}`;
+    } else if (view === 'guides') {
+      setCurrentView('guides');
+      cleanPath = '/guides';
+    } else if (view === 'home') {
+      setCurrentView('home');
+      cleanPath = '/';
     } else {
       setCurrentView(view);
-      window.location.hash = `#/${view}`;
+      cleanPath = `/${view}`;
+    }
+
+    if (window.history && window.history.pushState) {
+      window.history.pushState(null, '', cleanPath);
+    } else {
+      window.location.hash = `#${cleanPath}`;
     }
   };
 
@@ -545,6 +719,22 @@ export default function App() {
 
         {/* VIEW 8: CONTACT */}
         {currentView === 'contact' && <ContactPage />}
+
+        {/* VIEW 9: GUIDES DIRECTORY */}
+        {currentView === 'guides' && (
+          <GuidesIndexPage
+            onNavigate={navigateTo}
+            onSelectGuide={(slug) => navigateTo('guide', undefined, slug)}
+          />
+        )}
+
+        {/* VIEW 10: INDIVIDUAL EDUCATIONAL GUIDE */}
+        {currentView === 'guide' && (
+          <GuideDetailPage
+            guide={EDUCATIONAL_GUIDES.find((g) => g.slug === selectedGuideSlug) || EDUCATIONAL_GUIDES[0]}
+            onNavigate={navigateTo}
+          />
+        )}
       </main>
 
       {/* Floating Top-Right 5-Star Rating Widget */}
