@@ -340,15 +340,15 @@ export default function App() {
             />
 
             {/* Tools Gallery Anchor Section */}
-            <section id="tools-gallery" className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12">
-              <div className="relative z-10 mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <section id="tools-gallery" className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-8 sm:pt-6 sm:pb-10">
+              <div className="relative z-10 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-500 mb-1 tracking-wide uppercase">
                     <Compass className="w-3.5 h-3.5" />
                     <span>Tool Explorer</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[#1D1D1F] dark:text-[#F5F5F7]">
-                    Top 12 Power Tools
+                    Explore {TOOLS.length} Pro Image Utilities
                   </h2>
                   <p className="text-xs sm:text-sm mt-1 max-w-xl text-[#6E6E73] dark:text-[#86868B]">
                     High-performance client-side photo utilities. Compress, resize, crop, convert, and craft with zero server uploads.
@@ -357,7 +357,7 @@ export default function App() {
               </div>
 
               {/* Category Segmented Filter Tabs */}
-              <div className="relative z-10 mb-8 w-full max-w-full min-w-0">
+              <div className="relative z-10 mb-4 sm:mb-6 w-full max-w-full min-w-0">
                 <CategoryFilters
                   activeCategory={activeCategory}
                   onSelectCategory={(cat) => setActiveCategory(cat)}
@@ -379,9 +379,9 @@ export default function App() {
             </section>
 
             {/* Feature Highlights Banner */}
-            <section className="border-t border-black/5 dark:border-white/10 py-16 relative overflow-hidden">
+            <section className="border-t border-black/5 dark:border-white/10 py-8 sm:py-12 relative overflow-hidden">
               <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
-                <div className="text-center max-w-2xl mx-auto mb-12">
+                <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
                   <h2 className="text-2xl sm:text-3xl font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7] mb-2">
                     Why Creators Choose Pixal Lab
                   </h2>
@@ -420,10 +420,10 @@ export default function App() {
                       03
                     </div>
                     <h3 className="text-base font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">
-                      12 Essential Utilities
+                      {TOOLS.length} Pro Browser Utilities
                     </h3>
                     <p className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
-                      Everything from intelligent compression and resizing to Pakistan CNIC passport photos, group collages, and PDF conversions.
+                      Everything from intelligent compression and resizing to Pakistan CNIC passport photos, group collages, EXIF cleaning, and PDF conversions.
                     </p>
                   </div>
                 </div>
@@ -431,9 +431,9 @@ export default function App() {
             </section>
 
             {/* HOMEPAGE FREQUENTLY ASKED QUESTIONS SECTION (AdSense & High-Value Content) */}
-            <section className="py-16 border-t border-black/5 dark:border-white/10">
+            <section className="py-8 sm:py-12 border-t border-black/5 dark:border-white/10">
               <div className="max-w-3xl mx-auto px-4 sm:px-6">
-                <div className="text-center mb-10">
+                <div className="text-center mb-6">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-500 mb-3">
                     <HelpCircle className="w-3.5 h-3.5" />
                     <span>Common Questions</span>

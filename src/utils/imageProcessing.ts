@@ -387,10 +387,11 @@ export async function adjustBrightnessContrast(
   return { blob, url: URL.createObjectURL(blob) };
 }
 
-// 9. IMAGE BLUR
+// 9. IMAGE BLUR & PIXELATE REDACTOR
 export async function applyBlur(
   img: HTMLImageElement,
-  radius: number // 1 to 30
+  radius: number, // 1 to 50
+  mode: 'gaussian' | 'pixelate' | 'soft' = 'gaussian'
 ): Promise<{ blob: Blob; url: string }> {
   const w = img.naturalWidth || img.width;
   const h = img.naturalHeight || img.height;
@@ -399,9 +400,31 @@ export async function applyBlur(
   canvas.height = h;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.filter = `blur(${radius}px)`;
-  ctx.drawImage(img, 0, 0, w, h);
-  ctx.filter = 'none';
+  if (mode === 'pixelate') {
+    // Pixelate/Mosaic mode: downscale then upscale with nearest neighbor
+    const pixelSize = Math.max(2, Math.round(radius * 1.2));
+    const smallW = Math.max(1, Math.floor(w / pixelSize));
+    const smallH = Math.max(1, Math.floor(h / pixelSize));
+
+    const smallCanvas = document.createElement('canvas');
+    smallCanvas.width = smallW;
+    smallCanvas.height = smallH;
+    const smallCtx = smallCanvas.getContext('2d')!;
+    smallCtx.drawImage(img, 0, 0, smallW, smallH);
+
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(smallCanvas, 0, 0, smallW, smallH, 0, 0, w, h);
+  } else if (mode === 'soft') {
+    // Soft Portrait Blur: subtle blur with enhanced color saturation
+    ctx.filter = `blur(${Math.max(1, Math.round(radius * 0.35))}px) saturate(112%)`;
+    ctx.drawImage(img, 0, 0, w, h);
+    ctx.filter = 'none';
+  } else {
+    // Standard Gaussian Blur
+    ctx.filter = `blur(${radius}px)`;
+    ctx.drawImage(img, 0, 0, w, h);
+    ctx.filter = 'none';
+  }
 
   const blob = await canvasToBlob(canvas, 'image/png');
   return { blob, url: URL.createObjectURL(blob) };
@@ -1260,5 +1283,112 @@ export async function renderPdfToImage(
         url: URL.createObjectURL(pageBlob),
       },
     ],
+  };
+}
+
+// 30. ASPECT RATIO PAD (NO-CROP SOCIAL EXPANDER)
+export async function aspectRatioPad(
+  img: HTMLImageElement,
+  options: {
+    ratio: '1:1' | '4:5' | '9:16' | '16:9';
+    bgMode: 'blur' | 'white' | 'black' | 'custom';
+    bgColor?: string;
+  }
+): Promise<{ blob: Blob; url: string; width: number; height: number }> {
+  const imgW = img.naturalWidth || img.width;
+  const imgH = img.naturalHeight || img.height;
+
+  let targetRatio = 1;
+  if (options.ratio === '1:1') targetRatio = 1;
+  else if (options.ratio === '4:5') targetRatio = 4 / 5;
+  else if (options.ratio === '9:16') targetRatio = 9 / 16;
+  else if (options.ratio === '16:9') targetRatio = 16 / 9;
+
+  let canvasW = imgW;
+  let canvasH = imgH;
+
+  const currentRatio = imgW / imgH;
+  if (currentRatio > targetRatio) {
+    canvasW = imgW;
+    canvasH = Math.round(imgW / targetRatio);
+  } else {
+    canvasH = imgH;
+    canvasW = Math.round(imgH * targetRatio);
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+  const ctx = canvas.getContext('2d')!;
+
+  if (options.bgMode === 'blur') {
+    ctx.save();
+    ctx.filter = 'blur(45px) brightness(0.85)';
+    const scale = Math.max(canvasW / imgW, canvasH / imgH) * 1.25;
+    const bgW = imgW * scale;
+    const bgH = imgH * scale;
+    const bgX = (canvasW - bgW) / 2;
+    const bgY = (canvasH - bgH) / 2;
+    ctx.drawImage(img, bgX, bgY, bgW, bgH);
+    ctx.restore();
+  } else if (options.bgMode === 'white') {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+  } else if (options.bgMode === 'black') {
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+  } else {
+    ctx.fillStyle = options.bgColor || '#4F46E5';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+  }
+
+  const drawX = Math.round((canvasW - imgW) / 2);
+  const drawY = Math.round((canvasH - imgH) / 2);
+
+  if (options.bgMode === 'blur') {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    ctx.shadowBlur = 28;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 10;
+    ctx.drawImage(img, drawX, drawY, imgW, imgH);
+    ctx.restore();
+  } else {
+    ctx.drawImage(img, drawX, drawY, imgW, imgH);
+  }
+
+  const blob = await canvasToBlob(canvas, 'image/png');
+  return {
+    blob,
+    url: URL.createObjectURL(blob),
+    width: canvasW,
+    height: canvasH,
+  };
+}
+
+// 31. EXIF METADATA SCRUBBER
+export async function stripExifMetadata(
+  img: HTMLImageElement,
+  format: 'image/jpeg' | 'image/png' = 'image/jpeg',
+  quality = 0.95
+): Promise<{ blob: Blob; url: string; size: number }> {
+  const w = img.naturalWidth || img.width;
+  const h = img.naturalHeight || img.height;
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d')!;
+
+  if (format === 'image/jpeg') {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+  }
+  ctx.drawImage(img, 0, 0, w, h);
+
+  const blob = await canvasToBlob(canvas, format, quality);
+  return {
+    blob,
+    url: URL.createObjectURL(blob),
+    size: blob.size,
   };
 }

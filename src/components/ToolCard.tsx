@@ -25,6 +25,8 @@ import {
   Square,
   ScanLine,
   Pipette,
+  Maximize2,
+  ShieldCheck,
 } from 'lucide-react';
 import { ToolMetadata } from '../types';
 import { ToolPreviewContent } from './ToolPreviewContent';
@@ -34,11 +36,13 @@ interface ToolCardProps {
   onSelect: (id: string) => void;
 }
 
-// Icon mapper for all 24 tools
+// Icon mapper for all 26 tools
 const renderIcon = (name: string, className = 'w-4 h-4') => {
   switch (name) {
     case 'Minimize2':
       return <Minimize2 className={className} />;
+    case 'Maximize2':
+      return <Maximize2 className={className} />;
     case 'Scaling':
       return <Scaling className={className} />;
     case 'Layers':
@@ -69,6 +73,8 @@ const renderIcon = (name: string, className = 'w-4 h-4') => {
       return <PenTool className={className} />;
     case 'Shield':
       return <Shield className={className} />;
+    case 'ShieldCheck':
+      return <ShieldCheck className={className} />;
     case 'Sliders':
       return <Sliders className={className} />;
     case 'Sun':

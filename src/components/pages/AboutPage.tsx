@@ -55,7 +55,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
             <Cpu className="w-5 h-5" />
           </div>
           <h3 className="text-base font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7]">
-            Top {TOOLS.length} Power Tools
+            {TOOLS.length} Pro Browser Utilities
           </h3>
           <p className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
             Consolidated to deliver only high-impact, high-utility tools: from high-volume batch resizing to official Pakistan CNIC passport standards, squad DP collages, and permanent QR matrices.
@@ -76,7 +76,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
             onClick={onExploreTools}
             className="px-6 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all shadow-md active:scale-95"
           >
-            Explore Top {TOOLS.length} Tools →
+            Explore All {TOOLS.length} Tools →
           </button>
         </div>
       </div>

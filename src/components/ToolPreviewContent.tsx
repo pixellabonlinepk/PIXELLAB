@@ -437,7 +437,43 @@ export const ToolPreviewContent: React.FC<ToolPreviewContentProps> = ({ toolId }
         </div>
       );
 
-    // 24. MEME GENERATOR
+    // 24. EXIF & GPS METADATA CLEANER
+    case 'exif-metadata-remover':
+      return (
+        <div className="w-full h-full flex flex-col justify-center items-center p-2.5 gap-2 bg-black/5 dark:bg-white/5 rounded-xl">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center font-bold">
+              ✓
+            </div>
+            <div className="text-left">
+              <div className="text-[11px] font-bold text-theme-primary">Verified Clean</div>
+              <div className="text-[9px] text-theme-muted font-mono">0 EXIF / 0 GPS Tags</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-[9px] font-medium text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+            <span>Location & Camera Wiped</span>
+          </div>
+        </div>
+      );
+
+    // 25. NO-CROP SOCIAL EXPANDER & ASPECT RATIO PAD
+    case 'aspect-ratio-pad':
+      return (
+        <div className="w-full h-full rounded-xl overflow-hidden relative border border-black/5 dark:border-white/10 flex items-center justify-center">
+          {/* Blurred Background */}
+          <img src={portraitYoungWoman} alt="Blurred backdrop" className="absolute inset-0 w-full h-full object-cover blur-md scale-125 opacity-70" />
+          <div className="absolute inset-0 bg-black/30" />
+          {/* Centered Image */}
+          <div className="relative h-[80%] aspect-[3/4] rounded-lg overflow-hidden shadow-xl border border-white/40">
+            <img src={portraitYoungWoman} alt="Framed preview" className="w-full h-full object-cover" />
+          </div>
+          <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/75 text-[8px] font-mono text-white backdrop-blur-sm">
+            1:1 Fit (No Crop)
+          </span>
+        </div>
+      );
+
+    // 26. MEME GENERATOR
     case 'meme-generator':
     default:
       return (

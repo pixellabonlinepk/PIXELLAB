@@ -6,7 +6,7 @@ export type ToolCategory =
   | 'edit-retouch'
   | 'qr-utilities';
 
-export type ToolBadge = 'Free' | 'Browser-Based';
+export type ToolBadge = 'Free' | 'Browser-Based' | 'Popular' | 'Trending' | 'Security';
 
 export interface ToolGuideStep {
   step: number;

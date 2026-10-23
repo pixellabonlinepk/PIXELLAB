@@ -22,6 +22,7 @@ import {
   Sun,
   ExternalLink,
   FileImage,
+  Maximize2,
 } from 'lucide-react';
 import { ToolMetadata } from '../../types';
 import { getToolGuide } from '../../data/toolGuides';
@@ -52,6 +53,8 @@ import {
   readQrCodeFromImage,
   getPixelColor,
   extractColorPalette,
+  aspectRatioPad,
+  stripExifMetadata,
 } from '../../utils/imageProcessing';
 import { BatchImageResizer } from './BatchImageResizer';
 import { PhotoCollageDPMaker } from './PhotoCollageDPMaker';
@@ -179,8 +182,9 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   const [toolContrast, setToolContrast] = useState<number>(15);
   const [toolSharpen, setToolSharpen] = useState<number>(20);
 
-  // 15. Blur Tool
-  const [blurRadius, setBlurRadius] = useState<number>(8);
+  // 15. Privacy Blur & Pixelate Redactor
+  const [blurRadius, setBlurRadius] = useState<number>(14);
+  const [blurMode, setBlurMode] = useState<'gaussian' | 'pixelate' | 'soft'>('gaussian');
 
   // 16. Border & Corner Studio
   const [frameBorderWidth, setFrameBorderWidth] = useState<number>(16);
@@ -194,6 +198,44 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   const [pickedColor, setPickedColor] = useState<{ hex: string; rgb: string }>({ hex: '#4F46E5', rgb: 'rgb(79, 70, 229)' });
   const [paletteColors, setPaletteColors] = useState<string[]>([]);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // 19. Aspect Ratio Pad (No-Crop Social Expander)
+  const [aspectPadRatio, setAspectPadRatio] = useState<'1:1' | '4:5' | '9:16' | '16:9'>('1:1');
+  const [aspectPadBgMode, setAspectPadBgMode] = useState<'blur' | 'white' | 'black' | 'custom'>('blur');
+  const [aspectPadBgColor, setAspectPadBgColor] = useState<string>('#4F46E5');
+
+  // 20. EXIF & GPS Metadata Cleaner
+  const [exifFormat, setExifFormat] = useState<'image/jpeg' | 'image/png'>('image/jpeg');
+
+  // Color picker sampling on hover / tap
+  const handleCanvasPointer = (e: React.MouseEvent<HTMLImageElement>) => {
+    if (tool.id !== 'color-picker-palette' || !sourceImg) return;
+    const target = e.currentTarget;
+    const rect = target.getBoundingClientRect();
+    const clientX = e.clientX - rect.left;
+    const clientY = e.clientY - rect.top;
+    const normX = Math.max(0, Math.min(1, clientX / rect.width));
+    const normY = Math.max(0, Math.min(1, clientY / rect.height));
+
+    const origW = sourceImg.naturalWidth || sourceImg.width;
+    const origH = sourceImg.naturalHeight || sourceImg.height;
+    const pixelX = Math.floor(normX * origW);
+    const pixelY = Math.floor(normY * origH);
+
+    const sampleCanvas = document.createElement('canvas');
+    sampleCanvas.width = origW;
+    sampleCanvas.height = origH;
+    const sCtx = sampleCanvas.getContext('2d');
+    if (sCtx) {
+      sCtx.drawImage(sourceImg, 0, 0);
+      const pixel = sCtx.getImageData(pixelX, pixelY, 1, 1).data;
+      const r = pixel[0];
+      const g = pixel[1];
+      const b = pixel[2];
+      const hex = '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
+      setPickedColor({ hex, rgb: `rgb(${r}, ${g}, ${b})` });
+    }
+  };
 
   // Handle image upload
   const handleImageSelected = async (fileOrUrl: File | string, filename?: string) => {
@@ -429,7 +471,30 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
         case 'image-blur-tool': {
           if (sourceImg) {
-            res = await applyBlur(sourceImg, blurRadius);
+            res = await applyBlur(sourceImg, blurRadius, blurMode);
+          }
+          break;
+        }
+
+        case 'aspect-ratio-pad': {
+          if (sourceImg) {
+            const padRes = await aspectRatioPad(sourceImg, {
+              ratio: aspectPadRatio,
+              bgMode: aspectPadBgMode,
+              bgColor: aspectPadBgColor,
+            });
+            res = {
+              blob: padRes.blob,
+              url: padRes.url,
+              size: padRes.blob.size,
+            };
+          }
+          break;
+        }
+
+        case 'exif-metadata-remover': {
+          if (sourceImg) {
+            res = await stripExifMetadata(sourceImg, exifFormat, 0.95);
           }
           break;
         }
@@ -516,9 +581,14 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
     toolContrast,
     toolSharpen,
     blurRadius,
+    blurMode,
     frameBorderWidth,
     frameBorderColor,
     frameCornerRadius,
+    aspectPadRatio,
+    aspectPadBgMode,
+    aspectPadBgColor,
+    exifFormat,
   ]);
 
   // Handle Resize aspect ratio
@@ -724,13 +794,17 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                     <img
                       src={resultUrl}
                       alt="Processed output"
-                      className="max-h-[500px] max-w-full object-contain rounded-lg"
+                      onMouseMove={handleCanvasPointer}
+                      onClick={handleCanvasPointer}
+                      className={`max-h-[500px] max-w-full object-contain rounded-lg ${tool.id === 'color-picker-palette' ? 'cursor-crosshair' : ''}`}
                     />
                   ) : sourceUrl ? (
                     <img
                       src={sourceUrl}
                       alt="Preview"
-                      className="max-h-[500px] max-w-full object-contain rounded-lg"
+                      onMouseMove={handleCanvasPointer}
+                      onClick={handleCanvasPointer}
+                      className={`max-h-[500px] max-w-full object-contain rounded-lg ${tool.id === 'color-picker-palette' ? 'cursor-crosshair' : ''}`}
                     />
                   ) : (
                     <div className="text-center text-xs text-theme-muted">
@@ -1381,21 +1455,184 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                 )}
 
                 {/* 16. Background & Privacy Blur Tool */}
+                {/* 16. Privacy Blur & Pixelate Redactor */}
                 {tool.id === 'image-blur-tool' && (
                   <div className="space-y-4">
                     <div>
+                      <span className="text-xs text-theme-secondary block mb-1.5">
+                        Redaction Mode
+                      </span>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'gaussian', label: 'Gaussian' },
+                          { id: 'pixelate', label: 'Mosaic Pixel' },
+                          { id: 'soft', label: 'Soft Portrait' },
+                        ].map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => setBlurMode(m.id as any)}
+                            className={`py-2 px-1 rounded-xl text-xs font-semibold border transition-all text-center ${
+                              blurMode === m.id
+                                ? 'border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                            }`}
+                          >
+                            {m.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
                       <div className="flex justify-between text-xs text-theme-primary mb-1">
-                        <span>Blur Radius</span>
-                        <span className="font-mono text-indigo-500">{blurRadius}px</span>
+                        <span>{blurMode === 'pixelate' ? 'Mosaic Pixel Size' : 'Blur Intensity'}</span>
+                        <span className="font-mono text-teal-500">{blurRadius}px</span>
                       </div>
                       <input
                         type="range"
-                        min="1"
+                        min="2"
                         max="50"
                         value={blurRadius}
                         onChange={(e) => setBlurRadius(Number(e.target.value))}
-                        className="w-full accent-indigo-500 cursor-pointer"
+                        className="w-full accent-teal-500 cursor-pointer"
                       />
+                    </div>
+                  </div>
+                )}
+
+                {/* Aspect Ratio Pad & No-Crop Social Expander */}
+                {tool.id === 'aspect-ratio-pad' && (
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1.5">
+                        Target Aspect Ratio
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: '1:1', label: '1:1 Square (Feed)' },
+                          { id: '4:5', label: '4:5 Vertical (Instagram)' },
+                          { id: '9:16', label: '9:16 Story (TikTok/Reels)' },
+                          { id: '16:9', label: '16:9 Wide (YouTube)' },
+                        ].map((r) => (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => setAspectPadRatio(r.id as any)}
+                            className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all text-center ${
+                              aspectPadRatio === r.id
+                                ? 'border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-400'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                            }`}
+                          >
+                            {r.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1.5">
+                        Background Fill
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: 'blur', label: 'Aesthetic Blur' },
+                          { id: 'white', label: 'Clean White' },
+                          { id: 'black', label: 'Pitch Black' },
+                          { id: 'custom', label: 'Custom Color' },
+                        ].map((b) => (
+                          <button
+                            key={b.id}
+                            type="button"
+                            onClick={() => setAspectPadBgMode(b.id as any)}
+                            className={`py-2 px-2 rounded-xl text-xs font-semibold border transition-all text-center ${
+                              aspectPadBgMode === b.id
+                                ? 'border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-400'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                            }`}
+                          >
+                            {b.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {aspectPadBgMode === 'custom' && (
+                      <div>
+                        <span className="text-xs text-theme-secondary block mb-1">
+                          Border Color
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={aspectPadBgColor}
+                            onChange={(e) => setAspectPadBgColor(e.target.value)}
+                            className="w-10 h-10 rounded-xl cursor-pointer border-0 p-0 bg-transparent"
+                          />
+                          <span className="font-mono text-xs font-semibold text-theme-primary">
+                            {aspectPadBgColor}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* EXIF Metadata Cleaner */}
+                {tool.id === 'exif-metadata-remover' && (
+                  <div className="space-y-4">
+                    <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                      <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs">
+                        <ShieldCheck className="w-4 h-4" />
+                        <span>Verified Clean Status</span>
+                      </div>
+                      <div className="text-[11px] text-theme-secondary leading-relaxed">
+                        Raw pixel stream extracted through sandboxed HTML5 Canvas. All EXIF binary chunks, GPS coordinates, device identifiers, and timestamps have been permanently stripped.
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="text-xs text-theme-secondary block">
+                        Purged Metadata Categories:
+                      </span>
+                      <div className="grid grid-cols-2 gap-2 text-[11px]">
+                        {[
+                          'GPS Coordinates (Lat/Long)',
+                          'Camera Make & Model',
+                          'Lens & Shutter Speed',
+                          'Exact Timestamp & Date',
+                        ].map((tag, i) => (
+                          <div
+                            key={i}
+                            className="p-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 flex items-center gap-1.5 text-theme-primary"
+                          >
+                            <span className="text-emerald-500 font-bold">✓</span>
+                            <span className="truncate">{tag}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1">
+                        Export Format
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(['image/jpeg', 'image/png'] as const).map((fmt) => (
+                          <button
+                            key={fmt}
+                            type="button"
+                            onClick={() => setExifFormat(fmt)}
+                            className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all ${
+                              exifFormat === fmt
+                                ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                            }`}
+                          >
+                            {fmt === 'image/jpeg' ? 'JPEG (Sanitized)' : 'PNG (Sanitized)'}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1493,6 +1730,50 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                 {/* 19. Color Picker & Palette Extractor */}
                 {tool.id === 'color-picker-palette' && (
                   <div className="space-y-4">
+                    {/* Active Selected Pixel Loupe */}
+                    <div className="p-3.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-theme-primary flex items-center gap-1.5">
+                          <Pipette className="w-3.5 h-3.5 text-rose-500" />
+                          Inspected Pixel Color
+                        </span>
+                        <span className="text-[10px] text-theme-muted">Tap image to sample</span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-12 h-12 rounded-xl border border-black/10 dark:border-white/20 shadow-md shrink-0 transition-colors"
+                          style={{ backgroundColor: pickedColor.hex }}
+                        />
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-mono font-bold text-theme-primary">
+                              {pickedColor.hex}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(pickedColor.hex)}
+                              className="px-2 py-0.5 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[10px] font-semibold text-theme-primary transition-colors cursor-pointer"
+                            >
+                              {copiedText === pickedColor.hex ? 'Copied!' : 'Copy HEX'}
+                            </button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-mono text-theme-muted">
+                              {pickedColor.rgb}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(pickedColor.rgb)}
+                              className="px-2 py-0.5 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[10px] font-semibold text-theme-primary transition-colors cursor-pointer"
+                            >
+                              {copiedText === pickedColor.rgb ? 'Copied!' : 'Copy RGB'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <span className="text-xs text-theme-secondary block mb-1">
                       Dominant Harmonic Palette
                     </span>
@@ -1500,8 +1781,9 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                       {paletteColors.map((col, idx) => (
                         <button
                           key={idx}
+                          type="button"
                           onClick={() => copyToClipboard(col)}
-                          className="p-2 rounded-xl border border-black/5 dark:border-white/10 flex flex-col items-center gap-1.5 hover:scale-105 transition-transform"
+                          className="p-2 rounded-xl border border-black/5 dark:border-white/10 flex flex-col items-center gap-1.5 hover:scale-105 active:scale-95 transition-all bg-black/5 dark:bg-white/5 cursor-pointer"
                         >
                           <span className="w-full h-8 rounded-lg shadow-inner" style={{ backgroundColor: col }} />
                           <span className="text-[10px] font-mono font-bold text-theme-primary">
@@ -1536,7 +1818,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
         )}
 
         {/* HIGH-VALUE SEO EDUCATIONAL SECTION */}
-        <section className="mt-16 pt-12 border-t border-black/5 dark:border-white/10">
+        <section className="mt-10 pt-8 border-t border-black/5 dark:border-white/10">
           <div className="mb-8">
             <h2 className="text-xl sm:text-2xl font-bold font-display text-theme-primary mb-2">
               How to Use {tool.name}
@@ -1614,7 +1896,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
         </section>
 
         {/* RELATED TOOLS */}
-        <div className="mt-16 pt-10 border-t border-black/5 dark:border-white/10">
+        <div className="mt-10 pt-8 border-t border-black/5 dark:border-white/10">
           <h3 className="text-lg font-bold font-display text-theme-primary mb-4">
             Related Creative Tools
           </h3>

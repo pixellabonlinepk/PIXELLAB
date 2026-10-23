@@ -43,13 +43,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   ];
 
   return (
-    <section className="relative pt-12 pb-16 lg:pt-20 lg:pb-24 overflow-hidden">
+    <section className="relative pt-6 pb-6 sm:pt-10 sm:pb-8 overflow-hidden">
       {/* Luminous Apple Atmospheric Background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[450px] bg-gradient-to-b from-indigo-500/10 via-sky-400/5 to-transparent blur-3xl pointer-events-none" />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
         {/* Subtle Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-black/5 dark:bg-white/10 text-[#6E6E73] dark:text-[#86868B] border border-black/5 dark:border-white/10 mb-6 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-black/5 dark:bg-white/10 text-[#6E6E73] dark:text-[#86868B] border border-black/5 dark:border-white/10 mb-3.5 backdrop-blur-md">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
           <span>Client-Side Architecture · 100% Private</span>
         </div>
@@ -63,7 +63,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </h1>
 
         {/* Subtitle */}
-        <p className="text-base sm:text-xl max-w-2xl mx-auto text-[#6E6E73] dark:text-[#86868B] font-normal leading-relaxed mb-10">
+        <p className="text-base sm:text-xl max-w-2xl mx-auto text-[#6E6E73] dark:text-[#86868B] font-normal leading-relaxed mb-5 sm:mb-6">
           {TOOLS.length} professional, client-side image utilities. Zero server uploads. Free forever.
         </p>
 
@@ -124,7 +124,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* 4 Quick Category Glass Pills */}
-        <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto mb-12">
+        <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto mb-5 sm:mb-6">
           {QUICK_CATEGORY_GLASS_PILLS.map((pill) => (
             <button
               key={pill.id}
@@ -139,7 +139,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* Three Apple Trust Features */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto pt-8 border-t border-black/5 dark:border-white/10 text-left">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto pt-4 sm:pt-5 border-t border-black/5 dark:border-white/10 text-left">
           <div className="glass-panel rounded-2xl p-4 flex items-start gap-3">
             <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
               <Zap className="w-4 h-4" />

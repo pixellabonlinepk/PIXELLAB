@@ -304,6 +304,66 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       },
     ],
   },
+
+  'aspect-ratio-pad': {
+    steps: [
+      { step: 1, title: 'Upload Any Photo', desc: 'Select or drop any landscape, portrait, or square image.' },
+      { step: 2, title: 'Choose Target Ratio & Fill', desc: 'Select 1:1, 4:5, 9:16 or 16:9 and pick an aesthetic blurred or solid color background.' },
+      { step: 3, title: 'Download Social-Ready Image', desc: 'Export your photo perfectly formatted for Instagram, TikTok, or YouTube without losing parts of your photo to cropping.' },
+    ],
+    howItWorks:
+      'The No-Crop Social Expander calculates optimal canvas geometry based on standard social aspect ratios (1:1 square for Instagram posts, 4:5 vertical for feed engagement, 9:16 for TikTok/Reels/Stories, and 16:9 for YouTube). Instead of destructively cropping out people or scenery, it cushions the photo with an atmospheric Gaussian-blurred mirrored replica or clean solid color border.',
+    benefits: [
+      'Fit full portraits into Instagram square or vertical feeds with zero cropping',
+      'Aesthetic cinematic blurred background fill with soft drop shadow depth',
+      'Solid white, pitch-black OLED, or custom brand color borders',
+      '100% private in-browser generation with high-fidelity PNG export',
+    ],
+    faqs: [
+      {
+        question: 'Why should I pad an image instead of cropping it?',
+        answer: 'Cropping frequently cuts off heads, group members, or important composition elements. Padding preserves every single pixel of your original photo while fitting social platform frame constraints.',
+      },
+      {
+        question: 'Which aspect ratio is best for Instagram posts and stories?',
+        answer: 'Use 1:1 for classic square posts, 4:5 for maximum mobile vertical feed real estate, and 9:16 for Instagram Stories and Reels.',
+      },
+      {
+        question: 'Does the blurred background cause pixelation?',
+        answer: 'No. The background utilizes a multi-pass Gaussian blur filter and slight scale magnification to create a smooth, luxurious aesthetic glow.',
+      },
+    ],
+  },
+
+  'exif-metadata-remover': {
+    steps: [
+      { step: 1, title: 'Select Photo to Clean', desc: 'Select any JPEG, PNG, or camera photo containing sensitive metadata.' },
+      { step: 2, title: 'Inspect & Scrub Metadata', desc: 'Review detected EXIF tags, GPS geotags, and device information.' },
+      { step: 3, title: 'Download Verified Clean Photo', desc: 'Save your sanitized photo with 100% of camera, GPS, and timestamp metadata stripped.' },
+    ],
+    howItWorks:
+      'Modern digital cameras and smartphones embed rich Exchangeable Image File (EXIF) metadata into photo headers: exact GPS latitude/longitude coordinates, device serial numbers, camera model, lens settings, and exact timestamps. Pixal Lab cleans this metadata by rendering the raw pixel bitmap to an isolated HTML5 Canvas buffer and re-encoding it into a clean stream. This mathematical extraction discards every binary header tag while leaving image visual quality completely untouched.',
+    benefits: [
+      'Permanently purges GPS coordinates, home locations, and geolocation data',
+      'Removes camera serial numbers, iPhone/Android device IDs, and shutter timestamps',
+      'Re-encodes cleanly with high-grade JPEG/PNG codecs with zero visible quality loss',
+      '100% client-side: unscrubbed photos are NEVER sent across the internet to a server',
+    ],
+    faqs: [
+      {
+        question: 'Why is stripping EXIF metadata critical for online privacy?',
+        answer: 'Photos taken on smartphones contain your exact home or work GPS coordinates. Anyone downloading the photo can view where and when it was captured. Cleaning metadata protects your identity and personal safety.',
+      },
+      {
+        question: 'Does removing EXIF reduce photo resolution or visual sharpness?',
+        answer: 'No. Pixel dimensions and visual data remain exactly the same. Only invisible binary metadata headers (camera name, GPS, lens) are permanently discarded.',
+      },
+      {
+        question: 'Is this tool safe for sensitive government or legal documents?',
+        answer: 'Yes. Pixal Lab runs 100% client-side in your local browser memory. Files are never transmitted to any third party or cloud database.',
+      },
+    ],
+  },
 };
 
 export function getToolGuide(toolId: string, toolName: string, categoryLabel: string): ToolGuideContent {
