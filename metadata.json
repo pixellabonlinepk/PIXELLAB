@@ -1,5 +1,5 @@
 {
-  "name": "Pixel Lab",
+  "name": "Pixal Lab",
   "description": "Every Image. More Possibilities. Resize, compress, edit, convert, and enhance your images with simple, powerful browser-based tools in one place.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

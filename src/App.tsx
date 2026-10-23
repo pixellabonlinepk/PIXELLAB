@@ -35,7 +35,7 @@ export const HOMEPAGE_FAQS = [
   {
     question: 'Are all tools on Pixal Lab free to use without an account?',
     answer:
-      'Yes! Every single tool in our 24 professional image utility collection is completely free forever. You never have to create an account, enter credit card details, pay subscription fees, or deal with rate limits.',
+      `Yes! Every single tool in our ${TOOLS.length} professional image utility collection is completely free forever. You never have to create an account, enter credit card details, pay subscription fees, or deal with rate limits.`,
   },
   {
     question: 'Can I use Pixal Lab on my iPhone, Android, or tablet?',

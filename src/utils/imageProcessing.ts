@@ -1,6 +1,8 @@
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
 import jsQR from 'jsqr';
+import { renderPdfPages, RenderPdfOptions, RenderedPdfPage } from './pdfRenderer';
+export type { RenderPdfOptions, RenderedPdfPage };
 
 // Helper to load HTMLImageElement from File or data URL
 export function loadImage(src: string | File): Promise<HTMLImageElement> {
@@ -1237,52 +1239,15 @@ export async function convertImagesToPdf(
   return doc.output('blob');
 }
 
-// 29. PDF TO IMAGE CONVERTER
+// 29. REAL PDF TO IMAGE CONVERTER
 export async function renderPdfToImage(
-  pdfFile: File
-): Promise<{ pages: { pageNumber: number; blob: Blob; url: string }[] }> {
-  // Client-side PDF render using embed/iframe canvas capture or standard fallback
-  // If native PDF object isn't parsed via worker, we create a clean rendered document representation
-  const arrayBuffer = await pdfFile.arrayBuffer();
-  const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-  const pdfUrl = URL.createObjectURL(blob);
-
-  // Create an offscreen frame or canvas preview
-  const canvas = document.createElement('canvas');
-  canvas.width = 1240;
-  canvas.height = 1754; // A4 150 DPI
-  const ctx = canvas.getContext('2d')!;
-
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Decorative PDF page preview with header and document representation
-  ctx.fillStyle = '#f1f5f9';
-  ctx.fillRect(40, 40, canvas.width - 80, 100);
-  ctx.fillStyle = '#0f172a';
-  ctx.font = '700 32px Outfit, sans-serif';
-  ctx.fillText(pdfFile.name, 60, 100);
-
-  ctx.fillStyle = '#64748b';
-  ctx.font = '24px Plus Jakarta Sans, sans-serif';
-  ctx.fillText(`Extracted Document View · ${formatBytes(pdfFile.size)}`, 60, 135);
-
-  // Document lines simulation
-  ctx.fillStyle = '#e2e8f0';
-  for (let y = 200; y < canvas.height - 100; y += 40) {
-    const lineW = canvas.width - 120 - (y % 180 === 0 ? 300 : 0);
-    ctx.fillRect(60, y, lineW, 16);
-  }
-
-  const pageBlob = await canvasToBlob(canvas, 'image/png');
+  pdfFile: File,
+  options?: RenderPdfOptions
+): Promise<{ pages: RenderedPdfPage[]; totalPages: number }> {
+  const result = await renderPdfPages(pdfFile, options);
   return {
-    pages: [
-      {
-        pageNumber: 1,
-        blob: pageBlob,
-        url: URL.createObjectURL(pageBlob),
-      },
-    ],
+    pages: result.pages,
+    totalPages: result.totalPages,
   };
 }
 

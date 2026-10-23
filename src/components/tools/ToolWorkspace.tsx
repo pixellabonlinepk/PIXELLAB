@@ -23,9 +23,16 @@ import {
   ExternalLink,
   FileImage,
   Maximize2,
+  ZoomIn,
+  ZoomOut,
+  Archive,
+  ChevronLeft,
+  ChevronRight,
+  FileDown,
 } from 'lucide-react';
 import { ToolMetadata } from '../../types';
 import { getToolGuide } from '../../data/toolGuides';
+import { RenderedPdfPage } from '../../utils/pdfRenderer';
 import { ImageUploader } from '../ImageUploader';
 import {
   loadImage,
@@ -106,6 +113,26 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
+  // Zoom & Preview state
+  const [zoomLevel, setZoomLevel] = useState<number>(100);
+
+  // Object URL tracking for memory leak prevention
+  const trackedUrlsRef = useRef<Set<string>>(new Set());
+
+  // Memory cleanup on unmount
+  useEffect(() => {
+    return () => {
+      trackedUrlsRef.current.forEach((url) => {
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          // ignore
+        }
+      });
+      trackedUrlsRef.current.clear();
+    };
+  }, []);
+
   // Comparison view toggle
   const [compareMode, setCompareMode] = useState<'after' | 'before' | 'split'>('after');
   const [splitPos, setSplitPos] = useState<number>(50);
@@ -164,7 +191,11 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
   // 11. PDF to Image
   const [pdfPage, setPdfPage] = useState<number>(1);
+  const [pdfTotalPages, setPdfTotalPages] = useState<number>(1);
+  const [pdfScale, setPdfScale] = useState<number>(2.0);
   const [pdfTargetFormat, setPdfTargetFormat] = useState<'image/png' | 'image/jpeg'>('image/png');
+  const [pdfPages, setPdfPages] = useState<RenderedPdfPage[]>([]);
+  const [isZippingPdf, setIsZippingPdf] = useState<boolean>(false);
 
   // 12. Watermark Maker
   const [wmText, setWmText] = useState<string>('© PIXAL LAB');
@@ -263,7 +294,11 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
         if (tool.id === 'pdf-to-image-converter' || fileOrUrl.type === 'application/pdf') {
           // Process PDF directly
-          const pdfRes = await renderPdfToImage(fileOrUrl);
+          const pdfRes = await renderPdfToImage(fileOrUrl, { scale: pdfScale, format: pdfTargetFormat });
+          pdfRes.pages.forEach((p) => trackedUrlsRef.current.add(p.url));
+          setPdfPages(pdfRes.pages);
+          setPdfTotalPages(pdfRes.totalPages);
+          setPdfPage(1);
           if (pdfRes.pages.length > 0) {
             setResultBlob(pdfRes.pages[0].blob);
             setResultUrl(pdfRes.pages[0].url);
@@ -275,6 +310,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
         const img = await loadImage(fileOrUrl);
         const url = URL.createObjectURL(fileOrUrl);
+        trackedUrlsRef.current.add(url);
         setSourceImg(img);
         setSourceUrl(url);
         setResizeW(img.naturalWidth);
@@ -401,12 +437,21 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
         case 'pdf-to-image-converter': {
           if (sourceFile) {
-            const pdfRes = await renderPdfToImage(sourceFile);
-            if (pdfRes.pages.length > 0) {
+            let currentPages = pdfPages;
+            if (currentPages.length === 0) {
+              const pdfRes = await renderPdfToImage(sourceFile, { scale: pdfScale, format: pdfTargetFormat });
+              pdfRes.pages.forEach((p) => trackedUrlsRef.current.add(p.url));
+              setPdfPages(pdfRes.pages);
+              setPdfTotalPages(pdfRes.totalPages);
+              currentPages = pdfRes.pages;
+            }
+            const pageIdx = Math.min(Math.max(1, pdfPage), currentPages.length || 1) - 1;
+            const targetPage = currentPages[pageIdx];
+            if (targetPage) {
               res = {
-                blob: pdfRes.pages[0].blob,
-                url: pdfRes.pages[0].url,
-                size: pdfRes.pages[0].blob.size,
+                blob: targetPage.blob,
+                url: targetPage.url,
+                size: targetPage.blob.size,
               };
             }
           }
@@ -608,24 +653,116 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
     }
   };
 
+  // Handle PDF Page selection
+  const handlePdfPageChange = (newPageNum: number) => {
+    const target = Math.max(1, Math.min(newPageNum, pdfTotalPages));
+    setPdfPage(target);
+    if (pdfPages.length >= target) {
+      const page = pdfPages[target - 1];
+      setResultBlob(page.blob);
+      setResultUrl(page.url);
+      setResultSize(page.blob.size);
+    }
+  };
+
+  // Handle PDF Format or Scale change
+  const handlePdfFormatOrScaleChange = async (newFormat?: 'image/png' | 'image/jpeg', newScale?: number) => {
+    const fmt = newFormat ?? pdfTargetFormat;
+    const sc = newScale ?? pdfScale;
+    if (newFormat) setPdfTargetFormat(newFormat);
+    if (newScale) setPdfScale(sc);
+
+    if (sourceFile) {
+      setIsProcessing(true);
+      try {
+        const pdfRes = await renderPdfToImage(sourceFile, { scale: sc, format: fmt });
+        pdfRes.pages.forEach((p) => trackedUrlsRef.current.add(p.url));
+        setPdfPages(pdfRes.pages);
+        setPdfTotalPages(pdfRes.totalPages);
+        const pageIdx = Math.min(Math.max(1, pdfPage), pdfRes.totalPages) - 1;
+        const curPage = pdfRes.pages[pageIdx] || pdfRes.pages[0];
+        if (curPage) {
+          setResultBlob(curPage.blob);
+          setResultUrl(curPage.url);
+          setResultSize(curPage.blob.size);
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Failed to re-render PDF with updated settings';
+        setErrorMessage(msg);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+  };
+
+  // Download all PDF pages as a ZIP package
+  const handleDownloadAllPdfPages = async () => {
+    if (pdfPages.length === 0) return;
+    setIsZippingPdf(true);
+    try {
+      const zip = new JSZip();
+      const baseName = sourceFilename.replace(/\.[^/.]+$/, '') || 'document';
+      const ext = pdfTargetFormat === 'image/jpeg' ? 'jpg' : 'png';
+
+      pdfPages.forEach((page) => {
+        zip.file(`${baseName}-page-${page.pageNumber}.${ext}`, page.blob);
+      });
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      downloadBlob(zipBlob, `pixallab-${baseName}-all-pages.zip`);
+
+      window.dispatchEvent(
+        new CustomEvent('pixellab:tool-completed', {
+          detail: { toolId: tool.id, toolName: tool.name },
+        })
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create ZIP package';
+      setErrorMessage(msg);
+    } finally {
+      setIsZippingPdf(false);
+    }
+  };
+
   // Download handler
   const handleDownload = () => {
     if (!resultBlob && tool.id !== 'qr-code-generator') return;
 
-    let filename = `pixallab-${tool.id}-${Date.now()}`;
-    if (tool.id === 'image-to-pdf-converter') filename += '.pdf';
-    else if (tool.id === 'favicon-generator') filename = `pixallab-favicon-pack-${Date.now()}.zip`;
-    else if (tool.id === 'image-format-converter') filename += `.${targetMime.replace('image/', '')}`;
-    else if (compFormat === 'image/webp') filename += '.webp';
-    else if (compFormat === 'image/png') filename += '.png';
-    else filename += '.jpg';
+    let baseName = sourceFilename.replace(/\.[^/.]+$/, '');
+    if (!baseName || baseName === 'image') {
+      baseName = `pixallab-${tool.id}`;
+    }
+
+    let ext = '.png';
+    if (tool.id === 'image-to-pdf-converter' || resultBlob?.type === 'application/pdf') {
+      ext = '.pdf';
+    } else if (tool.id === 'favicon-generator' || resultBlob?.type === 'application/zip') {
+      ext = '.zip';
+    } else if (tool.id === 'image-format-converter') {
+      ext = `.${targetMime.replace('image/', '')}`;
+    } else if (tool.id === 'pdf-to-image-converter') {
+      ext = pdfTargetFormat === 'image/jpeg' ? '.jpg' : '.png';
+    } else if (tool.id === 'image-compressor') {
+      ext = compFormat === 'image/png' ? '.png' : compFormat === 'image/webp' ? '.webp' : '.jpg';
+    } else if (resultBlob?.type === 'image/jpeg') {
+      ext = '.jpg';
+    } else if (resultBlob?.type === 'image/webp') {
+      ext = '.webp';
+    } else if (resultBlob?.type === 'image/png') {
+      ext = '.png';
+    }
+
+    let filename = `${baseName}-${Date.now()}${ext}`;
+    if (tool.id === 'pdf-to-image-converter') {
+      filename = `${baseName}-page-${pdfPage}${ext}`;
+    }
 
     if (resultBlob) {
       downloadBlob(resultBlob, filename);
     } else if (resultUrl && tool.id === 'qr-code-generator') {
       const a = document.createElement('a');
       a.href = resultUrl;
-      a.download = `${filename}.png`;
+      a.download = `pixallab-qrcode-${Date.now()}.png`;
       a.click();
     }
 
@@ -707,44 +844,104 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                     )}
                   </div>
 
-                  {/* Mode Toggles: After, Before, Split */}
-                  <div className="flex items-center apple-segmented p-1 rounded-full">
-                    <button
-                      onClick={() => setCompareMode('after')}
-                      className={`px-3 py-1 rounded-full text-xs transition-all ${
-                        compareMode === 'after'
-                          ? 'bg-white dark:bg-white/20 text-theme-primary font-semibold shadow-xs'
-                          : 'text-theme-muted'
-                      }`}
-                    >
-                      Output
-                    </button>
-                    {sourceUrl && (
+                  <div className="flex items-center gap-2">
+                    {/* Zoom Level Controls */}
+                    <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-full px-2 py-0.5">
                       <button
-                        onClick={() => setCompareMode('before')}
+                        type="button"
+                        onClick={() => setZoomLevel((z) => Math.max(25, z - 25))}
+                        title="Zoom Out"
+                        className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-theme-secondary hover:text-theme-primary transition-colors cursor-pointer"
+                      >
+                        <ZoomOut className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setZoomLevel(100)}
+                        title="Reset Zoom to 100%"
+                        className="px-1 text-[10px] font-mono font-bold text-theme-primary cursor-pointer hover:underline"
+                      >
+                        {zoomLevel}%
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setZoomLevel((z) => Math.min(300, z + 25))}
+                        title="Zoom In"
+                        className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-theme-secondary hover:text-theme-primary transition-colors cursor-pointer"
+                      >
+                        <ZoomIn className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Mode Toggles: After, Before, Split */}
+                    <div className="flex items-center apple-segmented p-1 rounded-full">
+                      <button
+                        onClick={() => setCompareMode('after')}
                         className={`px-3 py-1 rounded-full text-xs transition-all ${
-                          compareMode === 'before'
+                          compareMode === 'after'
                             ? 'bg-white dark:bg-white/20 text-theme-primary font-semibold shadow-xs'
                             : 'text-theme-muted'
                         }`}
                       >
-                        Original
+                        Output
                       </button>
-                    )}
-                    {sourceUrl && resultUrl && (
-                      <button
-                        onClick={() => setCompareMode('split')}
-                        className={`px-3 py-1 rounded-full text-xs transition-all ${
-                          compareMode === 'split'
-                            ? 'bg-white dark:bg-white/20 text-theme-primary font-semibold shadow-xs'
-                            : 'text-theme-muted'
-                        }`}
-                      >
-                        Split View
-                      </button>
-                    )}
+                      {sourceUrl && (
+                        <button
+                          onClick={() => setCompareMode('before')}
+                          className={`px-3 py-1 rounded-full text-xs transition-all ${
+                            compareMode === 'before'
+                              ? 'bg-white dark:bg-white/20 text-theme-primary font-semibold shadow-xs'
+                              : 'text-theme-muted'
+                          }`}
+                        >
+                          Original
+                        </button>
+                      )}
+                      {sourceUrl && resultUrl && (
+                        <button
+                          onClick={() => setCompareMode('split')}
+                          className={`px-3 py-1 rounded-full text-xs transition-all ${
+                            compareMode === 'split'
+                              ? 'bg-white dark:bg-white/20 text-theme-primary font-semibold shadow-xs'
+                              : 'text-theme-muted'
+                          }`}
+                        >
+                          Split View
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {/* Multi-page PDF Stepper Banner */}
+                {tool.id === 'pdf-to-image-converter' && pdfTotalPages > 1 && (
+                  <div className="flex items-center justify-between p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 mb-3 text-xs">
+                    <button
+                      type="button"
+                      disabled={pdfPage <= 1 || isProcessing}
+                      onClick={() => handlePdfPageChange(pdfPage - 1)}
+                      className="px-3 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/70 dark:bg-black/40 disabled:opacity-40 hover:bg-white dark:hover:bg-black/60 font-semibold flex items-center gap-1 transition-all cursor-pointer text-theme-primary"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                      <span>Prev Page</span>
+                    </button>
+
+                    <div className="font-semibold text-theme-primary">
+                      Viewing Page <span className="text-indigo-500 font-bold font-mono">{pdfPage}</span> of{' '}
+                      <span className="font-mono">{pdfTotalPages}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={pdfPage >= pdfTotalPages || isProcessing}
+                      onClick={() => handlePdfPageChange(pdfPage + 1)}
+                      className="px-3 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/70 dark:bg-black/40 disabled:opacity-40 hover:bg-white dark:hover:bg-black/60 font-semibold flex items-center gap-1 transition-all cursor-pointer text-theme-primary"
+                    >
+                      <span>Next Page</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
 
                 {/* Canvas/Image Viewer Area */}
                 <div className="w-full min-h-[380px] max-h-[560px] rounded-2xl bg-checkerboard flex items-center justify-center p-4 relative overflow-hidden border border-black/5 dark:border-white/10">
@@ -754,6 +951,11 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                       <img
                         src={resultUrl}
                         alt="Output comparison"
+                        style={{
+                          transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined,
+                          transformOrigin: 'center center',
+                          transition: 'transform 0.15s ease-out',
+                        }}
                         className="max-h-[480px] max-w-full object-contain pointer-events-none"
                       />
                       <div
@@ -763,6 +965,11 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         <img
                           src={sourceUrl}
                           alt="Original comparison"
+                          style={{
+                            transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined,
+                            transformOrigin: 'center center',
+                            transition: 'transform 0.15s ease-out',
+                          }}
                           className="max-h-[480px] max-w-full object-contain"
                         />
                       </div>
@@ -788,6 +995,11 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                     <img
                       src={sourceUrl}
                       alt="Original view"
+                      style={{
+                        transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined,
+                        transformOrigin: 'center center',
+                        transition: 'transform 0.15s ease-out',
+                      }}
                       className="max-h-[500px] max-w-full object-contain rounded-lg"
                     />
                   ) : resultUrl ? (
@@ -796,6 +1008,11 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                       alt="Processed output"
                       onMouseMove={handleCanvasPointer}
                       onClick={handleCanvasPointer}
+                      style={{
+                        transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined,
+                        transformOrigin: 'center center',
+                        transition: 'transform 0.15s ease-out',
+                      }}
                       className={`max-h-[500px] max-w-full object-contain rounded-lg ${tool.id === 'color-picker-palette' ? 'cursor-crosshair' : ''}`}
                     />
                   ) : sourceUrl ? (
@@ -804,6 +1021,11 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                       alt="Preview"
                       onMouseMove={handleCanvasPointer}
                       onClick={handleCanvasPointer}
+                      style={{
+                        transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined,
+                        transformOrigin: 'center center',
+                        transition: 'transform 0.15s ease-out',
+                      }}
                       className={`max-h-[500px] max-w-full object-contain rounded-lg ${tool.id === 'color-picker-palette' ? 'cursor-crosshair' : ''}`}
                     />
                   ) : (
@@ -1262,38 +1484,140 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                 {/* 11. PDF to Image Converter */}
                 {tool.id === 'pdf-to-image-converter' && (
                   <div className="space-y-4">
-                    <div>
-                      <label className="text-xs text-theme-secondary block mb-1">
-                        Page Number
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={pdfPage}
-                        onChange={(e) => setPdfPage(Math.max(1, Number(e.target.value)))}
-                        className="w-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-theme-primary"
-                      />
+                    {/* Document Stats Badge */}
+                    <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs font-bold text-theme-primary">
+                        <span className="flex items-center gap-1.5 text-indigo-500">
+                          <FileImage className="w-4 h-4" />
+                          <span>PDF Document</span>
+                        </span>
+                        <span className="font-mono text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-500 font-semibold">
+                          {pdfTotalPages} {pdfTotalPages === 1 ? 'Page' : 'Pages'}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-theme-secondary truncate font-mono">
+                        {sourceFilename}
+                      </div>
                     </div>
+
+                    {/* Page Selector & Quick Switch */}
                     <div>
-                      <span className="text-xs text-theme-secondary block mb-1">
+                      <div className="flex items-center justify-between text-xs text-theme-secondary mb-1.5">
+                        <span>Select Page</span>
+                        <span className="font-mono text-xs font-bold text-indigo-500">
+                          Page {pdfPage} of {pdfTotalPages}
+                        </span>
+                      </div>
+
+                      {pdfTotalPages > 1 ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={pdfPage <= 1 || isProcessing}
+                            onClick={() => handlePdfPageChange(pdfPage - 1)}
+                            className="p-2 rounded-xl border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-30 transition-all text-theme-primary cursor-pointer"
+                            title="Previous Page"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+
+                          <select
+                            value={pdfPage}
+                            onChange={(e) => handlePdfPageChange(Number(e.target.value))}
+                            className="flex-1 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-theme-primary font-semibold focus:outline-none"
+                          >
+                            {Array.from({ length: pdfTotalPages }, (_, i) => i + 1).map((pg) => (
+                              <option key={pg} value={pg}>
+                                Page {pg} of {pdfTotalPages}
+                              </option>
+                            ))}
+                          </select>
+
+                          <button
+                            type="button"
+                            disabled={pdfPage >= pdfTotalPages || isProcessing}
+                            onClick={() => handlePdfPageChange(pdfPage + 1)}
+                            className="p-2 rounded-xl border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-30 transition-all text-theme-primary cursor-pointer"
+                            title="Next Page"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="p-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-xs text-theme-secondary text-center">
+                          Single page document (Page 1)
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Rendering Resolution / Scale */}
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1.5">
+                        Rendering Resolution (DPI)
+                      </span>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {[
+                          { scale: 1.5, label: '1.5x Web' },
+                          { scale: 2.0, label: '2.0x Retina' },
+                          { scale: 3.0, label: '3.0x Ultra' },
+                        ].map((item) => (
+                          <button
+                            key={item.scale}
+                            type="button"
+                            onClick={() => handlePdfFormatOrScaleChange(undefined, item.scale)}
+                            className={`py-2 px-1 rounded-xl text-xs font-semibold border transition-all text-center ${
+                              pdfScale === item.scale
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
+                                : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Export Format */}
+                    <div>
+                      <span className="text-xs text-theme-secondary block mb-1.5">
                         Export Format
                       </span>
                       <div className="grid grid-cols-2 gap-2">
                         {(['image/png', 'image/jpeg'] as const).map((fmt) => (
                           <button
                             key={fmt}
-                            onClick={() => setPdfTargetFormat(fmt)}
+                            type="button"
+                            onClick={() => handlePdfFormatOrScaleChange(fmt, undefined)}
                             className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
                               pdfTargetFormat === fmt
                                 ? 'border-indigo-500 bg-indigo-500/10 text-indigo-500'
                                 : 'border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 text-theme-primary'
                             }`}
                           >
-                            {fmt === 'image/png' ? 'PNG Image' : 'JPG Image'}
+                            {fmt === 'image/png' ? 'PNG (Sharp)' : 'JPG (Compact)'}
                           </button>
                         ))}
                       </div>
                     </div>
+
+                    {/* Multi-page ZIP Download Button */}
+                    {pdfTotalPages > 1 && (
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={handleDownloadAllPdfPages}
+                          disabled={isZippingPdf || isProcessing}
+                          className="w-full py-2.5 px-4 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer disabled:opacity-40"
+                        >
+                          <Archive className="w-3.5 h-3.5" />
+                          <span>
+                            {isZippingPdf
+                              ? 'Packaging ZIP Archive...'
+                              : `Download All ${pdfTotalPages} Pages (ZIP)`}
+                          </span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1800,10 +2124,16 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                   <button
                     onClick={handleDownload}
                     disabled={(!resultBlob && tool.id !== 'qr-code-generator') || isProcessing}
-                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-500 hover:to-blue-500 disabled:opacity-40 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all active:scale-95"
+                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-500 hover:to-blue-500 disabled:opacity-40 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Download Finished File</span>
+                    <span>
+                      {tool.id === 'pdf-to-image-converter'
+                        ? `Download Page ${pdfPage} (${pdfTargetFormat === 'image/jpeg' ? 'JPG' : 'PNG'})`
+                        : tool.id === 'favicon-generator'
+                        ? 'Download Favicon Suite (ZIP)'
+                        : 'Download Finished File'}
+                    </span>
                   </button>
                 </div>
 
