@@ -38,6 +38,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const QUICK_CATEGORY_GLASS_PILLS = [
     { label: 'Compress Image', id: 'image-compressor', icon: '⚡' },
     { label: 'Passport Photo', id: 'passport-photo-resizer', icon: '🪪' },
+    { label: 'Picture Puzzle Game', id: 'puzzle', icon: '🧩' },
     { label: 'Image to PDF', id: 'image-to-pdf-converter', icon: '📄' },
     { label: 'Squad DP Collage', id: 'photo-collage-dp-maker', icon: '👥' },
   ];

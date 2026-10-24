@@ -11,6 +11,8 @@ import { TermsPage } from './components/pages/TermsPage';
 import { ContactPage } from './components/pages/ContactPage';
 import { GuidesIndexPage } from './components/pages/GuidesIndexPage';
 import { GuideDetailPage } from './components/pages/GuideDetailPage';
+import { SlidingPuzzleGame } from './components/puzzle/SlidingPuzzleGame';
+import { PuzzleBanner } from './components/PuzzleBanner';
 import { RatingWidget } from './components/RatingWidget';
 import { TOOLS } from './data/tools';
 import { getToolGuide } from './data/toolGuides';
@@ -126,6 +128,11 @@ export default function App() {
         return;
       }
 
+      if (['puzzle', 'game', 'picture-puzzle'].includes(pathname)) {
+        setCurrentView('puzzle');
+        return;
+      }
+
       if (['all-tools', 'about', 'privacy', 'terms', 'contact'].includes(pathname)) {
         setCurrentView(pathname);
         return;
@@ -153,6 +160,11 @@ export default function App() {
 
       if (hash === 'guides') {
         setCurrentView('guides');
+        return;
+      }
+
+      if (['puzzle', 'game', 'picture-puzzle'].includes(hash)) {
+        setCurrentView('puzzle');
         return;
       }
 
@@ -384,6 +396,45 @@ export default function App() {
       pageDesc =
         'Get in touch with the PIXAL LAB engineering and support team for feedback, feature requests, or questions.';
       canonicalUrl = `${DOMAIN}/contact`;
+    } else if (currentView === 'puzzle') {
+      pageTitle = 'Free Online Picture Puzzle Game | PIXAL LAB';
+      pageDesc =
+        'Play a free online sliding picture puzzle with beautiful landmarks, nature scenes, cartoon-style illustrations, and scenic destinations. Solve puzzles, track your moves, and unlock new levels.';
+      canonicalUrl = `${DOMAIN}/puzzle`;
+      jsonLdData = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'PIXAL LAB — Picture Puzzle Challenge',
+          applicationCategory: 'GameApplication',
+          operatingSystem: 'All',
+          browserRequirements: 'Requires modern web browser with HTML5 Canvas and Web Audio support',
+          url: canonicalUrl,
+          offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'USD',
+          },
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: `${DOMAIN}/`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Picture Puzzle Challenge',
+              item: canonicalUrl,
+            },
+          ],
+        },
+      ];
     }
 
     // 1. Update document title
@@ -451,6 +502,9 @@ export default function App() {
     } else if (view === 'guides') {
       setCurrentView('guides');
       cleanPath = '/guides';
+    } else if (view === 'puzzle' || view === 'game') {
+      setCurrentView('puzzle');
+      cleanPath = '/puzzle';
     } else if (view === 'home') {
       setCurrentView('home');
       cleanPath = '/';
@@ -509,7 +563,7 @@ export default function App() {
                 const el = document.getElementById('tools-gallery');
                 el?.scrollIntoView({ behavior: 'smooth' });
               }}
-              onSelectTool={(id) => navigateTo('tool', id)}
+              onSelectTool={(id) => (id === 'puzzle' ? navigateTo('puzzle') : navigateTo('tool', id))}
               onSearchQueryChange={(q) => setSearchQuery(q)}
             />
 
@@ -735,6 +789,14 @@ export default function App() {
             onNavigate={navigateTo}
           />
         )}
+
+        {/* VIEW 11: PICTURE PUZZLE GAME */}
+        {currentView === 'puzzle' && (
+          <SlidingPuzzleGame
+            onBackToHome={() => navigateTo('home')}
+            onExploreTools={() => navigateTo('all-tools')}
+          />
+        )}
       </main>
 
       {/* Floating Top-Right 5-Star Rating Widget */}
@@ -743,6 +805,12 @@ export default function App() {
         toolId={ratingWidget.toolId}
         toolName={ratingWidget.toolName}
         onClose={() => setRatingWidget((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* Floating Bottom Picture Puzzle Promotional Banner */}
+      <PuzzleBanner
+        currentView={currentView}
+        onPlayNow={() => navigateTo('puzzle')}
       />
 
       {/* Global Footer */}

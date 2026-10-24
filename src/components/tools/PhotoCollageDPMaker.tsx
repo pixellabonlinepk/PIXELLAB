@@ -331,6 +331,49 @@ export const LAYOUT_DEFINITIONS: LayoutDefinition[] = [
     },
   },
   {
+    id: 'dp-circle-5',
+    name: '5-Person Penta Squad',
+    category: 'group-dp',
+    description: '5 circular member avatars in an orbiting pentagon ring',
+    slotsCount: 5,
+    defaultShape: 'circle',
+    getSlots: (sampleUrls) => {
+      const radius = 30;
+      const size = 29;
+      return Array.from({ length: 5 }).map((_, i) => {
+        const angle = (i * 72 - 90) * (Math.PI / 180);
+        const x = 50 + radius * Math.cos(angle);
+        const y = 50 + radius * Math.sin(angle);
+        const url = sampleUrls[i % sampleUrls.length];
+        return {
+          id: `slot-${i + 1}`,
+          photoUrl: url,
+          photoName: `Friend ${i + 1}`,
+          x,
+          y,
+          width: size,
+          height: size,
+          rotation: 0,
+          zoom: 1,
+          panX: 0,
+          panY: 0,
+          photoRotation: 0,
+          shape: 'circle',
+          borderWidth: 4,
+          borderColor: '#a855f7',
+          borderGlowColor: 'rgba(168, 85, 247, 0.4)',
+          shadowBlur: 10,
+          shadowColor: 'rgba(0, 0, 0, 0.6)',
+          brightness: 100,
+          contrast: 100,
+          saturation: 100,
+          filterPreset: 'normal',
+          visible: true,
+        };
+      });
+    },
+  },
+  {
     id: 'dp-circle-4',
     name: '4-Person Quad Squad',
     category: 'group-dp',
@@ -342,6 +385,49 @@ export const LAYOUT_DEFINITIONS: LayoutDefinition[] = [
       const size = 36;
       return Array.from({ length: 4 }).map((_, i) => {
         const angle = (i * 90 - 45) * (Math.PI / 180);
+        const x = 50 + radius * Math.cos(angle);
+        const y = 50 + radius * Math.sin(angle);
+        const url = sampleUrls[i % sampleUrls.length];
+        return {
+          id: `slot-${i + 1}`,
+          photoUrl: url,
+          photoName: `Friend ${i + 1}`,
+          x,
+          y,
+          width: size,
+          height: size,
+          rotation: 0,
+          zoom: 1,
+          panX: 0,
+          panY: 0,
+          photoRotation: 0,
+          shape: 'circle',
+          borderWidth: 5,
+          borderColor: '#06b6d4',
+          borderGlowColor: 'rgba(6, 182, 212, 0.45)',
+          shadowBlur: 12,
+          shadowColor: 'rgba(0, 0, 0, 0.6)',
+          brightness: 100,
+          contrast: 100,
+          saturation: 100,
+          filterPreset: 'normal',
+          visible: true,
+        };
+      });
+    },
+  },
+  {
+    id: 'dp-circle-3',
+    name: '3-Person Triangle Trio',
+    category: 'group-dp',
+    description: '3 large circular member avatars in an equilateral triangle',
+    slotsCount: 3,
+    defaultShape: 'circle',
+    getSlots: (sampleUrls) => {
+      const radius = 25;
+      const size = 36;
+      return Array.from({ length: 3 }).map((_, i) => {
+        const angle = (i * 120 - 90) * (Math.PI / 180);
         const x = 50 + radius * Math.cos(angle);
         const y = 50 + radius * Math.sin(angle);
         const url = sampleUrls[i % sampleUrls.length];
@@ -824,6 +910,8 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
   const [jpegQuality, setJpegQuality] = useState<number>(0.92);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [clipboardCopied, setClipboardCopied] = useState<boolean>(false);
+  const [downloadSuccessToast, setDownloadSuccessToast] = useState<boolean>(false);
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
 
   // Undo / Redo History
   interface HistorySnapshot {
@@ -1459,12 +1547,55 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
     }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList);
 
-    const url = URL.createObjectURL(file);
-    preloadImage(url).then(() => {
+    if (files.length > 1) {
+      // Multiple friends photos uploaded at once (e.g. 6-7 friends)
+      const loadedPhotos = await Promise.all(
+        files.map(async (file) => {
+          const url = URL.createObjectURL(file);
+          await preloadImage(url);
+          return { url, name: file.name };
+        })
+      );
+
+      // Determine the best squad layout matching the friend count
+      let targetLayoutId = 'dp-circle-6';
+      if (files.length === 7) targetLayoutId = 'dp-circle-7';
+      else if (files.length >= 8) targetLayoutId = 'dp-circle-8';
+      else if (files.length === 6) targetLayoutId = 'dp-circle-6';
+      else if (files.length === 5) targetLayoutId = 'dp-circle-5';
+      else if (files.length === 4) targetLayoutId = 'dp-circle-4';
+      else if (files.length === 3) targetLayoutId = 'dp-circle-3';
+      else if (files.length === 2) targetLayoutId = 'dp-circle-2';
+
+      const layout = LAYOUT_DEFINITIONS.find((l) => l.id === targetLayoutId) || LAYOUT_DEFINITIONS[0];
+      setSelectedLayoutId(targetLayoutId);
+
+      const urls = loadedPhotos.map((p) => p.url);
+      const newSlots = layout.getSlots(urls).map((s, idx) => ({
+        ...s,
+        photoUrl: loadedPhotos[idx % loadedPhotos.length].url,
+        photoName: loadedPhotos[idx % loadedPhotos.length].name,
+        zoom: 1,
+        panX: 0,
+        panY: 0,
+        visible: true,
+      }));
+
+      setSlots(newSlots);
+      setSelectedSlotIndex(0);
+      setUploadSuccessMessage(`Successfully loaded ${files.length} squad members to your College Group DP!`);
+      setTimeout(() => setUploadSuccessMessage(null), 4000);
+      pushHistory();
+    } else {
+      // Single photo uploaded for selected slot
+      const file = files[0];
+      const url = URL.createObjectURL(file);
+      await preloadImage(url);
       setSlots((prev) =>
         prev.map((s, idx) =>
           idx === selectedSlotIndex
@@ -1472,8 +1603,102 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
             : s
         )
       );
+      setUploadSuccessMessage(`Updated photo for Friend #${selectedSlotIndex + 1}!`);
+      setTimeout(() => setUploadSuccessMessage(null), 3000);
       pushHistory();
-    });
+    }
+    e.target.value = '';
+  };
+
+  const handleReplaceSlotPhoto = async (slotIndex: number, file: File) => {
+    const url = URL.createObjectURL(file);
+    await preloadImage(url);
+    setSlots((prev) =>
+      prev.map((s, idx) =>
+        idx === slotIndex
+          ? { ...s, photoUrl: url, photoName: file.name, zoom: 1, panX: 0, panY: 0 }
+          : s
+      )
+    );
+    setSelectedSlotIndex(slotIndex);
+    setUploadSuccessMessage(`Updated photo for Friend #${slotIndex + 1}!`);
+    setTimeout(() => setUploadSuccessMessage(null), 3000);
+    pushHistory();
+  };
+
+  const handleRemoveSlot = (slotIndex: number) => {
+    if (slots.length <= 2) {
+      alert('A group squad DP requires at least 2 members.');
+      return;
+    }
+    const newSlots = slots.filter((_, idx) => idx !== slotIndex);
+    setSlots(newSlots);
+    setSelectedSlotIndex(Math.max(0, slotIndex - 1));
+    pushHistory();
+  };
+
+  const handleAddFriendPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const file = fileList[0];
+    const url = URL.createObjectURL(file);
+    await preloadImage(url);
+
+    // If upgrading from 6 to 7 members, automatically switch to 7-Person Leader + Ring layout!
+    if (slots.length === 6) {
+      const layout = LAYOUT_DEFINITIONS.find((l) => l.id === 'dp-circle-7');
+      if (layout) {
+        setSelectedLayoutId('dp-circle-7');
+        const allUrls = [...slots.map((s) => s.photoUrl), url];
+        const allNames = [...slots.map((s) => s.photoName), file.name];
+        const newSlots = layout.getSlots(allUrls).map((s, idx) => ({
+          ...s,
+          photoUrl: allUrls[idx] || url,
+          photoName: allNames[idx] || file.name,
+          visible: true,
+        }));
+        setSlots(newSlots);
+        setSelectedSlotIndex(0);
+        setUploadSuccessMessage('Added 7th friend! Upgraded to 7-Person Leader + Squad Ring layout.');
+        setTimeout(() => setUploadSuccessMessage(null), 4000);
+        pushHistory();
+        e.target.value = '';
+        return;
+      }
+    }
+
+    const nextId = `slot-${slots.length + 1}`;
+    const newSlot: CollageSlot = {
+      id: nextId,
+      photoUrl: url,
+      photoName: file.name,
+      x: 50,
+      y: 50,
+      width: 26,
+      height: 26,
+      rotation: 0,
+      zoom: 1,
+      panX: 0,
+      panY: 0,
+      photoRotation: 0,
+      shape: 'circle',
+      borderWidth: 4,
+      borderColor: '#38bdf8',
+      borderGlowColor: 'rgba(56, 189, 248, 0.4)',
+      shadowBlur: 10,
+      shadowColor: 'rgba(0, 0, 0, 0.6)',
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      filterPreset: 'normal',
+      visible: true,
+    };
+    setSlots((prev) => [...prev, newSlot]);
+    setSelectedSlotIndex(slots.length);
+    setUploadSuccessMessage(`Added Friend #${slots.length + 1} to your squad DP!`);
+    setTimeout(() => setUploadSuccessMessage(null), 3000);
+    pushHistory();
+    e.target.value = '';
   };
 
   const assignSamplePhoto = (sample: SampleAvatarItem) => {
@@ -1602,28 +1827,59 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
     pushHistory();
   };
 
+  const fallbackDataUrlDownload = (canvas: HTMLCanvasElement, fileName: string) => {
+    try {
+      const dataUrl = canvas.toDataURL(exportFormat, exportFormat === 'image/jpeg' ? jpegQuality : undefined);
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setDownloadSuccessToast(true);
+      setTimeout(() => setDownloadSuccessToast(false), 4500);
+    } catch (e) {
+      console.error('Data URL fallback failed:', e);
+      alert('Automatic download could not be initiated. You can also touch and hold or right click the canvas preview to save.');
+    }
+  };
+
   const handleExportDownload = async () => {
+    if (isExporting) return;
     setIsExporting(true);
     try {
       const offscreen = document.createElement('canvas');
       renderCanvas(offscreen, exportMultiplier);
 
-      const mimeType = exportFormat;
-      const extension = exportFormat === 'image/png' ? 'png' : exportFormat === 'image/webp' ? 'webp' : 'jpg';
+      if (!offscreen.width || !offscreen.height) {
+        throw new Error('Canvas render failed');
+      }
 
-      offscreen.toBlob(
-        (blob) => {
-          if (blob) {
-            const fileName = `pixal-lab-dp-collage-${Date.now()}.${extension}`;
-            downloadBlob(blob, fileName);
-          }
-          setIsExporting(false);
-        },
-        mimeType,
-        exportFormat === 'image/jpeg' ? jpegQuality : undefined
-      );
+      const extension = exportFormat === 'image/png' ? 'png' : exportFormat === 'image/webp' ? 'webp' : 'jpg';
+      const fileName = `pixal-lab-squad-dp.${extension}`;
+
+      if (offscreen.toBlob) {
+        offscreen.toBlob(
+          (blob) => {
+            if (blob) {
+              downloadBlob(blob, fileName);
+              setDownloadSuccessToast(true);
+              setTimeout(() => setDownloadSuccessToast(false), 4500);
+            } else {
+              fallbackDataUrlDownload(offscreen, fileName);
+            }
+            setIsExporting(false);
+          },
+          exportFormat,
+          exportFormat === 'image/jpeg' ? jpegQuality : undefined
+        );
+      } else {
+        fallbackDataUrlDownload(offscreen, fileName);
+        setIsExporting(false);
+      }
     } catch (err) {
       console.error('Export error:', err);
+      alert('Unable to generate full squad DP image. Please try again.');
       setIsExporting(false);
     }
   };
@@ -1984,24 +2240,42 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
             {/* TAB: PHOTOS */}
             {activeTab === 'photos' && (
               <div className="space-y-4">
+                {/* 1. Multi-Photo Upload Dropzone */}
                 <div>
-                  <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                    Upload Photos
-                  </h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Upload Friends' Photos
+                    </h3>
+                    <span className="text-[10px] font-medium text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                      Multi-Photo Ready
+                    </span>
+                  </div>
+
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${
+                    className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all group ${
                       theme === 'dark'
-                        ? 'border-slate-700 hover:border-cyan-500 bg-slate-900/60'
-                        : 'border-slate-300 hover:border-cyan-500 bg-slate-50'
+                        ? 'border-slate-700 hover:border-cyan-400 bg-slate-900/60 hover:bg-slate-900/90'
+                        : 'border-slate-300 hover:border-cyan-500 bg-slate-50 hover:bg-white'
                     }`}
                   >
-                    <Upload className="w-6 h-6 mx-auto mb-1.5 text-cyan-400" />
-                    <p className="text-xs font-semibold">Upload Photo for Slot #{selectedSlotIndex + 1}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Drag & drop or click to upload</p>
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center mx-auto mb-2.5 group-hover:scale-110 transition-transform">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <p className="text-xs font-bold text-slate-200">
+                      Upload 6–7 Friends' Photos
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-1 max-w-[220px] mx-auto leading-relaxed">
+                      Select all friends at once. We'll automatically arrange everyone into a stunning college squad DP.
+                    </p>
+                    <div className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 group-hover:bg-cyan-400 transition-colors">
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Select Photos (2–8)</span>
+                    </div>
                     <input
                       ref={fileInputRef}
                       type="file"
+                      multiple
                       accept="image/*"
                       onChange={handlePhotoUpload}
                       className="hidden"
@@ -2009,52 +2283,158 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
                   </div>
                 </div>
 
-                {/* 9 Slots Thumbnails Grid matching reference UI */}
+                {/* Upload Success Alert */}
+                {uploadSuccessMessage && (
+                  <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-medium flex items-center gap-2">
+                    <Check className="w-4 h-4 shrink-0 text-emerald-400" />
+                    <span>{uploadSuccessMessage}</span>
+                  </div>
+                )}
+
+                {/* 2. Squad Members List with Replace / Remove */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Photo Slots ({slots.length})
+                      Squad Members ({slots.length})
                     </h3>
                     <button
                       onClick={shuffleAllPhotos}
-                      className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+                      title="Shuffle placement order"
+                      className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors"
                     >
                       <Shuffle className="w-3 h-3" />
                       Shuffle
                     </button>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+
+                  <div className="space-y-2">
                     {slots.map((slot, idx) => (
-                      <button
+                      <div
                         key={slot.id}
-                        onClick={() => setSelectedSlotIndex(idx)}
-                        className={`group relative aspect-square rounded-xl overflow-hidden border p-1 text-left transition-all ${
+                        className={`flex items-center gap-2.5 p-2 rounded-xl border transition-all ${
                           idx === selectedSlotIndex
-                            ? 'border-cyan-400 ring-2 ring-cyan-500/50 bg-cyan-950/40'
+                            ? 'border-cyan-400 bg-cyan-950/30 shadow-md shadow-cyan-500/10'
                             : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
                         }`}
                       >
-                        <img
-                          src={slot.photoUrl}
-                          alt={slot.photoName}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                        <span className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full bg-cyan-500 text-slate-950 font-bold text-[9px] flex items-center justify-center">
-                          {idx + 1}
-                        </span>
-                      </button>
+                        {/* Member Thumbnail */}
+                        <div
+                          onClick={() => setSelectedSlotIndex(idx)}
+                          className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-slate-700 cursor-pointer group"
+                        >
+                          <img
+                            src={slot.photoUrl}
+                            alt={slot.photoName}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                          <span className="absolute bottom-0 right-0 w-4 h-4 rounded-tl bg-cyan-500 text-slate-950 font-bold text-[9px] flex items-center justify-center">
+                            {idx + 1}
+                          </span>
+                        </div>
+
+                        {/* Member Info */}
+                        <div
+                          onClick={() => setSelectedSlotIndex(idx)}
+                          className="flex-1 min-w-0 cursor-pointer"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold truncate">
+                              {selectedLayoutId === 'dp-circle-7' && idx === 0
+                                ? '👑 Leader / Center'
+                                : `Friend #${idx + 1}`}
+                            </span>
+                            {idx === selectedSlotIndex && (
+                              <span className="text-[9px] text-cyan-400 bg-cyan-500/15 px-1 rounded font-medium">
+                                Selected
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-400 truncate">
+                            {slot.photoName || `Photo ${idx + 1}`}
+                          </p>
+                        </div>
+
+                        {/* Actions: Replace & Remove */}
+                        <div className="flex items-center gap-1 shrink-0">
+                          <label
+                            className="p-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-400 cursor-pointer transition-colors"
+                            title="Replace this friend's photo"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleReplaceSlotPhoto(idx, file);
+                                e.target.value = '';
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                          {slots.length > 2 && (
+                            <button
+                              onClick={() => handleRemoveSlot(idx)}
+                              title="Remove from DP"
+                              className="p-1.5 rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     ))}
                   </div>
 
-                  <button
-                    onClick={addNewSlot}
-                    className="w-full mt-2.5 py-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add More Photos
-                  </button>
+                  {/* Add Another Friend Button */}
+                  {slots.length < 9 && (
+                    <div className="mt-2.5">
+                      <label className="w-full py-2.5 rounded-xl border border-dashed border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors">
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Another Friend Photo</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAddFriendPhoto}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
                 </div>
 
-                {/* One-click Sample Library */}
+                {/* 3. Quick Squad Ring Presets */}
+                <div>
+                  <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                    Quick Squad Ring Presets
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => applyLayout('dp-circle-6')}
+                      className={`p-2 rounded-xl border text-left text-xs font-medium transition-all ${
+                        selectedLayoutId === 'dp-circle-6'
+                          ? 'border-cyan-400 bg-cyan-950/40 text-cyan-300'
+                          : 'border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700'
+                      }`}
+                    >
+                      <p className="font-bold">6-Friend Ring</p>
+                      <p className="text-[10px] text-slate-400">Equal Orbit</p>
+                    </button>
+                    <button
+                      onClick={() => applyLayout('dp-circle-7')}
+                      className={`p-2 rounded-xl border text-left text-xs font-medium transition-all ${
+                        selectedLayoutId === 'dp-circle-7'
+                          ? 'border-cyan-400 bg-cyan-950/40 text-cyan-300'
+                          : 'border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700'
+                      }`}
+                    >
+                      <p className="font-bold">7-Friend Ring</p>
+                      <p className="text-[10px] text-slate-400">Leader + 6 Orbit</p>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4. Sample Portrait Avatars for instant testing */}
                 <div>
                   <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                     Sample Portrait Avatars
@@ -2064,12 +2444,18 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
                       <button
                         key={sample.id}
                         onClick={() => assignSamplePhoto(sample)}
-                        className="group relative rounded-xl overflow-hidden border border-slate-800 bg-slate-900/80 p-1 text-left hover:border-cyan-500"
+                        className="group relative rounded-xl overflow-hidden border border-slate-800 bg-slate-900/80 p-1 text-left hover:border-cyan-500 transition-colors"
                       >
                         <div className="aspect-square rounded-lg overflow-hidden bg-slate-800 mb-1">
-                          <img src={sample.url} alt={sample.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          <img
+                            src={sample.url}
+                            alt={sample.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
                         </div>
-                        <p className="text-[10px] font-semibold truncate leading-tight">{sample.name}</p>
+                        <p className="text-[10px] font-semibold truncate leading-tight text-slate-300">
+                          {sample.name}
+                        </p>
                       </button>
                     ))}
                   </div>
@@ -2117,7 +2503,17 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
                 </h3>
                 {[
                   {
-                    name: 'Friends Forever Squad DP',
+                    name: 'College Squad 7-Person Ring (Leader + 6)',
+                    desc: '1 center captain surrounded by 6 orbiting friend avatars with gold crest',
+                    action: () => {
+                      applyLayout('dp-circle-7');
+                      setSelectedGradient('midnight-navy');
+                      setCurvedText((prev) => ({ ...prev, enabled: true, text: 'College Squad 2026' }));
+                      setEmblem((prev) => ({ ...prev, enabled: true, title: 'SQUAD', iconEmoji: '👑' }));
+                    },
+                  },
+                  {
+                    name: 'Friends Forever Squad DP (6 Members)',
                     desc: '6 member circle with glowing cyan ring & script emblem',
                     action: () => {
                       applyLayout('dp-circle-6');
@@ -2404,7 +2800,7 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
           }`}
         >
           {/* Main Editing Canvas Area */}
-          <div className="flex-1 flex items-center justify-center w-full">
+          <div className="flex-1 flex flex-col items-center justify-center w-full my-auto">
             <div
               style={{
                 transform: `scale(${zoomLevel})`,
@@ -2416,8 +2812,45 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
               <canvas
                 ref={canvasRef}
                 onClick={handleCanvasClick}
-                className="max-h-[65vh] max-w-[70vw] w-auto h-auto object-contain cursor-pointer"
+                className="max-h-[58vh] max-w-[70vw] w-auto h-auto object-contain cursor-pointer"
               />
+            </div>
+
+            {/* 3. SHOW DOWNLOAD BUTTON AFTER SUCCESS: Prominently displayed immediately below DP preview */}
+            <div className="w-full max-w-md mt-4 flex flex-col items-center gap-2 z-10 px-2">
+              <button
+                onClick={handleExportDownload}
+                disabled={isExporting}
+                id="squad-dp-main-download-btn"
+                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black text-sm sm:text-base tracking-wide shadow-xl shadow-teal-500/25 flex items-center justify-center gap-2.5 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed group border border-teal-300/40 cursor-pointer"
+              >
+                {isExporting ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 animate-spin text-slate-950" />
+                    <span>Generating High-Res Squad DP...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-5 h-5 text-slate-950 group-hover:translate-y-0.5 transition-transform" />
+                    <span>Download Squad DP ({exportFormat === 'image/jpeg' ? 'JPG' : exportFormat === 'image/webp' ? 'WEBP' : 'PNG'})</span>
+                  </>
+                )}
+              </button>
+
+              <div className="flex items-center justify-center gap-2.5 text-[11px] text-slate-400 font-medium">
+                <span className="flex items-center gap-1 text-emerald-400">
+                  <Check className="w-3.5 h-3.5" /> Full Composite ({slots.length} Friends)
+                </span>
+                <span>•</span>
+                <span>Ready for WhatsApp, Instagram & Group DP</span>
+              </div>
+
+              {downloadSuccessToast && (
+                <div className="mt-1 px-4 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-bounce">
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span>Squad DP downloaded as pixal-lab-squad-dp.{exportFormat === 'image/png' ? 'png' : exportFormat === 'image/webp' ? 'webp' : 'jpg'}!</span>
+                </div>
+              )}
             </div>
           </div>
 

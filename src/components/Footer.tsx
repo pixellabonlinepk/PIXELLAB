@@ -221,6 +221,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <a
+                  href="/puzzle"
+                  onClick={(e) => handleLinkClick(e, 'puzzle')}
+                  className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors block"
+                >
+                  🧩 Picture Puzzle Challenge
+                </a>
+              </li>
+              <li>
+                <a
                   href="/tool/pdf-to-image-converter"
                   onClick={(e) => handleLinkClick(e, 'tool', 'pdf-to-image-converter')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
