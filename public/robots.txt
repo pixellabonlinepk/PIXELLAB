@@ -1,4 +1,4 @@
-# Pixal Lab Robots.txt
+# PIXAL LAB Robots.txt
 # Official Domain: https://www.pixallab.online/
 User-agent: *
 Allow: /

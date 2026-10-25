@@ -70,10 +70,16 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
         <div className="liquid-dock rounded-full px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 shadow-lg">
           {/* ZONE 1: SLEEK MINIMAL BRAND LOGO */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <button
-              onClick={() => onNavigate('home')}
-              className="flex items-center gap-2.5 text-left group focus:outline-none rounded-full transition-transform active:scale-95"
-              aria-label="Pixal Lab Home"
+            <a
+              href="/"
+              onClick={(e) => {
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                  e.preventDefault();
+                  onNavigate('home');
+                }
+              }}
+              className="flex items-center gap-2.5 text-left group focus:outline-none rounded-full transition-transform active:scale-95 no-underline"
+              aria-label="PIXAL LAB Home"
             >
               {/* Minimal Liquid Glass Glyph */}
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 via-blue-500 to-cyan-400 p-[1.5px] shadow-sm shadow-indigo-500/30 group-hover:shadow-indigo-500/50 transition-shadow shrink-0">
@@ -86,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
               <span className="font-display font-black text-base sm:text-lg tracking-tight leading-none text-[#1D1D1F] dark:text-[#F5F5F7]">
                 PIXAL<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 ml-1">LAB</span>
               </span>
-            </button>
+            </a>
           </div>
 
           {/* ZONE 2: CENTER APPLE PILL NAVIGATION (Desktop Only) */}
@@ -303,9 +309,15 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
                     </div>
                   ) : (
                     searchResults.map((tool) => (
-                      <button
+                      <a
                         key={tool.id}
-                        onClick={() => handleToolClick(tool.id)}
+                        href={`/tool/${tool.id}`}
+                        onClick={(e) => {
+                          if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                            e.preventDefault();
+                            handleToolClick(tool.id);
+                          }
+                        }}
                         className="w-full p-2.5 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-indigo-500/10 text-left transition-all flex items-center justify-between group"
                       >
                         <div className="min-w-0 pr-2">
@@ -317,7 +329,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
                           </div>
                         </div>
                         <ArrowRight className="w-3.5 h-3.5 text-indigo-500 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </button>
+                      </a>
                     ))
                   )}
                 </div>
@@ -428,16 +440,22 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
                           {isExpanded && (
                             <div className="px-2 pb-2.5 pt-1 space-y-1 border-t border-black/5 dark:border-white/10 bg-white/30 dark:bg-black/30">
                               {catTools.map((tool) => (
-                                <button
+                                <a
                                   key={tool.id}
-                                  onClick={() => handleToolClick(tool.id)}
+                                  href={`/tool/${tool.id}`}
+                                  onClick={(e) => {
+                                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                                      e.preventDefault();
+                                      handleToolClick(tool.id);
+                                    }
+                                  }}
                                   className="w-full px-2.5 py-1.5 rounded-lg text-left text-xs text-theme-secondary hover:text-indigo-500 hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-between group transition-colors"
                                 >
                                   <span className="truncate pr-1">{tool.name}</span>
                                   <span className="text-[10px] text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">
                                     →
                                   </span>
-                                </button>
+                                </a>
                               ))}
                             </div>
                           )}

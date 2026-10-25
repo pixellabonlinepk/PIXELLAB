@@ -12,8 +12,8 @@ export const ContactPage: React.FC = () => {
   const SUPPORT_EMAIL = 'pixellab.online.pk@gmail.com';
 
   const generateMailtoUrl = () => {
-    const emailSubject = `[Pixal Lab] ${subject} from ${name.trim() || 'User'}`;
-    const emailBody = `Hi Pixal Lab Team,\n\n${message}\n\n---\nSender Name: ${name}\nSender Email: ${email || 'Not provided'}\nSent from Pixal Lab (https://pixallab.online)`;
+    const emailSubject = `[PIXAL LAB] ${subject} from ${name.trim() || 'User'}`;
+    const emailBody = `Hi PIXAL LAB Team,\n\n${message}\n\n---\nSender Name: ${name}\nSender Email: ${email || 'Not provided'}\nSent from PIXAL LAB (https://pixallab.online)`;
     return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
   };
 
@@ -43,7 +43,7 @@ export const ContactPage: React.FC = () => {
           <span>Support & Direct Feedback</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold font-display mb-3 text-[#1D1D1F] dark:text-[#F5F5F7]">
-          Get in Touch with Pixal Lab
+          Get in Touch with PIXAL LAB
         </h1>
         <p className="text-xs sm:text-sm text-[#6E6E73] dark:text-[#86868B] leading-relaxed">
           Have an idea for a new image tool, noticed a bug, or have a suggestion? We process all client-side tools locally and read every creator message directly at{' '}
@@ -100,7 +100,7 @@ export const ContactPage: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => copyToClipboard(`Subject: [Pixal Lab] ${subject}\n\n${message}\n\nFrom: ${name} (${email})`, 'message')}
+                onClick={() => copyToClipboard(`Subject: [PIXAL LAB] ${subject}\n\n${message}\n\nFrom: ${name} (${email})`, 'message')}
                 className="w-full py-2 px-3 rounded-xl border border-black/10 dark:border-white/10 text-xs font-semibold text-theme-secondary hover:text-theme-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5"
               >
                 {copiedType === 'message' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}

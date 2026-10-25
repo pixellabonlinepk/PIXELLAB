@@ -14,13 +14,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
       <div className="text-center max-w-3xl mx-auto mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-4 glass-panel text-indigo-500">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>About Pixal Lab</span>
+          <span>About PIXAL LAB</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold font-display mb-4 text-[#1D1D1F] dark:text-[#F5F5F7] tracking-tight">
           Every Image. More Possibilities.
         </h1>
         <p className="text-sm sm:text-base leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
-          Pixal Lab is a curated suite of {TOOLS.length} high-impact image processing utilities engineered from first principles to execute entirely inside your web browser. No cloud queues, no account signups, and zero remote data harvesting.
+          PIXAL LAB is a curated suite of {TOOLS.length} high-impact image processing utilities engineered from first principles to execute entirely inside your web browser. No cloud queues, no account signups, and zero remote data harvesting.
         </p>
       </div>
 
@@ -34,7 +34,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
             100% Privacy by Design
           </h3>
           <p className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
-            Unlike legacy online converters that transmit private photos to unknown remote servers, Pixal Lab processes your files locally using client-side Web APIs and HTML5 Canvas. Your photos never leave your device.
+            Unlike legacy online converters that transmit private photos to unknown remote servers, PIXAL LAB processes your files locally using client-side Web APIs and HTML5 Canvas. Your photos never leave your device.
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onExploreTools }) => {
           Our Commitment to Creators
         </h2>
         <p className="text-xs sm:text-sm leading-relaxed text-[#6E6E73] dark:text-[#86868B]">
-          We believe basic photo and document utilities should not require watching full-screen advertisements, waiting in cloud render queues, or signing up for recurring monthly subscriptions. Pixal Lab provides fast, honest, and completely private browser software.
+          We believe basic photo and document utilities should not require watching full-screen advertisements, waiting in cloud render queues, or signing up for recurring monthly subscriptions. PIXAL LAB provides fast, honest, and completely private browser software.
         </p>
         <div className="pt-2">
           <button

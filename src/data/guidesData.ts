@@ -64,7 +64,7 @@ export const EDUCATIONAL_GUIDES: EducationalGuide[] = [
       {
         number: 4,
         title: 'Export and Verify File Size Under 2 MB',
-        description: 'Download your finished thumbnail in high definition. If your file exceeds 2 MB, use the Pixal Lab Image Compressor to reduce file size without losing sharpness.',
+        description: 'Download your finished thumbnail in high definition. If your file exceeds 2 MB, use the PIXAL LAB Image Compressor to reduce file size without losing sharpness.',
       },
     ],
     faqs: [
@@ -78,7 +78,7 @@ export const EDUCATIONAL_GUIDES: EducationalGuide[] = [
       },
       {
         question: 'Can I create YouTube thumbnails on my phone?',
-        answer: 'Yes! The Pixal Lab YouTube Thumbnail Maker runs smoothly inside mobile Safari and Chrome on iPhone, iPad, and Android devices without requiring any app download.',
+        answer: 'Yes! The PIXAL LAB YouTube Thumbnail Maker runs smoothly inside mobile Safari and Chrome on iPhone, iPad, and Android devices without requiring any app download.',
       },
     ],
     relatedToolIds: ['youtube-thumbnail-maker', 'image-compressor', 'aspect-ratio-pad', 'image-cropper'],
@@ -105,7 +105,7 @@ export const EDUCATIONAL_GUIDES: EducationalGuide[] = [
       {
         number: 1,
         title: 'Open Your Image in the Resizer',
-        description: 'Drag and drop your photo into the Pixal Lab Image Resizer. The tool immediately reads your native width and height in pixels.',
+        description: 'Drag and drop your photo into the PIXAL LAB Image Resizer. The tool immediately reads your native width and height in pixels.',
       },
       {
         number: 2,
@@ -135,7 +135,7 @@ export const EDUCATIONAL_GUIDES: EducationalGuide[] = [
       },
       {
         question: 'How do I resize dozens of photos at once?',
-        answer: 'Use the Pixal Lab Batch Image Resizer to upload 20 to 50 photos simultaneously, apply uniform dimensions or percentage scales, and download a single ZIP file.',
+        answer: 'Use the PIXAL LAB Batch Image Resizer to upload 20 to 50 photos simultaneously, apply uniform dimensions or percentage scales, and download a single ZIP file.',
       },
     ],
     relatedToolIds: ['image-resizer', 'batch-image-resizer', 'image-cropper', 'image-compressor'],
@@ -184,7 +184,7 @@ export const EDUCATIONAL_GUIDES: EducationalGuide[] = [
     faqs: [
       {
         question: 'Is my digital signature saved or stored anywhere online?',
-        answer: 'Never. The Pixal Lab Digital Signature Maker operates 100% client-side inside your browser memory. Your stroke data is never sent across the internet, logged in a database, or viewed by anyone.',
+        answer: 'Never. The PIXAL LAB Digital Signature Maker operates 100% client-side inside your browser memory. Your stroke data is never sent across the internet, logged in a database, or viewed by anyone.',
       },
       {
         question: 'How do I add my transparent signature to a PDF document?',
@@ -339,7 +339,7 @@ export const EDUCATIONAL_GUIDES: EducationalGuide[] = [
     faqs: [
       {
         question: 'What happens if my photos have different heights?',
-        answer: 'The Pixal Lab Image Joiner automatically scales the photos proportionally to match heights in horizontal mode, ensuring no awkward blank spaces or uneven edges.',
+        answer: 'The PIXAL LAB Image Joiner automatically scales the photos proportionally to match heights in horizontal mode, ensuring no awkward blank spaces or uneven edges.',
       },
       {
         question: 'Can I join images on mobile devices?',

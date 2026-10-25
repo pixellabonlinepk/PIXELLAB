@@ -131,8 +131,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <a
-                  href="/guide/how-to-create-a-transparent-digital-signature"
-                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-create-a-transparent-digital-signature')}
+                  href="/guide/how-to-create-a-digital-signature"
+                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-create-a-digital-signature')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   Digital Signature Tutorial
@@ -140,8 +140,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <a
-                  href="/guide/how-to-make-a-full-size-whatsapp-dp"
-                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-make-a-full-size-whatsapp-dp')}
+                  href="/guide/how-to-make-a-whatsapp-dp"
+                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-make-a-whatsapp-dp')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   No-Crop WhatsApp DP
@@ -149,8 +149,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <a
-                  href="/guide/how-to-split-an-image-for-instagram-grid"
-                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-split-an-image-for-instagram-grid')}
+                  href="/guide/how-to-split-an-image-into-multiple-parts"
+                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-split-an-image-into-multiple-parts')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   Instagram Grid Splitter
@@ -252,7 +252,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   onClick={(e) => handleLinkClick(e, 'about')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
-                  About Pixal Lab
+                  About PIXAL LAB
                 </a>
               </li>
               <li>

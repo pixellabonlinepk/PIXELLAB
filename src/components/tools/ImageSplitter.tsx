@@ -216,6 +216,11 @@ export const ImageSplitter: React.FC<ImageSplitterProps> = ({
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       downloadBlob(zipBlob, `${baseName}-split-${rows}x${cols}.zip`);
+      window.dispatchEvent(
+        new CustomEvent('pixellab:tool-completed', {
+          detail: { toolId: tool.id, toolName: tool.name },
+        })
+      );
     } catch (err: any) {
       setStatusMessage(`Failed to create ZIP: ${err.message}`);
     } finally {
@@ -228,6 +233,11 @@ export const ImageSplitter: React.FC<ImageSplitterProps> = ({
     const ext = outputFormat === 'image/jpeg' ? 'jpg' : outputFormat === 'image/png' ? 'png' : 'webp';
     const baseName = sourceName.replace(/\.[^/.]+$/, '');
     downloadBlob(piece.blob, `${baseName}_part_${piece.partNumber}.${ext}`);
+    window.dispatchEvent(
+      new CustomEvent('pixellab:tool-completed', {
+        detail: { toolId: tool.id, toolName: tool.name },
+      })
+    );
   };
 
   return (

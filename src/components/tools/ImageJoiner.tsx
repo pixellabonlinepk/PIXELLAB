@@ -292,7 +292,16 @@ export const ImageJoiner: React.FC<ImageJoinerProps> = ({
 
       const url = URL.createObjectURL(blob);
       setJoinedBlob(blob);
-      setJoinedUrl(url);
+      setJoinedUrl((prev) => {
+        if (prev && prev.startsWith('blob:')) {
+          try {
+            URL.revokeObjectURL(prev);
+          } catch {
+            // ignore
+          }
+        }
+        return url;
+      });
       setJoinedWidth(canvasW);
       setJoinedHeight(canvasH);
       setJoinedSize(blob.size);
@@ -312,6 +321,11 @@ export const ImageJoiner: React.FC<ImageJoinerProps> = ({
     if (!joinedBlob) return;
     const ext = isTransparent || outputFormat === 'image/png' ? 'png' : outputFormat === 'image/jpeg' ? 'jpg' : 'webp';
     downloadBlob(joinedBlob, `pixallab-joined-${layout}-${Date.now()}.${ext}`);
+    window.dispatchEvent(
+      new CustomEvent('pixellab:tool-completed', {
+        detail: { toolId: tool.id, toolName: tool.name },
+      })
+    );
   };
 
   return (

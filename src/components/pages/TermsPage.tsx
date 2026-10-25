@@ -23,7 +23,7 @@ export const TermsPage: React.FC = () => {
             1. Service Provision
           </h3>
           <p className="leading-relaxed text-xs">
-            Pixal Lab provides web-based client-side graphic processing software on an &quot;as-is&quot; and &quot;as-available&quot; basis. Because processing runs in your browser, performance depends on your device CPU, memory, and browser capabilities.
+            PIXAL LAB provides web-based client-side graphic processing software on an &quot;as-is&quot; and &quot;as-available&quot; basis. Because processing runs in your browser, performance depends on your device CPU, memory, and browser capabilities.
           </p>
         </div>
 
@@ -32,7 +32,7 @@ export const TermsPage: React.FC = () => {
             2. Intellectual Property & Ownership
           </h3>
           <p className="leading-relaxed text-xs">
-            You retain 100% full copyright and ownership of any images, graphics, memes, or documents processed through Pixal Lab. Pixal Lab claims zero rights or ownership over your output files.
+            You retain 100% full copyright and ownership of any images, graphics, memes, or documents processed through PIXAL LAB. PIXAL LAB claims zero rights or ownership over your output files.
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export const TermsPage: React.FC = () => {
             3. Acceptable Use
           </h3>
           <p className="leading-relaxed text-xs">
-            Users agree not to utilize Pixal Lab for unlawful purposes, creating defamatory or non-consensual imagery, or distributing malicious files.
+            Users agree not to utilize PIXAL LAB for unlawful purposes, creating defamatory or non-consensual imagery, or distributing malicious files.
           </p>
         </div>
       </div>

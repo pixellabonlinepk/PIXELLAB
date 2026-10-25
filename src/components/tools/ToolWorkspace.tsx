@@ -68,6 +68,8 @@ import { PhotoCollageDPMaker } from './PhotoCollageDPMaker';
 import { ImageSplitter } from './ImageSplitter';
 import { ImageJoiner } from './ImageJoiner';
 import { SignatureMaker } from './SignatureMaker';
+import { ToolSeoSection } from './ToolSeoSection';
+import { TOOL_SEO_CONFIG } from '../../data/toolSeoConfig';
 import JSZip from 'jszip';
 
 interface ToolWorkspaceProps {
@@ -81,21 +83,81 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   onBack,
   onSelectRelatedTool,
 }) => {
-  // Delegate specialized multi-item / canvas studios
+  // Delegate specialized multi-item / canvas studios with rich SEO & FAQs below
   if (tool.id === 'photo-collage-dp-maker') {
-    return <PhotoCollageDPMaker tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />;
+    return (
+      <div className="w-full">
+        <PhotoCollageDPMaker tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <ToolSeoSection
+            tool={tool}
+            onSelectRelatedTool={onSelectRelatedTool}
+            onNavigateHome={onBack}
+            onNavigateAllTools={() => onSelectRelatedTool('all-tools')}
+          />
+        </div>
+      </div>
+    );
   }
   if (tool.id === 'batch-image-resizer') {
-    return <BatchImageResizer tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />;
+    return (
+      <div className="w-full">
+        <BatchImageResizer tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <ToolSeoSection
+            tool={tool}
+            onSelectRelatedTool={onSelectRelatedTool}
+            onNavigateHome={onBack}
+            onNavigateAllTools={() => onSelectRelatedTool('all-tools')}
+          />
+        </div>
+      </div>
+    );
   }
   if (tool.id === 'image-splitter') {
-    return <ImageSplitter tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />;
+    return (
+      <div className="w-full">
+        <ImageSplitter tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <ToolSeoSection
+            tool={tool}
+            onSelectRelatedTool={onSelectRelatedTool}
+            onNavigateHome={onBack}
+            onNavigateAllTools={() => onSelectRelatedTool('all-tools')}
+          />
+        </div>
+      </div>
+    );
   }
   if (tool.id === 'image-joiner') {
-    return <ImageJoiner tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />;
+    return (
+      <div className="w-full">
+        <ImageJoiner tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <ToolSeoSection
+            tool={tool}
+            onSelectRelatedTool={onSelectRelatedTool}
+            onNavigateHome={onBack}
+            onNavigateAllTools={() => onSelectRelatedTool('all-tools')}
+          />
+        </div>
+      </div>
+    );
   }
   if (tool.id === 'signature-maker') {
-    return <SignatureMaker tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />;
+    return (
+      <div className="w-full">
+        <SignatureMaker tool={tool} onBack={onBack} onSelectRelatedTool={onSelectRelatedTool} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <ToolSeoSection
+            tool={tool}
+            onSelectRelatedTool={onSelectRelatedTool}
+            onNavigateHome={onBack}
+            onNavigateAllTools={() => onSelectRelatedTool('all-tools')}
+          />
+        </div>
+      </div>
+    );
   }
 
   // Source Image state
@@ -138,8 +200,9 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
   const [splitPos, setSplitPos] = useState<number>(50);
   const [openToolFaq, setOpenToolFaq] = useState<number | null>(0);
 
-  // High-value SEO guide for this specific tool
+  // High-value SEO guide and configuration for this specific tool
   const guide = getToolGuide(tool.id, tool.name, tool.categoryLabel);
+  const seoConfig = TOOL_SEO_CONFIG[tool.id];
 
   // Specific Tool Settings:
   // 1. Compressor
@@ -170,7 +233,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
   // 7. YouTube Thumbnail
   const [ytTitle, setYtTitle] = useState<string>('HOW TO EDIT LIKE A PRO');
-  const [ytSubtitle, setYtSubtitle] = useState<string>('Pixal Lab Masterclass 2026');
+  const [ytSubtitle, setYtSubtitle] = useState<string>('PIXAL LAB Masterclass 2026');
   const [ytBadge, setYtBadge] = useState<string>('NEW GUIDE');
   const [ytGradient, setYtGradient] = useState<'blue-violet' | 'emerald-cyan' | 'amber-rose' | 'dark-scrim'>('blue-violet');
 
@@ -467,7 +530,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
             }
             zip.file(
               'favicon-instructions.html',
-              `<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">\n<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">\n<link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png">`
+              `<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">\n<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">\n<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">\n<link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png">\n<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">\n<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">`
             );
             const zipBlob = await zip.generateAsync({ type: 'blob' });
             res = {
@@ -573,8 +636,21 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
       }
 
       if (res) {
+        if (res.url && res.url.startsWith('blob:')) {
+          trackedUrlsRef.current.add(res.url);
+        }
         setResultBlob(res.blob);
-        setResultUrl(res.url);
+        setResultUrl((prev) => {
+          if (prev && prev !== res?.url && prev.startsWith('blob:') && prev !== sourceUrl) {
+            try {
+              URL.revokeObjectURL(prev);
+              trackedUrlsRef.current.delete(prev);
+            } catch {
+              // ignore
+            }
+          }
+          return res ? res.url : null;
+        });
         setResultSize(res.blob.size || 0);
       }
     } catch (err: unknown) {
@@ -802,14 +878,25 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* Centered Title & Tagline */}
-        <div className="text-center max-w-2xl mx-auto mb-10">
+        {/* Centered Title & Tagline with SEO-Optimized H1 and Intro */}
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <h1 className="text-2xl sm:text-4xl font-extrabold font-display text-theme-primary mb-2.5 [text-wrap:balance]">
-            {tool.name}
+            {seoConfig?.h1 || tool.name}
           </h1>
-          <p className="text-xs sm:text-sm text-theme-secondary leading-relaxed">
-            {tool.description}
+          <p className="text-xs sm:text-sm text-theme-secondary leading-relaxed mb-4">
+            {seoConfig?.introParagraph || tool.description}
           </p>
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 text-[11px] text-theme-muted">
+            <span className="px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 font-mono">
+              Formats: {tool.acceptedFormats.map((f) => f.replace('image/', '').toUpperCase()).join(', ')}
+            </span>
+            <span className="px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 font-mono">
+              Max Size: {tool.maxFileSizeMB} MB
+            </span>
+            <span className="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 font-semibold">
+              Instant In-Browser Execution
+            </span>
+          </div>
         </div>
 
         {/* UPLOADER / WORKSPACE AREA */}
@@ -2147,111 +2234,13 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
           </div>
         )}
 
-        {/* HIGH-VALUE SEO EDUCATIONAL SECTION */}
-        <section className="mt-10 pt-8 border-t border-black/5 dark:border-white/10">
-          <div className="mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold font-display text-theme-primary mb-2">
-              How to Use {tool.name}
-            </h2>
-            <p className="text-xs sm:text-sm text-theme-secondary">
-              Step-by-step guidance for optimal results, zero compression artifacts, and privacy guarantees.
-            </p>
-          </div>
-
-          {/* 3 Steps Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-            {guide.steps.map((st) => (
-              <div key={st.step} className="glass-panel rounded-2xl p-5">
-                <div className="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-xs mb-3">
-                  0{st.step}
-                </div>
-                <h3 className="text-sm font-bold text-theme-primary mb-1">
-                  {st.title}
-                </h3>
-                <p className="text-xs text-theme-secondary leading-relaxed">
-                  {st.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* How It Works & Architecture */}
-          <div className="glass-panel rounded-2xl p-6 mb-10">
-            <div className="flex items-center gap-2 mb-3">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              <h3 className="text-sm font-bold text-theme-primary">
-                How It Works & Client-Side Privacy
-              </h3>
-            </div>
-            <p className="text-xs sm:text-sm text-theme-secondary leading-relaxed">
-              {guide.howItWorks}
-            </p>
-          </div>
-
-          {/* FAQ Accordion */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <HelpCircle className="w-4 h-4 text-indigo-500" />
-              <h3 className="text-base font-bold text-theme-primary">
-                Frequently Asked Questions ({guide.faqs.length})
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {guide.faqs.map((faq, idx) => {
-                const isOpen = openToolFaq === idx;
-                return (
-                  <div key={idx} className="glass-panel rounded-2xl overflow-hidden transition-all">
-                    <button
-                      type="button"
-                      onClick={() => setOpenToolFaq(isOpen ? null : idx)}
-                      className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4"
-                    >
-                      <span className="text-xs sm:text-sm font-semibold text-theme-primary">
-                        {faq.question}
-                      </span>
-                      <span className="text-theme-muted shrink-0">
-                        {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      </span>
-                    </button>
-                    {isOpen && (
-                      <div className="px-4 pb-4 sm:px-5 sm:pb-5 text-xs sm:text-sm text-theme-secondary leading-relaxed border-t border-black/5 dark:border-white/10 pt-3">
-                        {faq.answer}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* RELATED TOOLS */}
-        <div className="mt-10 pt-8 border-t border-black/5 dark:border-white/10">
-          <h3 className="text-lg font-bold font-display text-theme-primary mb-4">
-            Related Creative Tools
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { id: 'image-compressor', name: 'Image Compressor', desc: 'Shrink file size up to 90%' },
-              { id: 'image-resizer', name: 'Image Resizer', desc: 'Exact pixel dimensions & aspect ratio' },
-              { id: 'signature-maker', name: 'Digital Signature Maker', desc: 'Draw smooth transparent signatures' },
-              { id: 'qr-code-generator', name: 'QR Code Generator', desc: 'Permanent scannable QR matrices' },
-            ].map((rel) => (
-              <button
-                key={rel.id}
-                onClick={() => onSelectRelatedTool(rel.id)}
-                className="glass-panel glass-panel-interactive rounded-2xl p-4 text-left transition-all"
-              >
-                <div className="text-xs font-bold text-theme-primary mb-1">
-                  {rel.name}
-                </div>
-                <div className="text-[11px] text-theme-muted">
-                  {rel.desc}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* REUSABLE HIGH-VALUE CRAWLABLE SEO SECTION */}
+        <ToolSeoSection
+          tool={tool}
+          onSelectRelatedTool={onSelectRelatedTool}
+          onNavigateHome={onBack}
+          onNavigateAllTools={() => onSelectRelatedTool('all-tools')}
+        />
       </div>
     </div>
   );

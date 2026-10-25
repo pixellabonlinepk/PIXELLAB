@@ -34,29 +34,29 @@ import {
 
 export const HOMEPAGE_FAQS = [
   {
-    question: 'How is Pixal Lab completely private with zero server uploads?',
+    question: 'How is PIXAL LAB completely private with zero server uploads?',
     answer:
-      'Unlike standard online image converters that transmit your files to remote cloud servers, Pixal Lab processes your photos 100% locally on your computer or phone using modern HTML5 Canvas, WebGL, and WebAssembly APIs. Your personal images, sensitive documents, and photos never leave your device memory.',
+      'Unlike standard online image converters that transmit your files to remote cloud servers, PIXAL LAB processes your photos 100% locally on your computer or phone using modern HTML5 Canvas, WebGL, and WebAssembly APIs. Your personal images, sensitive documents, and photos never leave your device memory.',
   },
   {
-    question: 'Are all tools on Pixal Lab free to use without an account?',
+    question: 'Are all tools on PIXAL LAB free to use without an account?',
     answer:
       `Yes! Every single tool in our ${TOOLS.length} professional image utility collection is completely free forever. You never have to create an account, enter credit card details, pay subscription fees, or deal with rate limits.`,
   },
   {
-    question: 'Can I use Pixal Lab on my iPhone, Android, or tablet?',
+    question: 'Can I use PIXAL LAB on my iPhone, Android, or tablet?',
     answer:
-      'Absolutely. Pixal Lab is engineered with a mobile-first responsive architecture that adjusts smoothly to all screen sizes, including iOS Safari, Android Chrome, iPads, and high-resolution desktop displays.',
+      'Absolutely. PIXAL LAB is engineered with a mobile-first responsive architecture that adjusts smoothly to all screen sizes, including iOS Safari, Android Chrome, iPads, and high-resolution desktop displays.',
   },
   {
     question: 'What file formats and sizes are supported?',
     answer:
-      'Pixal Lab supports all common raster and vector formats including JPG/JPEG, PNG, WebP, SVG, and PDF documents, handling image resolutions up to 50 MB per file with instant real-time results.',
+      'PIXAL LAB supports all common raster and vector formats including JPG/JPEG, PNG, WebP, SVG, and PDF documents, handling image resolutions up to 50 MB per file with instant real-time results.',
   },
   {
-    question: 'Can I use images edited on Pixal Lab for commercial or client work?',
+    question: 'Can I use images edited on PIXAL LAB for commercial or client work?',
     answer:
-      'Yes. You retain 100% copyright and intellectual property rights over all images, collages, signatures, and QR codes processed on Pixal Lab. We place zero watermarks on your exports.',
+      'Yes. You retain 100% copyright and intellectual property rights over all images, collages, signatures, and QR codes processed on PIXAL LAB. We place zero watermarks on your exports.',
   },
 ];
 
@@ -611,7 +611,7 @@ export default function App() {
               <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
                   <h2 className="text-2xl sm:text-3xl font-bold font-display text-[#1D1D1F] dark:text-[#F5F5F7] mb-2">
-                    Why Creators Choose Pixal Lab
+                    Why Creators Choose PIXAL LAB
                   </h2>
                   <p className="text-xs sm:text-sm text-[#6E6E73] dark:text-[#86868B]">
                     Engineered with modern Web APIs for maximum privacy, zero bandwidth limits, and instant exports.
@@ -728,7 +728,7 @@ export default function App() {
                   theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
                 }`}
               >
-                Browse every utility in the Pixal Lab platform. Click any tool to open its dedicated workspace.
+                Browse every utility in the PIXAL LAB platform. Click any tool to open its dedicated workspace.
               </p>
             </div>
 

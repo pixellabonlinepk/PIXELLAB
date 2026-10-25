@@ -1865,8 +1865,18 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
               downloadBlob(blob, fileName);
               setDownloadSuccessToast(true);
               setTimeout(() => setDownloadSuccessToast(false), 4500);
+              window.dispatchEvent(
+                new CustomEvent('pixellab:tool-completed', {
+                  detail: { toolId: tool.id, toolName: tool.name },
+                })
+              );
             } else {
               fallbackDataUrlDownload(offscreen, fileName);
+              window.dispatchEvent(
+                new CustomEvent('pixellab:tool-completed', {
+                  detail: { toolId: tool.id, toolName: tool.name },
+                })
+              );
             }
             setIsExporting(false);
           },
@@ -2092,7 +2102,7 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
             <div className="text-center md:text-left shrink-0">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 mb-2">
                 <Sparkles className="w-3 h-3" />
-                Pixal Lab Pro Studio
+                PIXAL LAB Pro Studio
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
                 Photo Collage <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">& DP Maker</span>

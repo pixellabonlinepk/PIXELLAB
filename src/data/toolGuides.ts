@@ -8,7 +8,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       { step: 3, title: 'Instant Download', desc: 'Inspect the live file size savings and download your optimized image with zero watermarks.' },
     ],
     howItWorks:
-      'Pixal Lab Image Compressor processes your photos directly inside your web browser using HTML5 Canvas and browser-native image codecs. Unlike legacy compression websites that upload your personal photos to remote cloud servers, our in-browser engine adjusts quantization matrices, chroma subsampling, and entropy encoding entirely on your device CPU. This guarantees that your private images, sensitive documents, and personal memories never leave your browser, providing 100% data security, infinite bandwidth, and zero waiting in server queues.',
+      'PIXAL LAB Image Compressor processes your photos directly inside your web browser using HTML5 Canvas and browser-native image codecs. Unlike legacy compression websites that upload your personal photos to remote cloud servers, our in-browser engine adjusts quantization matrices, chroma subsampling, and entropy encoding entirely on your device CPU. This guarantees that your private images, sensitive documents, and personal memories never leave your browser, providing 100% data security, infinite bandwidth, and zero waiting in server queues.',
     benefits: [
       'Reduces file sizes by up to 90% while preserving crisp sharpness and vibrant colors',
       '100% private client-side processing with zero server uploads or cloud storage',
@@ -22,7 +22,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       },
       {
         question: 'Are my personal images uploaded to any server or database?',
-        answer: 'Never. Pixal Lab runs 100% client-side in your browser using HTML5 Canvas. We have no backend file servers, and your images are never stored, logged, or viewed by anyone.',
+        answer: 'Never. PIXAL LAB runs 100% client-side in your browser using HTML5 Canvas. We have no backend file servers, and your images are never stored, logged, or viewed by anyone.',
       },
       {
         question: 'What image formats can I compress with this tool?',
@@ -30,7 +30,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       },
       {
         question: 'Is there any limit on how many images I can compress?',
-        answer: 'No limits at all. Pixal Lab is completely free with no registration, no subscriptions, and unlimited daily usage for creators, students, and professionals.',
+        answer: 'No limits at all. PIXAL LAB is completely free with no registration, no subscriptions, and unlimited daily usage for creators, students, and professionals.',
       },
       {
         question: 'Why is image compression important for websites and SEO?',
@@ -46,7 +46,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       { step: 3, title: 'Download Resized Image', desc: 'Save the resized image instantly in high definition with locked or unlocked aspect ratio.' },
     ],
     howItWorks:
-      'The Pixal Lab Image Resizer utilizes high-quality bicubic and bilinear interpolation algorithms within the HTML5 Canvas 2D rendering context. When you scale an image down or up, the browser recalculates sub-pixel coordinates to prevent pixelation, jagged edges, or stretching. By locking the aspect ratio, the tool automatically calculates proportional height when width changes, ensuring your subjects never look distorted.',
+      'The PIXAL LAB Image Resizer utilizes high-quality bicubic and bilinear interpolation algorithms within the HTML5 Canvas 2D rendering context. When you scale an image down or up, the browser recalculates sub-pixel coordinates to prevent pixelation, jagged edges, or stretching. By locking the aspect ratio, the tool automatically calculates proportional height when width changes, ensuring your subjects never look distorted.',
     benefits: [
       'Precise pixel dimension control with proportional aspect ratio lock/unlock',
       'Instant presets for YouTube, Instagram, Facebook, LinkedIn, and Full HD screens',
@@ -68,7 +68,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       },
       {
         question: 'Does this tool work on mobile devices and tablets?',
-        answer: 'Yes, Pixal Lab is fully responsive and touch-optimized for iPhones, Android smartphones, iPads, and desktop computers.',
+        answer: 'Yes, PIXAL LAB is fully responsive and touch-optimized for iPhones, Android smartphones, iPads, and desktop computers.',
       },
     ],
   },
@@ -80,7 +80,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       { step: 3, title: 'Download ZIP Archive', desc: 'Download all processed photos cleanly bundled into a single ZIP file.' },
     ],
     howItWorks:
-      'Batch processing in Pixal Lab harnesses client-side JavaScript asynchronous queues and the JSZip library. Each file is loaded into an isolated canvas buffer, transformed to your target dimensions, encoded, and packaged into a ZIP archive without requiring heavy server uploads or software installations.',
+      'Batch processing in PIXAL LAB harnesses client-side JavaScript asynchronous queues and the JSZip library. Each file is loaded into an isolated canvas buffer, transformed to your target dimensions, encoded, and packaged into a ZIP archive without requiring heavy server uploads or software installations.',
     benefits: [
       'Resize dozens of product photos or gallery collections simultaneously in seconds',
       'Convenient one-click ZIP archive packaging for rapid workflow',
@@ -110,7 +110,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       { step: 3, title: 'Export Cropped Photo', desc: 'Crop out unwanted margins and save your focused composition immediately.' },
     ],
     howItWorks:
-      'Pixal Lab Image Cropper provides an intuitive bounding box on top of the image coordinates. Once you define the rectangular boundary, the canvas extracts the precise pixel coordinates using drawImage slicing, producing a clean, lossless cut of the selected zone.',
+      'PIXAL LAB Image Cropper provides an intuitive bounding box on top of the image coordinates. Once you define the rectangular boundary, the canvas extracts the precise pixel coordinates using drawImage slicing, producing a clean, lossless cut of the selected zone.',
     benefits: [
       'Freeform rectangular cropping and locked aspect ratios for social stories and avatars',
       'Visual guide boundaries with live dimension feedback',
@@ -124,7 +124,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       },
       {
         question: 'Can I crop high-resolution DSLR photos?',
-        answer: 'Yes, Pixal Lab easily processes high-resolution photos up to 50 MB directly on your device.',
+        answer: 'Yes, PIXAL LAB easily processes high-resolution photos up to 50 MB directly on your device.',
       },
       {
         question: 'Is cropping destructive to my original photo?',
@@ -170,7 +170,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       { step: 3, title: 'Export at 300 DPI', desc: 'Download your official biometric passport photo formatted for printing or online submission.' },
     ],
     howItWorks:
-      'Official visa and passport agencies require precise millimeter dimensions and 300 DPI (dots per inch) print resolution. The Pixal Lab Passport Photo Resizer scales your photo to exact biometric specifications with centered head composition and clean white background rendering.',
+      'Official visa and passport agencies require precise millimeter dimensions and 300 DPI (dots per inch) print resolution. The PIXAL LAB Passport Photo Resizer scales your photo to exact biometric specifications with centered head composition and clean white background rendering.',
     benefits: [
       'Supports official standards for Pakistan (Passport & CNIC), US, UK, Schengen, and India',
       'Accurate 300 DPI high-resolution export compliant with government online visa portals',
@@ -200,7 +200,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       { step: 3, title: 'Download Scannable QR', desc: 'Save as a sharp, high-resolution PNG image ready for print or web.' },
     ],
     howItWorks:
-      'Pixal Lab QR Code Generator encodes alphanumeric data into standard 2D matrix symbology using Reed-Solomon error correction algorithms. This ensures your QR codes scan instantly on any iPhone, Android, or barcode scanner even if partially obscured or printed on textured paper.',
+      'PIXAL LAB QR Code Generator encodes alphanumeric data into standard 2D matrix symbology using Reed-Solomon error correction algorithms. This ensures your QR codes scan instantly on any iPhone, Android, or barcode scanner even if partially obscured or printed on textured paper.',
     benefits: [
       'Genuinely scannable QR codes with Level H error correction for maximum durability',
       'Custom colors, dark mode styling, and high-DPI rasterization',
@@ -210,7 +210,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
     faqs: [
       {
         question: 'Do these QR codes ever expire or require a monthly subscription?',
-        answer: 'No! Pixal Lab generates permanent, static QR codes that contain your actual URL or text directly inside the pattern. They will work forever without subscriptions or redirects.',
+        answer: 'No! PIXAL LAB generates permanent, static QR codes that contain your actual URL or text directly inside the pattern. They will work forever without subscriptions or redirects.',
       },
       {
         question: 'What phone cameras can scan these QR codes?',
@@ -230,7 +230,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       { step: 3, title: 'Download PNG / SVG', desc: 'Export as transparent PNG for PDF contracts or copy straight to clipboard.' },
     ],
     howItWorks:
-      'Pixal Lab Digital Signature Maker captures high-precision vector touch coordinates and draws smooth quadratic Bezier curves on an HTML5 Canvas. The generated signature is rendered directly on your local device without sending strokes across the network, providing 100% security for legal agreements and document signings.',
+      'PIXAL LAB Digital Signature Maker captures high-precision vector touch coordinates and draws smooth quadratic Bezier curves on an HTML5 Canvas. The generated signature is rendered directly on your local device without sending strokes across the network, providing 100% security for legal agreements and document signings.',
     benefits: [
       'Smooth Bezier stroke interpolation prevents pixelation and jagged handwriting',
       'Transparent PNG and scalable SVG vector download options',
@@ -342,7 +342,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       { step: 3, title: 'Download Verified Clean Photo', desc: 'Save your sanitized photo with 100% of camera, GPS, and timestamp metadata stripped.' },
     ],
     howItWorks:
-      'Modern digital cameras and smartphones embed rich Exchangeable Image File (EXIF) metadata into photo headers: exact GPS latitude/longitude coordinates, device serial numbers, camera model, lens settings, and exact timestamps. Pixal Lab cleans this metadata by rendering the raw pixel bitmap to an isolated HTML5 Canvas buffer and re-encoding it into a clean stream. This mathematical extraction discards every binary header tag while leaving image visual quality completely untouched.',
+      'Modern digital cameras and smartphones embed rich Exchangeable Image File (EXIF) metadata into photo headers: exact GPS latitude/longitude coordinates, device serial numbers, camera model, lens settings, and exact timestamps. PIXAL LAB cleans this metadata by rendering the raw pixel bitmap to an isolated HTML5 Canvas buffer and re-encoding it into a clean stream. This mathematical extraction discards every binary header tag while leaving image visual quality completely untouched.',
     benefits: [
       'Permanently purges GPS coordinates, home locations, and geolocation data',
       'Removes camera serial numbers, iPhone/Android device IDs, and shutter timestamps',
@@ -360,7 +360,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       },
       {
         question: 'Is this tool safe for sensitive government or legal documents?',
-        answer: 'Yes. Pixal Lab runs 100% client-side in your local browser memory. Files are never transmitted to any third party or cloud database.',
+        answer: 'Yes. PIXAL LAB runs 100% client-side in your local browser memory. Files are never transmitted to any third party or cloud database.',
       },
     ],
   },
@@ -379,7 +379,7 @@ export function getToolGuide(toolId: string, toolName: string, categoryLabel: st
       { step: 3, title: 'Instant Download', desc: 'Save your polished image in crystal-clear quality with zero uploads or watermarks.' },
     ],
     howItWorks:
-      `Pixal Lab ${toolName} operates entirely inside your web browser utilizing modern HTML5 Canvas, WebGL, and Web API graphics technology. Unlike traditional cloud converter services that transmit your private images across public networks to remote servers, our client-side engine executes all mathematical image transformations locally on your device CPU. This architectural advantage ensures total personal privacy, zero upload waiting times, and unrestricted usage without data collection.`,
+      `PIXAL LAB ${toolName} operates entirely inside your web browser utilizing modern HTML5 Canvas, WebGL, and Web API graphics technology. Unlike traditional cloud converter services that transmit your private images across public networks to remote servers, our client-side engine executes all mathematical image transformations locally on your device CPU. This architectural advantage ensures total personal privacy, zero upload waiting times, and unrestricted usage without data collection.`,
     benefits: [
       `100% private, in-browser ${toolName.toLowerCase()} processing with zero cloud uploads`,
       'Live before-and-after comparison tools to evaluate results in real time',
@@ -393,7 +393,7 @@ export function getToolGuide(toolId: string, toolName: string, categoryLabel: st
       },
       {
         question: `Is ${toolName} free to use?`,
-        answer: `Yes, all tools on Pixal Lab are 100% free with unlimited daily usage, no account signup required, and zero hidden costs.`,
+        answer: `Yes, all tools on PIXAL LAB are 100% free with unlimited daily usage, no account signup required, and zero hidden costs.`,
       },
       {
         question: `What formats are supported by ${toolName}?`,
@@ -401,7 +401,7 @@ export function getToolGuide(toolId: string, toolName: string, categoryLabel: st
       },
       {
         question: `Can I use ${toolName} on my phone?`,
-        answer: `Yes, Pixal Lab is built with a responsive interface that functions smoothly on Android and iOS mobile devices.`,
+        answer: `Yes, PIXAL LAB is built with a responsive interface that functions smoothly on Android and iOS mobile devices.`,
       },
     ],
   };

@@ -366,7 +366,8 @@ export async function adjustBrightnessContrast(
   const d = imgData.data;
 
   // Contrast factor: 259 * (C + 255) / (255 * (259 - C))
-  const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+  const safeContrast = Math.min(250, Math.max(-250, contrast));
+  const factor = (259 * (safeContrast + 255)) / (255 * (259 - safeContrast));
 
   for (let i = 0; i < d.length; i += 4) {
     // Brightness first
@@ -450,10 +451,8 @@ export async function applySharpen(
   const output = ctx.createImageData(w, h);
   const dst = output.data;
 
-  // Copy alpha
-  for (let i = 0; i < src.length; i += 4) {
-    dst[i + 3] = src[i + 3];
-  }
+  // Initialize dst with src so outer boundary pixels retain true image color rather than turning black
+  dst.set(src);
 
   // 3x3 Sharpen Kernel:
   // [ 0,  -a,  0 ]
@@ -505,18 +504,19 @@ export async function applyWatermark(
   const ctx = canvas.getContext('2d')!;
   ctx.drawImage(img, 0, 0);
 
+  const safeFontSize = Math.max(12, options.fontSize || 24);
   ctx.save();
   ctx.globalAlpha = options.opacity;
   ctx.fillStyle = options.color;
-  ctx.font = `600 ${options.fontSize}px ${options.fontFamily || 'Plus Jakarta Sans, sans-serif'}`;
+  ctx.font = `600 ${safeFontSize}px ${options.fontFamily || 'Plus Jakarta Sans, sans-serif'}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  const margin = options.fontSize * 1.5;
+  const margin = safeFontSize * 1.5;
 
   if (options.position === 'tiled') {
-    const stepX = options.fontSize * 8;
-    const stepY = options.fontSize * 4;
+    const stepX = Math.max(50, safeFontSize * 8);
+    const stepY = Math.max(30, safeFontSize * 4);
     for (let x = 0; x < w + stepX; x += stepX) {
       for (let y = 0; y < h + stepY; y += stepY) {
         ctx.save();
@@ -987,14 +987,16 @@ export async function generateMeme(
   ctx.lineWidth = Math.max(3, fontSize * 0.12);
   ctx.font = `900 ${fontSize}px Impact, 'Arial Black', sans-serif`;
 
+  const maxTextW = Math.max(10, w - 40);
+
   if (t1) {
-    ctx.strokeText(t1, w / 2, fontSize + 20, w - 40);
-    ctx.fillText(t1, w / 2, fontSize + 20, w - 40);
+    ctx.strokeText(t1, w / 2, fontSize + 20, maxTextW);
+    ctx.fillText(t1, w / 2, fontSize + 20, maxTextW);
   }
 
   if (t2) {
-    ctx.strokeText(t2, w / 2, h - 30, w - 40);
-    ctx.fillText(t2, w / 2, h - 30, w - 40);
+    ctx.strokeText(t2, w / 2, h - 30, maxTextW);
+    ctx.fillText(t2, w / 2, h - 30, maxTextW);
   }
 
   const blob = await canvasToBlob(canvas, 'image/jpeg', 0.95);
@@ -1062,8 +1064,10 @@ export function extractColorPalette(
 ): { hex: string; rgb: string; percentage: number }[] {
   const canvas = document.createElement('canvas');
   // Sample at smaller dimension for speed & smoothing
+  const origW = img.naturalWidth || img.width || 1;
+  const origH = img.naturalHeight || img.height || 1;
   const sampleW = 100;
-  const sampleH = Math.round((100 * (img.naturalHeight || img.height)) / (img.naturalWidth || img.width));
+  const sampleH = Math.max(1, Math.round((100 * origH) / origW));
   canvas.width = sampleW;
   canvas.height = sampleH;
   const ctx = canvas.getContext('2d')!;
@@ -1114,6 +1118,8 @@ export async function generateFaviconPack(
     { size: 32, label: '32x32 (Desktop bookmark / retina)' },
     { size: 48, label: '48x48 (Windows desktop icon)' },
     { size: 180, label: '180x180 (Apple Touch Icon iOS)' },
+    { size: 192, label: '192x192 (Android Chrome standard)' },
+    { size: 512, label: '512x512 (High-Res Web App Splash)' },
   ];
 
   const results: { size: number; label: string; blob: Blob; url: string }[] = [];
@@ -1170,9 +1176,33 @@ export async function readQrCodeFromImage(
   img: HTMLImageElement
 ): Promise<{ found: boolean; data: string | null; error?: string }> {
   try {
+    const origW = img.naturalWidth || img.width;
+    const origH = img.naturalHeight || img.height;
+    if (origW <= 0 || origH <= 0) {
+      return { found: false, data: null, error: 'Invalid image dimensions.' };
+    }
+
+    // Fast pass: if image is large (> 1200px), downsample first to prevent browser freezing
+    if (origW > 1200 || origH > 1200) {
+      const scale = Math.min(1200 / origW, 1200 / origH);
+      const sw = Math.round(origW * scale);
+      const sh = Math.round(origH * scale);
+      const fastCanvas = document.createElement('canvas');
+      fastCanvas.width = sw;
+      fastCanvas.height = sh;
+      const fctx = fastCanvas.getContext('2d')!;
+      fctx.drawImage(img, 0, 0, sw, sh);
+      const fastData = fctx.getImageData(0, 0, sw, sh);
+      const fastCode = jsQR(fastData.data, sw, sh);
+      if (fastCode) {
+        return { found: true, data: fastCode.data };
+      }
+    }
+
+    // Full resolution pass
     const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth || img.width;
-    canvas.height = img.naturalHeight || img.height;
+    canvas.width = origW;
+    canvas.height = origH;
     const ctx = canvas.getContext('2d')!;
     ctx.drawImage(img, 0, 0);
 
@@ -1208,7 +1238,7 @@ export async function convertImagesToPdf(
   const usableH = pageHeight - m * 2;
 
   for (let i = 0; i < images.length; i++) {
-    if (i > 0) doc.addPage();
+    if (i > 0) doc.addPage(options.format, options.orientation);
     const item = images[i];
     const imgW = item.img.naturalWidth || item.img.width;
     const imgH = item.img.naturalHeight || item.img.height;
@@ -1225,13 +1255,15 @@ export async function convertImagesToPdf(
     const posX = m + (usableW - targetW) / 2;
     const posY = m + (usableH - targetH) / 2;
 
-    // Convert image to data URL
+    // Convert image to data URL with clean white background for transparent alpha channels
     const c = document.createElement('canvas');
     c.width = imgW;
     c.height = imgH;
     const ctx = c.getContext('2d')!;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, imgW, imgH);
     ctx.drawImage(item.img, 0, 0);
-    const dataUrl = c.toDataURL('image/jpeg', 0.92);
+    const dataUrl = c.toDataURL('image/jpeg', 0.94);
 
     doc.addImage(dataUrl, 'JPEG', posX, posY, targetW, targetH);
   }

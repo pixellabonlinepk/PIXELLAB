@@ -257,6 +257,11 @@ export const BatchImageResizer: React.FC<BatchImageResizerProps> = ({
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       downloadBlob(zipBlob, `pixallab-batch-resized-${Date.now()}.zip`);
+      window.dispatchEvent(
+        new CustomEvent('pixellab:tool-completed', {
+          detail: { toolId: tool.id, toolName: tool.name },
+        })
+      );
     } catch (err: any) {
       setStatusMessage(`Failed to create ZIP: ${err.message}`);
     } finally {
@@ -270,6 +275,11 @@ export const BatchImageResizer: React.FC<BatchImageResizerProps> = ({
     const ext = outputFormat === 'image/jpeg' ? 'jpg' : outputFormat === 'image/png' ? 'png' : 'webp';
     const baseName = item.name.replace(/\.[^/.]+$/, '');
     downloadBlob(item.resizedBlob, `${baseName}_resized_${item.resizedWidth}x${item.resizedHeight}.${ext}`);
+    window.dispatchEvent(
+      new CustomEvent('pixellab:tool-completed', {
+        detail: { toolId: tool.id, toolName: tool.name },
+      })
+    );
   };
 
   const selectedImage = images.find((i) => i.id === selectedImageId) || images[0];

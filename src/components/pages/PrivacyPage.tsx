@@ -13,7 +13,7 @@ export const PrivacyPage: React.FC = () => {
           Your Images Never Leave Your Device
         </h1>
         <p className="text-xs sm:text-sm text-[#6E6E73] dark:text-[#86868B]">
-          Last updated: October 2026. Pixal Lab guarantees 100% in-browser processing with zero remote file storage.
+          Last updated: October 2026. PIXAL LAB guarantees 100% in-browser processing with zero remote file storage.
         </p>
       </div>
 
@@ -24,7 +24,7 @@ export const PrivacyPage: React.FC = () => {
             <span>1. Zero Server Uploads</span>
           </div>
           <p className="leading-relaxed text-xs">
-            Unlike traditional online file converters that transmit your files to backend servers, Pixal Lab performs all image manipulation, compression, resizing, filtering, and conversion using client-side HTML5 Canvas, Web Workers, and browser Blobs. No image data is ever transferred to our servers or stored on remote disks.
+            Unlike traditional online file converters that transmit your files to backend servers, PIXAL LAB performs all image manipulation, compression, resizing, filtering, and conversion using client-side HTML5 Canvas, Web Workers, and browser Blobs. No image data is ever transferred to our servers or stored on remote disks.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export const PrivacyPage: React.FC = () => {
             <span>4. No Account Required</span>
           </div>
           <p className="leading-relaxed text-xs">
-            Pixal Lab does not ask for your email, credit card, phone number, or login credentials. All tools are unlocked and freely accessible without an account.
+            PIXAL LAB does not ask for your email, credit card, phone number, or login credentials. All tools are unlocked and freely accessible without an account.
           </p>
         </div>
 
@@ -65,7 +65,7 @@ export const PrivacyPage: React.FC = () => {
           </div>
           <div className="space-y-2.5 leading-relaxed text-xs">
             <p>
-              Pixal Lab uses industry-standard, anonymized analytics via Google Analytics (gtag.js) to understand visitor aggregate traffic trends, browser compatibility, and popular utility usage. No personally identifiable information or image content is ever transmitted to analytics services.
+              PIXAL LAB uses industry-standard, anonymized analytics via Google Analytics (gtag.js) to understand visitor aggregate traffic trends, browser compatibility, and popular utility usage. No personally identifiable information or image content is ever transmitted to analytics services.
             </p>
             <p>
               To maintain our free tools for users worldwide, we may partner with third-party advertising networks, including Google AdSense. Google and third-party vendors use cookies (such as the DoubleClick cookie) to serve ads based on prior visits to our website and other sites across the internet. Users may opt out of personalized advertising by visiting Google Ads Settings (www.google.com/settings/ads) or through aboutads.info.

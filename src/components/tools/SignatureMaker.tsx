@@ -55,10 +55,15 @@ export const SignatureMaker: React.FC<SignatureMakerProps> = ({
 
   // Drawing state & history stack
   const [strokes, setStrokes] = useState<Stroke[]>([]);
+  const strokesRef = useRef<Stroke[]>([]);
   const [history, setHistory] = useState<Stroke[][]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const isDrawing = useRef<boolean>(false);
   const currentPoints = useRef<Point[]>([]);
+
+  useEffect(() => {
+    strokesRef.current = strokes;
+  }, [strokes]);
 
   // UI status
   const [copied, setCopied] = useState<boolean>(false);
@@ -197,10 +202,11 @@ export const SignatureMaker: React.FC<SignatureMakerProps> = ({
     isDrawing.current = false;
     currentPoints.current = [];
 
-    // Push to undo history stack
+    // Push latest completed strokes to undo history stack
+    const latest = strokesRef.current.length > 0 ? strokesRef.current : strokes;
     setHistory((prev) => {
       const upToCurrent = prev.slice(0, historyIndex + 1);
-      return [...upToCurrent, strokes];
+      return [...upToCurrent, latest];
     });
     setHistoryIndex((prev) => prev + 1);
   };
@@ -250,6 +256,11 @@ export const SignatureMaker: React.FC<SignatureMakerProps> = ({
     canvas.toBlob((blob) => {
       if (blob) {
         downloadBlob(blob, `signature-${bgType}-${Date.now()}.png`);
+        window.dispatchEvent(
+          new CustomEvent('pixellab:tool-completed', {
+            detail: { toolId: tool.id, toolName: tool.name },
+          })
+        );
       }
     }, 'image/png');
   };
@@ -273,6 +284,11 @@ export const SignatureMaker: React.FC<SignatureMakerProps> = ({
     svgContent += `</svg>`;
     const blob = new Blob([svgContent], { type: 'image/svg+xml' });
     downloadBlob(blob, `signature-${Date.now()}.svg`);
+    window.dispatchEvent(
+      new CustomEvent('pixellab:tool-completed', {
+        detail: { toolId: tool.id, toolName: tool.name },
+      })
+    );
   };
 
   // Copy to clipboard

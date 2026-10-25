@@ -102,10 +102,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 Matching Tools ({suggestions.length})
               </div>
               {suggestions.map((tool) => (
-                <button
+                <a
                   key={tool.id}
-                  onClick={() => onSelectTool(tool.id)}
-                  className="w-full flex items-center justify-between p-3 rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/10 text-left group"
+                  href={`/tool/${tool.id}`}
+                  onClick={(e) => {
+                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                      e.preventDefault();
+                      onSelectTool(tool.id);
+                    }
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/10 text-left group no-underline"
                 >
                   <div className="min-w-0 pr-2">
                     <div className="text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7] group-hover:text-indigo-500 transition-colors">
@@ -118,7 +124,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   <span className="text-xs font-semibold text-indigo-500 shrink-0">
                     Open →
                   </span>
-                </button>
+                </a>
               ))}
             </div>
           )}
@@ -126,17 +132,25 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* 4 Quick Category Glass Pills */}
         <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto mb-5 sm:mb-6">
-          {QUICK_CATEGORY_GLASS_PILLS.map((pill) => (
-            <button
-              key={pill.id}
-              type="button"
-              onClick={() => onSelectTool(pill.id)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold glass-panel glass-panel-interactive text-[#1D1D1F] dark:text-[#F5F5F7] transition-all active:scale-95"
-            >
-              <span className="text-sm">{pill.icon}</span>
-              <span>{pill.label}</span>
-            </button>
-          ))}
+          {QUICK_CATEGORY_GLASS_PILLS.map((pill) => {
+            const href = pill.id === 'puzzle' ? '/puzzle' : `/tool/${pill.id}`;
+            return (
+              <a
+                key={pill.id}
+                href={href}
+                onClick={(e) => {
+                  if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                    e.preventDefault();
+                    onSelectTool(pill.id);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold glass-panel glass-panel-interactive text-[#1D1D1F] dark:text-[#F5F5F7] transition-all active:scale-95 no-underline"
+              >
+                <span className="text-sm">{pill.icon}</span>
+                <span>{pill.label}</span>
+              </a>
+            );
+          })}
         </div>
 
         {/* Three Apple Trust Features */}
