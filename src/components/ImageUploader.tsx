@@ -101,11 +101,20 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   return (
     <div className="w-full">
       <div
+        role="button"
+        tabIndex={0}
+        aria-label={`Upload ${acceptPdf ? 'PDF document' : multiple ? 'images' : 'photo'} file dropzone`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative rounded-3xl border-2 border-dashed p-8 sm:p-14 text-center transition-all cursor-pointer group glass-panel ${
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        className={`relative rounded-3xl border-2 border-dashed p-8 sm:p-14 text-center transition-all cursor-pointer group glass-panel focus:outline-none focus:ring-4 focus:ring-indigo-500/30 ${
           isDragging
             ? 'border-indigo-500 scale-[0.99] ring-4 ring-indigo-500/20'
             : 'border-indigo-500/30 hover:border-indigo-500'
@@ -118,6 +127,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           multiple={multiple}
           onChange={handleFileInputChange}
           className="hidden"
+          aria-label={acceptPdf ? 'Select PDF document' : multiple ? 'Select multiple images' : 'Select photo file'}
         />
 
         <div className="flex flex-col items-center justify-center max-w-lg mx-auto">
@@ -197,9 +207,22 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         </div>
 
         {errorMsg && (
-          <div className="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold flex items-center justify-center gap-2 max-w-md mx-auto">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{errorMsg}</span>
+          <div role="alert" className="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold flex items-center justify-between gap-2 max-w-md mx-auto">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setErrorMsg(null);
+              }}
+              className="px-2 py-0.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 text-[11px] font-bold"
+              aria-label="Dismiss error message"
+            >
+              ✕
+            </button>
           </div>
         )}
       </div>

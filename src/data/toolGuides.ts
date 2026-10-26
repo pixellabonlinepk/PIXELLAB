@@ -364,6 +364,426 @@ export const TOOL_GUIDES: Record<string, ToolGuideContent> = {
       },
     ],
   },
+
+  'image-format-converter': {
+    steps: [
+      { step: 1, title: 'Upload Image File', desc: 'Select or drag any PNG, JPG, WebP, BMP, or SVG graphic into the converter.' },
+      { step: 2, title: 'Select Target Format', desc: 'Choose PNG (lossless with alpha transparency), JPG (standard compressed), or modern WebP.' },
+      { step: 3, title: 'Instant Conversion', desc: 'Download your converted image immediately with zero server delays or quality degradation.' },
+    ],
+    howItWorks:
+      'The PIXAL LAB Image Format Converter utilizes browser-native HTML5 Canvas rasterization engines and native codecs (image/png, image/jpeg, image/webp). When transforming formats, the browser parses the source bitmap into an uncompressed 32-bit RGBA buffer and re-encodes it into your chosen output specification. Transparent alpha channels are preserved in PNG and WebP conversions, while JPG conversions seamlessly normalize transparent pixels onto a pure white canvas.',
+    benefits: [
+      'Convert between WebP, PNG, and JPG in milliseconds without server queues',
+      'Alpha transparency preservation for icons, logos, and UI graphics',
+      '100% private in-browser conversion: your files never leave your device',
+      'High-efficiency WebP compression reduces website bandwidth by up to 35%',
+    ],
+    faqs: [
+      {
+        question: 'Can I convert WebP images back into standard JPG or PNG format?',
+        answer: 'Yes! Simply upload your WebP image, select JPG or PNG as the target format, and click download. It converts instantly for compatibility with legacy software and older picture viewers.',
+      },
+      {
+        question: 'What happens to transparent backgrounds when converting PNG to JPG?',
+        answer: 'Because the JPEG format does not support alpha transparency channels, transparent areas are automatically normalized to a crisp, clean white background.',
+      },
+      {
+        question: 'Is there any file upload limit or daily conversion quota?',
+        answer: 'No quotas at all. You can convert files up to 40 MB each with unlimited daily conversions completely free without creating an account.',
+      },
+    ],
+  },
+
+  'image-to-pdf-converter': {
+    steps: [
+      { step: 1, title: 'Select Image(s)', desc: 'Choose one or multiple photos, scanned receipts, or document pages from your device.' },
+      { step: 2, title: 'Configure Page Layout', desc: 'Select A4 or US Letter page size, Portrait or Landscape orientation, and margin spacing.' },
+      { step: 3, title: 'Generate PDF Document', desc: 'Download a clean, multi-page vector-wrapped PDF ready for printing, submission, or emailing.' },
+    ],
+    howItWorks:
+      'PIXAL LAB Image to PDF Converter compiles images into standardized Adobe PDF document specifications directly in client-side memory using the jsPDF library. Each uploaded image is scaled proportionally to fit standard print page margins without geometric stretching or compression artifacts. Multi-image workflows sequentially paginate each photo onto its own dedicated page, producing an optimized, compact PDF document in seconds.',
+    benefits: [
+      'Combine multiple photos, forms, and receipts into a single organized PDF',
+      'Standard A4 and US Letter document standards with Portrait and Landscape options',
+      '100% confidential: sensitive financial receipts and IDs are never sent to remote cloud servers',
+      'Proportional scaling preserves original sharpness for crystal-clear physical printing',
+    ],
+    faqs: [
+      {
+        question: 'How many images can I combine into a single PDF document?',
+        answer: 'You can combine dozens of images into a single PDF file. The browser handles the layout in memory, allowing you to create comprehensive multi-page documents.',
+      },
+      {
+        question: 'Will my scanned documents and receipts remain sharp when printed?',
+        answer: 'Yes! The converter embeds images at high resolution, matching your source image quality so text and fine numbers remain legible when printed or viewed on high-DPI displays.',
+      },
+      {
+        question: 'Is it safe to convert bank statements and identity documents here?',
+        answer: 'Completely safe. Unlike cloud PDF services that upload your personal records to third-party servers, PIXAL LAB processes your PDF 100% locally on your computer or phone.',
+      },
+    ],
+  },
+
+  'pdf-to-image-converter': {
+    steps: [
+      { step: 1, title: 'Upload PDF Document', desc: 'Select any single or multi-page PDF document up to 25 MB.' },
+      { step: 2, title: 'Preview & Choose Scale', desc: 'Browse page thumbnails and select standard 1.5x or high-DPI 2.5x rendering.' },
+      { step: 3, title: 'Download Images / ZIP', desc: 'Save individual pages as sharp PNG/JPG pictures or download all pages bundled in a ZIP.' },
+    ],
+    howItWorks:
+      'Our PDF to Image Extractor incorporates client-side PDF.js rendering technology. The engine parses the PDF document structure, font vectors, and embedded raster images directly inside browser memory, rasterizing each document page onto a dedicated HTML5 Canvas at high pixel density. Pages can then be exported as individual lossless PNG or compressed JPEG images, or packaged into a unified ZIP archive.',
+    benefits: [
+      'Extract pages from contracts, slides, reports, and ebooks into sharp image files',
+      'High-DPI 2.5x Retina rendering for razor-sharp typography and diagram clarity',
+      'One-click ZIP archive packaging for rapid multi-page extraction',
+      'Strict client-side privacy: confidential PDF documents are never uploaded to any server',
+    ],
+    faqs: [
+      {
+        question: 'Does this tool extract embedded photos or render the full document page?',
+        answer: 'It renders the complete document page exactly as you see it in a PDF reader, including all typography, vectors, diagrams, and layout elements, at high resolution.',
+      },
+      {
+        question: 'Can I extract just one specific page instead of the entire document?',
+        answer: 'Yes! You can browse through individual pages using the navigation controls and download only the specific page you need, or download all pages at once as a ZIP archive.',
+      },
+      {
+        question: 'Can I use this on password-protected PDF files?',
+        answer: 'For security reasons, PDF files must be unlocked prior to rendering. Standard unencrypted PDF documents render immediately in your browser.',
+      },
+    ],
+  },
+
+  'favicon-generator': {
+    steps: [
+      { step: 1, title: 'Upload Brand Logo / Icon', desc: 'Select any square logo, app icon, or graphic (PNG, SVG, or JPG).' },
+      { step: 2, title: 'Preview Icon Suite', desc: 'Inspect live previews across 16x16, 32x32, 48x48, and 180x180 mobile touch sizes.' },
+      { step: 3, title: 'Download ZIP & HTML', desc: 'Download the complete structured favicon package with ready-to-paste HTML meta tags.' },
+    ],
+    howItWorks:
+      'The PIXAL LAB Favicon & App Icon Generator scales your master artwork across all standard web and mobile icon specifications: 16x16 (browser tab), 32x32 (taskbar shortcut), 48x48 (desktop icon), 180x180 (Apple touch icon for iPhone/iPad), and 192x192/512x512 (Android Progressive Web App). Using bicubic downsampling, fine lines and brand shapes stay sharp without pixel jitter, bundling all assets into an organized ZIP with pre-written HTML link tags.',
+    benefits: [
+      'Complete icon suite covering desktop browsers, Apple iOS devices, and Android PWAs',
+      'High-quality downsampling preserves brand recognition at tiny 16x16 pixel dimensions',
+      'Includes copy-and-paste HTML `<link rel="icon">` code snippet for instant integration',
+      'Packaged in an organized ZIP file ready for web deployment with zero upload delays',
+    ],
+    faqs: [
+      {
+        question: 'What source image resolution produces the best favicons?',
+        answer: 'We recommend uploading a square image of at least 512x512 pixels with a transparent background (PNG or SVG). This provides maximum detail for clean downsampling.',
+      },
+      {
+        question: 'Where do I place the downloaded favicon files on my website?',
+        answer: 'Unzip the files and place them in your website root public directory (e.g. /public or /assets), then paste the generated HTML snippet inside your website <head> tag.',
+      },
+      {
+        question: 'Does this generator support Apple Touch Icons for iPhones and iPads?',
+        answer: 'Yes! The generated ZIP package includes the official 180x180 apple-touch-icon.png so your website displays a crisp app icon when users save it to their iOS home screen.',
+      },
+    ],
+  },
+
+  'whatsapp-dp-maker': {
+    steps: [
+      { step: 1, title: 'Upload Portrait or Landscape Photo', desc: 'Select any photo you want to use as your WhatsApp or social profile picture.' },
+      { step: 2, title: 'Choose Padding Style', desc: 'Select an aesthetic blurred background expansion or clean solid color border frame.' },
+      { step: 3, title: 'Download 1:1 Square DP', desc: 'Export your profile picture perfectly centered with zero unwanted cropping.' },
+    ],
+    howItWorks:
+      'Social platforms like WhatsApp, Instagram, and Twitter require square 1:1 avatars and display them in circular frames, frequently forcing users to crop out friends or key scenery. The PIXAL LAB WhatsApp DP Maker places your uncropped full photo onto a calibrated square canvas, padding outer edges with a Gaussian-blurred replica of the image or solid borders, and provides a real-time circular safe guide so no part of your face is clipped.',
+    benefits: [
+      'Fit entire rectangular photos into WhatsApp profile pictures with zero cropping',
+      'Interactive circular overlay preview guarantees faces and text fit inside social circles',
+      'Aesthetic blurred mirror background expansion for a modern, professional look',
+      '100% private in-browser generation with crystal-clear high-definition export',
+    ],
+    faqs: [
+      {
+        question: 'Why does WhatsApp cut off parts of my profile picture?',
+        answer: 'WhatsApp strictly requires a 1:1 square image and masks it into a circular display. Rectangular photos are forced into awkward crops unless padded into a square first.',
+      },
+      {
+        question: 'How does the Safe Circle guide help me?',
+        answer: 'The interactive circular overlay preview simulates the exact circular crop WhatsApp and Instagram use, allowing you to position your photo so no faces or borders are cut off.',
+      },
+      {
+        question: 'Can I choose a plain white or black border instead of blur?',
+        answer: 'Yes, you can toggle between atmospheric blurred background fills, solid white, dark OLED black, or custom color borders.',
+      },
+    ],
+  },
+
+  'image-joiner': {
+    steps: [
+      { step: 1, title: 'Select Photos to Stitch', desc: 'Upload two or more photos you want to merge side-by-side or stacked.' },
+      { step: 2, title: 'Choose Layout & Spacing', desc: 'Select Horizontal (side-by-side) or Vertical (stacked) orientation and adjust margin gaps.' },
+      { step: 3, title: 'Export Merged Image', desc: 'Download your combined composite image in high resolution with matched dimensions.' },
+    ],
+    howItWorks:
+      'The PIXAL LAB Image Joiner & Panorama Stitcher dynamically calculates unified canvas geometry based on all uploaded images. For horizontal stitching, it automatically normalizes images to a common height using proportional aspect scaling to eliminate uneven seams. For vertical stacking, it matches widths before rendering. Users can customize divider border thickness and background colors with instantaneous real-time canvas updates.',
+    benefits: [
+      'Stitch before-and-after comparisons, panoramic landscape pairs, or vertical comic strips',
+      'Automatic proportional dimension matching prevents distorted or stretched photos',
+      'Custom gap spacing slider and background color selector',
+      'Lossless client-side canvas composition with zero quality loss or watermarks',
+    ],
+    faqs: [
+      {
+        question: 'Can I join images with different original dimensions and heights?',
+        answer: 'Yes! The tool automatically calculates proportional scaling to match heights in horizontal mode and widths in vertical mode, ensuring clean, flush seams.',
+      },
+      {
+        question: 'What is the best format for before-and-after photo comparisons?',
+        answer: 'Horizontal mode (side-by-side) is ideal for before/after edits, fitness progress, and design comparisons, allowing viewers to contrast differences side by side.',
+      },
+      {
+        question: 'Is there a limit on how many photos I can join together?',
+        answer: 'You can join multiple photos together in a single sequence. Processing runs directly on your device CPU for lightning-fast real-time rendering.',
+      },
+    ],
+  },
+
+  'youtube-thumbnail-maker': {
+    steps: [
+      { step: 1, title: 'Upload Background Image', desc: 'Drop any 16:9 photo, video screenshot, or game capture into the editor.' },
+      { step: 2, title: 'Customize Title & Badges', desc: 'Add bold high-contrast headline text, highlight badges, and gradient scrims.' },
+      { step: 3, title: 'Download 1280x720 HD', desc: 'Export your high-converting YouTube thumbnail optimized under the 2 MB file limit.' },
+    ],
+    howItWorks:
+      'YouTube video performance heavily depends on Click-Through Rate (CTR) and mobile readability. The PIXAL LAB YouTube Thumbnail Maker sets up an exact 1280x720 (16:9) high-definition canvas, adding heavy stroke-outlined typography, gradient backdrop scrims, and vibrant badges designed to stand out against YouTube dark and light themes while staying comfortably under YouTube 2 MB file limit.',
+    benefits: [
+      'Strict 1280x720 16:9 resolution compliant with official YouTube creator guidelines',
+      'High-impact bold typography engineered for maximum legibility on mobile app feeds',
+      'Vibrant gradient scrim overlays (Blue-Violet, Emerald, Amber-Rose, Dark Scrim) boost contrast',
+      'Fast client-side export guaranteed to be under YouTube 2 MB thumbnail file size cap',
+    ],
+    faqs: [
+      {
+        question: 'What are the official YouTube thumbnail requirements?',
+        answer: 'YouTube recommends a resolution of 1280x720 pixels (minimum width 640 pixels), 16:9 aspect ratio, under 2 MB in file size, and saved in PNG or JPG format.',
+      },
+      {
+        question: 'How do I ensure thumbnail text is readable on mobile smartphones?',
+        answer: 'Use 3 to 5 words in bold uppercase lettering with strong outline strokes and high contrast against the background image so it catches eyes in small mobile feeds.',
+      },
+      {
+        question: 'Will this thumbnail upload to YouTube without file size errors?',
+        answer: 'Yes! The exported images are calibrated for high-definition visual punch while keeping total file size well below YouTube 2 MB limit.',
+      },
+    ],
+  },
+
+  'image-watermark-maker': {
+    steps: [
+      { step: 1, title: 'Upload Your Photo', desc: 'Select any artwork, photograph, or graphic you want to protect.' },
+      { step: 2, title: 'Configure Watermark Text', desc: 'Enter your brand name or copyright, choose single or 45-degree tiled pattern, and set opacity.' },
+      { step: 3, title: 'Export Protected Image', desc: 'Download your watermarked photo ready for safe sharing across social networks and websites.' },
+    ],
+    howItWorks:
+      'The PIXAL LAB Image Watermark Maker renders customizable copyright typography directly into canvas pixel data using 2D rotational matrix transformations. Users can position a discreet copyright badge in the center or apply a 45-degree repeating diagonal lattice across the entire image. Opacity, font scale, and text colors are fully adjustable to balance visual protection with aesthetic presentation.',
+    benefits: [
+      'Protect digital photos, artwork, and client proofs from unauthorized reposting and theft',
+      'Repeating 45-degree tiled diagonal lattice prevents simple cropping or content-aware removal',
+      'Smooth opacity slider (10% to 100%) to preserve artwork aesthetics while ensuring protection',
+      '100% private in-browser watermarking: unwatermarked originals are never uploaded to servers',
+    ],
+    faqs: [
+      {
+        question: 'Should I use a single watermark or a repeating tiled pattern?',
+        answer: 'For public portfolios and client proofing, a repeating 45-degree tiled pattern provides maximum protection against unauthorized cropping and AI removal tools.',
+      },
+      {
+        question: 'Can I adjust the transparency of the watermark text?',
+        answer: 'Yes, the opacity slider lets you fine-tune text transparency from a subtle translucent watermark to a bold, high-contrast copyright stamp.',
+      },
+      {
+        question: 'Does adding a watermark lower the resolution of my photo?',
+        answer: 'No. The watermark is composited directly onto your original high-resolution pixel dimensions without downsampling or degradation.',
+      },
+    ],
+  },
+
+  'image-filters': {
+    steps: [
+      { step: 1, title: 'Load Photo into Studio', desc: 'Select any portrait, landscape, architecture, or street photography image.' },
+      { step: 2, title: 'Select Filter & Intensity', desc: 'Choose Vintage Film, Noir Monochrome, Cyberpunk, Warm Golden Hour, or Sepia with live slider.' },
+      { step: 3, title: 'Instant High-Res Export', desc: 'Save your professionally color-graded photo with zero watermarks or subscription fees.' },
+    ],
+    howItWorks:
+      'Our Cinematic Photo Filters engine performs mathematical color matrix transformations directly on 32-bit pixel RGBA arrays via HTML5 Canvas. Each preset modifies color temperature, split toning, highlight rolloff, and luminance curves in real time. The interactive intensity slider smoothly blends filtered pixel buffers with the original image, enabling subtle cinematic nuances or dramatic artistic stylization.',
+    benefits: [
+      'Curated professional presets: Vintage Film, Noir B&W, Cyberpunk Neon, Golden Hour & Sepia',
+      'Smooth 0% to 100% intensity blending slider for precision aesthetic control',
+      'Instant real-time canvas rendering with zero waiting in server queues',
+      '100% private client-side processing: your personal photography stays on your device',
+    ],
+    faqs: [
+      {
+        question: 'Can I fine-tune the strength of the color grading filter?',
+        answer: 'Yes! The intensity slider allows you to blend the filter from 0% (natural original) to 100% (full dramatic effect) to achieve the exact aesthetic you want.',
+      },
+      {
+        question: 'Which filter is recommended for street photography and portraits?',
+        answer: 'Vintage Film creates a timeless analog look with soft highlights, while Noir Black & White adds striking dramatic contrast and shadow depth to portraits.',
+      },
+      {
+        question: 'Does applying filters reduce image sharpness or remove EXIF data?',
+        answer: 'The filter only modifies RGB color values. Pixel dimensions and sharpness are maintained at full original resolution.',
+      },
+    ],
+  },
+
+  'image-blur-tool': {
+    steps: [
+      { step: 1, title: 'Select Image to Redact', desc: 'Upload any photo containing sensitive data, faces, phone numbers, or license plates.' },
+      { step: 2, title: 'Choose Blur or Pixelate', desc: 'Switch between smooth Gaussian blur and retro mosaic pixelation and adjust intensity.' },
+      { step: 3, title: 'Download Anonymized Image', desc: 'Export your sanitized image with sensitive details permanently obscured.' },
+    ],
+    howItWorks:
+      'The PIXAL LAB Privacy Blur & Pixelate Redactor executes client-side kernel convolution and spatial downsampling. In Gaussian mode, a multi-pass mathematical blur filter diffuses pixel color values across neighboring coordinates. In Mosaic Pixelate mode, the canvas groups pixels into discrete geometric blocks and averages their color values, irreversibly eliminating underlying text, numbers, or biometric features.',
+    benefits: [
+      'Irreversible redaction permanently destroys sensitive visual data beneath the blur',
+      'Gaussian blur mode for aesthetic soft backgrounds and portrait defocusing',
+      'Mosaic Pixelate mode for standard legal, journalistic, and identity redaction',
+      '100% offline safety: unblurred images with sensitive data are NEVER uploaded to any cloud',
+    ],
+    faqs: [
+      {
+        question: 'Can someone reverse the blur or pixelation to read my blurred text?',
+        answer: 'No. Pixelation mathematically averages color blocks and permanently discards the original pixel information, making it impossible to reconstruct the underlying text or numbers.',
+      },
+      {
+        question: 'Is it safe to redact credit cards, IDs, and car license plates here?',
+        answer: 'Yes! Because PIXAL LAB runs 100% in your local browser memory, your unredacted document is never transmitted across the internet to any server.',
+      },
+      {
+        question: 'What is the difference between Gaussian blur and mosaic pixelate?',
+        answer: 'Gaussian blur creates a smooth, dreamy defocus effect popular for portraits, while mosaic pixelate creates crisp blocky tiles commonly used in media redactions.',
+      },
+    ],
+  },
+
+  'border-corner-maker': {
+    steps: [
+      { step: 1, title: 'Upload Photo or Graphic', desc: 'Select any product screenshot, UI mockup, or social media image.' },
+      { step: 2, title: 'Set Radius & Border Style', desc: 'Adjust the corner radius slider (0-200px), border thickness, and pick a custom frame color.' },
+      { step: 3, title: 'Download Rounded Image', desc: 'Export as transparent PNG with clipped rounded corners or crisp JPG with colored borders.' },
+    ],
+    howItWorks:
+      'This studio utilizes HTML5 Canvas 2D path clipping (`arcTo` and `roundRect` path geometries) to sculpt corners into smooth squircle or pill contours. When exporting as PNG, outer corner areas are rendered with transparent alpha channels, allowing the rounded image to sit seamlessly over any background. Border frames are stroke-rendered around the inner clipping boundary for uniform thickness.',
+    benefits: [
+      'Create stylish Apple-inspired squircle rounded corners for UI mockups and slide decks',
+      'Transparent PNG corner clipping ensures seamless placement over dark or light web backgrounds',
+      'Custom border thickness and curated color palette for modern social media posts',
+      'Pixel-perfect anti-aliased corner curves without jagged edges',
+    ],
+    faqs: [
+      {
+        question: 'How do I ensure the rounded corners have a transparent background?',
+        answer: 'Export your image in PNG format. PNG supports alpha transparency, leaving the corner cutouts transparent so your image blends cleanly on any website or presentation.',
+      },
+      {
+        question: 'What corner radius looks best for website UI mockups and screenshots?',
+        answer: 'A corner radius of 16px to 32px provides a modern, clean Apple-like aesthetic without cutting off too much of the screenshot content.',
+      },
+      {
+        question: 'Can I add a colored border without rounding the corners?',
+        answer: 'Yes! Keep the corner radius slider at 0px and adjust the border thickness and color controls to frame your photo with clean rectangular borders.',
+      },
+    ],
+  },
+
+  'qr-code-reader': {
+    steps: [
+      { step: 1, title: 'Upload QR Image / Screenshot', desc: 'Select any photo, screenshot, flyer, or picture containing a 2D QR code or barcode.' },
+      { step: 2, title: 'Instant In-Browser Scan', desc: 'Our computer vision engine automatically locates and decodes the QR matrix.' },
+      { step: 3, title: 'Copy or Open Decoded Content', desc: 'Inspect the decoded website URL, WiFi credentials, or text with one-click clipboard copying.' },
+    ],
+    howItWorks:
+      'The PIXAL LAB QR Code Scanner & Decoder embeds the open-source `jsQR` computer vision engine. When you upload an image, the tool draws it onto an off-screen canvas buffer, analyzes pixel binarization thresholds, and locates the three square position detection patterns at the corners. It then reconstructs the 2D matrix, applies Reed-Solomon error correction, and extracts the raw payload without requiring a physical camera.',
+    benefits: [
+      'Decode QR codes from saved photos and screenshots without needing a second phone camera',
+      'Extract website URLs, WiFi network passwords, email addresses, and text snippets',
+      'One-click direct copy to clipboard and verified URL navigation link',
+      '100% private in-browser decoding: scanned QR images and credentials never touch a server',
+    ],
+    faqs: [
+      {
+        question: 'Can I decode a QR code from a picture saved on my computer or phone?',
+        answer: 'Yes! This tool is specifically designed to decode QR codes from saved photos, screenshots, and downloaded images without needing a camera.',
+      },
+      {
+        question: 'Is it safe to scan confidential WiFi passwords or private QR codes here?',
+        answer: 'Completely safe. The decoding runs 100% inside your local web browser using client-side JavaScript. Zero image data or decoded text is ever transmitted over the network.',
+      },
+      {
+        question: 'Why might a QR code fail to scan?',
+        answer: 'If the image is extremely blurry, poorly lit, or cropped so the three corner alignment squares are missing, the scanner may not detect the matrix. Make sure the QR code is clear and fully visible.',
+      },
+    ],
+  },
+
+  'color-picker-palette': {
+    steps: [
+      { step: 1, title: 'Upload Any Photo or Graphic', desc: 'Drop any design mockup, illustration, or photo into the color analysis workspace.' },
+      { step: 2, title: 'Hover or Tap to Inspect', desc: 'Move the magnified pixel loupe across the image to inspect exact HEX and RGB values.' },
+      { step: 3, title: 'Copy Colors & Palettes', desc: 'Copy single pixel HEX codes or grab the top 6 dominant harmonic palette swatches with one click.' },
+    ],
+    howItWorks:
+      'The PIXAL LAB Image Color Picker & Palette Extractor reads pixel color values using HTML5 Canvas 2D `getImageData` pixel arrays. The interactive loupe magnifies a 9x9 pixel grid around your cursor, showing the exact center pixel color with instantaneous HEX and RGB conversions. Simultaneously, a k-means color quantization algorithm samples pixel distribution across the image to extract the top 6 dominant harmonic colors.',
+    benefits: [
+      'Magnified pixel loupe provides sub-pixel inspection accuracy for designers and developers',
+      'Instant HEX and RGB format readouts with one-click clipboard copying',
+      'Automated extraction of top 6 dominant harmonic color palette swatches',
+      'Works completely in-browser with zero uploads, ideal for proprietary design mockups',
+    ],
+    faqs: [
+      {
+        question: 'How do I copy a color code to my clipboard?',
+        answer: 'Click or tap any color swatch or click anywhere on the image with the loupe tool. The HEX code is instantly copied to your clipboard ready for Figma, CSS, or Photoshop.',
+      },
+      {
+        question: 'How does the dominant palette generator choose colors?',
+        answer: 'The tool uses color quantization algorithms to group similar pixel tones into clusters, identifying the 6 most prominent and harmonic color values across the entire photo.',
+      },
+      {
+        question: 'Can I inspect colors from high-resolution screenshots and logos?',
+        answer: 'Yes! The color picker reads native pixel data from images up to 40 MB, allowing you to accurately extract brand colors from high-res UI designs and photos.',
+      },
+    ],
+  },
+
+  'meme-generator': {
+    steps: [
+      { step: 1, title: 'Upload Meme Template', desc: 'Select any viral template, reaction image, or personal photo from your device.' },
+      { step: 2, title: 'Add Top & Bottom Captions', desc: 'Type your captions, adjust font size, and customize black outline stroke thickness.' },
+      { step: 3, title: 'Download High-Res Meme', desc: 'Export your finished meme immediately with zero watermarks or website branding.' },
+    ],
+    howItWorks:
+      'The PIXAL LAB Viral Meme Generator renders classic Impact uppercase typography directly onto an HTML5 Canvas. It utilizes dual-pass text rasterization: first drawing a heavy black outline stroke around the glyph contours, followed by a crisp white fill pass. This mathematical outline contrast ensures captions remain readable over any light, dark, or busy photographic background.',
+    benefits: [
+      'Classic bold Impact typography with customizable black outline stroke width',
+      'Top and bottom caption support with live interactive canvas preview',
+      '100% watermark-free exports: your memes are completely clean and unbranded',
+      'Instant high-resolution PNG download with zero account signup or waiting',
+    ],
+    faqs: [
+      {
+        question: 'Why do viral memes use white text with a black outline?',
+        answer: 'White lettering with a solid black outline is universally readable against any background, whether the image beneath is pitch black, bright white, or colorful.',
+      },
+      {
+        question: 'Can I leave the top or bottom caption blank?',
+        answer: 'Yes! You can fill in only the top caption, only the bottom caption, or both depending on the meme style you are creating.',
+      },
+      {
+        question: 'Does PIXAL LAB add any watermark to generated memes?',
+        answer: 'Never. All memes exported from PIXAL LAB are 100% watermark-free and completely owned by you.',
+      },
+    ],
+  },
 };
 
 export function getToolGuide(toolId: string, toolName: string, categoryLabel: string): ToolGuideContent {

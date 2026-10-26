@@ -376,7 +376,7 @@ export const ImageJoiner: React.FC<ImageJoinerProps> = ({
               theme === 'dark' ? 'text-white' : 'text-slate-900'
             }`}
           >
-            Image Joiner
+            Image Joiner & Photo Stitcher Online
           </h1>
           <p
             className={`text-xs sm:text-sm leading-relaxed ${
@@ -614,6 +614,7 @@ export const ImageJoiner: React.FC<ImageJoinerProps> = ({
                     max="60"
                     value={spacing}
                     onChange={(e) => setSpacing(Number(e.target.value))}
+                    aria-label="Spacing between joined images slider"
                     className="w-full accent-indigo-500 cursor-pointer"
                   />
                 </div>
@@ -725,6 +726,7 @@ export const ImageJoiner: React.FC<ImageJoinerProps> = ({
                 {/* Status Message */}
                 {statusMessage && (
                   <div
+                    role={statusMessage.startsWith('Error') ? 'alert' : 'status'}
                     className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${
                       statusMessage.startsWith('Error')
                         ? 'bg-rose-950/80 border-rose-800 text-rose-300'

@@ -446,7 +446,7 @@ export default function App() {
       metaDesc.setAttribute('content', pageDesc);
     }
 
-    // 3. Update OpenGraph tags
+    // 3. Update OpenGraph & Twitter tags
     const ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute('content', pageTitle);
 
@@ -455,6 +455,12 @@ export default function App() {
 
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
+
+    const twTitle = document.querySelector('meta[name="twitter:title"]');
+    if (twTitle) twTitle.setAttribute('content', pageTitle);
+
+    const twDesc = document.querySelector('meta[name="twitter:description"]');
+    if (twDesc) twDesc.setAttribute('content', pageDesc);
 
     // 4. Update canonical link
     const canonical = document.querySelector('link[rel="canonical"]');

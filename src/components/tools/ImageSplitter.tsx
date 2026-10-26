@@ -287,7 +287,7 @@ export const ImageSplitter: React.FC<ImageSplitterProps> = ({
               theme === 'dark' ? 'text-white' : 'text-slate-900'
             }`}
           >
-            Image Splitter
+            Instagram Grid & Image Splitter Online
           </h1>
           <p
             className={`text-xs sm:text-sm leading-relaxed ${
@@ -517,6 +517,7 @@ export const ImageSplitter: React.FC<ImageSplitterProps> = ({
                         max="8"
                         value={customCols}
                         onChange={(e) => setCustomCols(Number(e.target.value))}
+                        aria-label="Custom columns count slider"
                         className="w-full accent-violet-500 cursor-pointer"
                       />
                     </div>
@@ -531,6 +532,7 @@ export const ImageSplitter: React.FC<ImageSplitterProps> = ({
                         max="8"
                         value={customRows}
                         onChange={(e) => setCustomRows(Number(e.target.value))}
+                        aria-label="Custom rows count slider"
                         className="w-full accent-violet-500 cursor-pointer"
                       />
                     </div>
@@ -584,6 +586,7 @@ export const ImageSplitter: React.FC<ImageSplitterProps> = ({
                         max="40"
                         value={borderSize}
                         onChange={(e) => setBorderSize(Number(e.target.value))}
+                        aria-label="Border size slider"
                         className="w-full accent-violet-500 cursor-pointer"
                       />
                     </div>
@@ -619,6 +622,7 @@ export const ImageSplitter: React.FC<ImageSplitterProps> = ({
                 {/* Status Message */}
                 {statusMessage && (
                   <div
+                    role={statusMessage.startsWith('Error') ? 'alert' : 'status'}
                     className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${
                       statusMessage.startsWith('Error')
                         ? 'bg-rose-950/80 border-rose-800 text-rose-300'

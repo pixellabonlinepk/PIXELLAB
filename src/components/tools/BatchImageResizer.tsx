@@ -332,7 +332,7 @@ export const BatchImageResizer: React.FC<BatchImageResizerProps> = ({
               theme === 'dark' ? 'text-white' : 'text-slate-900'
             }`}
           >
-            Batch Image Resizer
+            Batch Image Resizer Online
           </h1>
           <p
             className={`text-xs sm:text-sm leading-relaxed ${
@@ -701,6 +701,7 @@ export const BatchImageResizer: React.FC<BatchImageResizerProps> = ({
                       step="5"
                       value={scalePercentage}
                       onChange={(e) => setScalePercentage(Number(e.target.value))}
+                      aria-label="Scale percentage slider"
                       className="w-full accent-blue-500 cursor-pointer"
                     />
                     <div className="grid grid-cols-4 gap-1.5 text-[11px]">
@@ -756,6 +757,7 @@ export const BatchImageResizer: React.FC<BatchImageResizerProps> = ({
                       step="0.05"
                       value={quality}
                       onChange={(e) => setQuality(Number(e.target.value))}
+                      aria-label="Compression quality slider"
                       className="w-full accent-blue-500 cursor-pointer"
                     />
                   </div>
@@ -764,6 +766,7 @@ export const BatchImageResizer: React.FC<BatchImageResizerProps> = ({
                 {/* Status Message */}
                 {statusMessage && (
                   <div
+                    role={statusMessage.startsWith('Error') ? 'alert' : 'status'}
                     className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${
                       statusMessage.startsWith('Error')
                         ? 'bg-rose-950/80 border-rose-800 text-rose-300'

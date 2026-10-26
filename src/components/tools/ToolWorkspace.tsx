@@ -29,6 +29,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileDown,
+  AlertCircle,
 } from 'lucide-react';
 import { ToolMetadata } from '../../types';
 import { getToolGuide } from '../../data/toolGuides';
@@ -1032,6 +1033,16 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
                 {/* Canvas/Image Viewer Area */}
                 <div className="w-full min-h-[380px] max-h-[560px] rounded-2xl bg-checkerboard flex items-center justify-center p-4 relative overflow-hidden border border-black/5 dark:border-white/10">
+                  {/* Processing Overlay with animated spinner */}
+                  {isProcessing && (
+                    <div className="absolute inset-0 bg-black/45 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 z-40 transition-opacity">
+                      <div className="w-9 h-9 rounded-full border-3 border-indigo-400 border-t-transparent animate-spin shadow-lg" />
+                      <span className="text-xs font-semibold text-white drop-shadow">
+                        Processing image in browser memory...
+                      </span>
+                    </div>
+                  )}
+
                   {/* Split Comparison View */}
                   {compareMode === 'split' && sourceUrl && resultUrl ? (
                     <div className="relative w-full h-full max-h-[500px] flex items-center justify-center overflow-hidden select-none">
@@ -1144,21 +1155,59 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                     )}
                   </div>
 
-                  {sourceUrl && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSourceImg(null);
-                        setSourceUrl(null);
-                        setResultUrl(null);
-                        setResultBlob(null);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/5 dark:border-white/10 text-xs text-theme-secondary hover:text-theme-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Replace Photo</span>
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {sourceUrl && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSourceImg(null);
+                          setSourceUrl(null);
+                          setResultUrl(null);
+                          setResultBlob(null);
+                          setErrorMessage(null);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/5 dark:border-white/10 text-xs text-theme-secondary hover:text-theme-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                        aria-label="Replace Photo"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Replace</span>
+                      </button>
+                    )}
+
+                    {/* Quick Action Button right by the result */}
+                    {tool.id === 'color-picker-palette' ? (
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(pickedColor.hex)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+                        aria-label="Copy Inspected Color HEX"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>{copiedText === pickedColor.hex ? 'Copied HEX!' : `Copy ${pickedColor.hex}`}</span>
+                      </button>
+                    ) : tool.id === 'qr-code-reader' && decodedQrResult ? (
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(decodedQrResult)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+                        aria-label="Copy Decoded QR Content"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>{copiedText === decodedQrResult ? 'Copied!' : 'Copy Decoded Text'}</span>
+                      </button>
+                    ) : (resultBlob || (tool.id === 'qr-code-generator' && resultUrl)) && (
+                      <button
+                        type="button"
+                        onClick={handleDownload}
+                        disabled={isProcessing}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-semibold text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+                        aria-label="Download Output"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>{isProcessing ? 'Processing...' : 'Download Output'}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1225,6 +1274,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         step="0.05"
                         value={compQuality}
                         onChange={(e) => setCompQuality(Number(e.target.value))}
+                        aria-label="Image compression quality slider"
                         className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
@@ -1746,6 +1796,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         step="0.05"
                         value={wmOpacity}
                         onChange={(e) => setWmOpacity(Number(e.target.value))}
+                        aria-label="Watermark opacity slider"
                         className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
@@ -1811,6 +1862,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         max="100"
                         value={filterIntensity}
                         onChange={(e) => setFilterIntensity(Number(e.target.value))}
+                        aria-label="Filter intensity slider"
                         className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
@@ -1831,6 +1883,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         max="100"
                         value={toolBrightness}
                         onChange={(e) => setToolBrightness(Number(e.target.value))}
+                        aria-label="Brightness adjustment slider"
                         className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
@@ -1845,6 +1898,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         max="100"
                         value={toolContrast}
                         onChange={(e) => setToolContrast(Number(e.target.value))}
+                        aria-label="Contrast adjustment slider"
                         className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
@@ -1859,6 +1913,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         max="100"
                         value={toolSharpen}
                         onChange={(e) => setToolSharpen(Number(e.target.value))}
+                        aria-label="Sharpen detail intensity slider"
                         className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
@@ -1905,6 +1960,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         max="50"
                         value={blurRadius}
                         onChange={(e) => setBlurRadius(Number(e.target.value))}
+                        aria-label={blurMode === 'pixelate' ? 'Mosaic pixel size slider' : 'Blur intensity slider'}
                         className="w-full accent-teal-500 cursor-pointer"
                       />
                     </div>
@@ -2062,6 +2118,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         max="120"
                         value={frameCornerRadius}
                         onChange={(e) => setFrameCornerRadius(Number(e.target.value))}
+                        aria-label="Corner roundness radius slider"
                         className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
@@ -2076,6 +2133,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
                         max="60"
                         value={frameBorderWidth}
                         onChange={(e) => setFrameBorderWidth(Number(e.target.value))}
+                        aria-label="Frame border width slider"
                         className="w-full accent-indigo-500 cursor-pointer"
                       />
                     </div>
@@ -2208,25 +2266,100 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
 
                 {/* Primary Action Button */}
                 <div className="pt-2">
-                  <button
-                    onClick={handleDownload}
-                    disabled={(!resultBlob && tool.id !== 'qr-code-generator') || isProcessing}
-                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-500 hover:to-blue-500 disabled:opacity-40 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>
-                      {tool.id === 'pdf-to-image-converter'
-                        ? `Download Page ${pdfPage} (${pdfTargetFormat === 'image/jpeg' ? 'JPG' : 'PNG'})`
-                        : tool.id === 'favicon-generator'
-                        ? 'Download Favicon Suite (ZIP)'
-                        : 'Download Finished File'}
-                    </span>
-                  </button>
+                  {tool.id === 'qr-code-reader' ? (
+                    decodedQrResult ? (
+                      <div className="space-y-2">
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(decodedQrResult)}
+                          className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                          aria-label="Copy Decoded QR Content"
+                        >
+                          <Copy className="w-4 h-4" />
+                          <span>{copiedText === decodedQrResult ? 'Copied to Clipboard!' : 'Copy Decoded QR Content'}</span>
+                        </button>
+                        {decodedQrResult.startsWith('http') && (
+                          <a
+                            href={decodedQrResult}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-2.5 px-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors text-center"
+                          >
+                            <span>Open URL in New Tab</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="p-3.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-center text-xs text-theme-muted">
+                        Select or drop an image containing a QR code to extract its data
+                      </div>
+                    )
+                  ) : tool.id === 'color-picker-palette' ? (
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(pickedColor.hex)}
+                        className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                        aria-label="Copy Inspected Color HEX"
+                      >
+                        <Copy className="w-4 h-4" />
+                        <span>{copiedText === pickedColor.hex ? `Copied ${pickedColor.hex}!` : `Copy Inspected Color (${pickedColor.hex})`}</span>
+                      </button>
+                      {paletteColors.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(paletteColors.join(', '))}
+                          className="w-full py-2.5 px-4 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                          aria-label="Copy Full Palette as HEX List"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>{copiedText === paletteColors.join(', ') ? 'Palette Copied!' : 'Copy Full Palette (HEX List)'}</span>
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleDownload}
+                      disabled={(!resultBlob && (tool.id !== 'qr-code-generator' || !resultUrl)) || isProcessing}
+                      className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-500 hover:to-blue-500 disabled:opacity-40 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                      aria-label="Download Finished File"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <RotateCcw className="w-4 h-4 animate-spin" />
+                          <span>Processing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-4 h-4" />
+                          <span>
+                            {tool.id === 'pdf-to-image-converter'
+                              ? `Download Page ${pdfPage} (${pdfTargetFormat === 'image/jpeg' ? 'JPG' : 'PNG'})`
+                              : tool.id === 'favicon-generator'
+                              ? 'Download Favicon Suite (ZIP)'
+                              : 'Download Finished File'}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
 
                 {errorMessage && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold">
-                    {errorMessage}
+                  <div role="alert" className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{errorMessage}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setErrorMessage(null)}
+                      className="px-2 py-0.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 text-[11px] font-bold cursor-pointer"
+                      aria-label="Dismiss error message"
+                    >
+                      ✕
+                    </button>
                   </div>
                 )}
               </div>

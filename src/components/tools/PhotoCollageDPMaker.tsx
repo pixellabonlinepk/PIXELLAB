@@ -1950,7 +1950,7 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <h1 className="text-xs sm:text-sm font-bold tracking-tight truncate">Photo Collage & DP</h1>
+                <span className="text-xs sm:text-sm font-bold tracking-tight truncate">Photo Collage & DP</span>
                 <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-400 border border-violet-500/30 shrink-0">
                   Pro
                 </span>
@@ -2104,9 +2104,9 @@ export const PhotoCollageDPMaker: React.FC<PhotoCollageDPMakerProps> = ({
                 <Sparkles className="w-3 h-3" />
                 PIXAL LAB Pro Studio
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                Photo Collage <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">& DP Maker</span>
-              </h2>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Squad DP <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">& Photo Collage Maker</span>
+              </h1>
               <p className="text-xs text-slate-400 mt-1 max-w-md">
                 Combine Your Photos • Create Beautiful Collages • Design Stunning DPs
               </p>

@@ -348,7 +348,7 @@ export const SignatureMaker: React.FC<SignatureMakerProps> = ({
               theme === 'dark' ? 'text-white' : 'text-slate-900'
             }`}
           >
-            Signature Maker
+            Digital Signature Maker Online
           </h1>
           <p
             className={`text-xs sm:text-sm leading-relaxed ${
@@ -561,6 +561,7 @@ export const SignatureMaker: React.FC<SignatureMakerProps> = ({
                       max="20"
                       value={penSize}
                       onChange={(e) => setPenSize(Number(e.target.value))}
+                      aria-label="Pen stroke size slider"
                       className="w-full accent-cyan-500 cursor-pointer"
                     />
                     <div
@@ -613,7 +614,10 @@ export const SignatureMaker: React.FC<SignatureMakerProps> = ({
 
                 {/* Status or Alert */}
                 {statusMessage && (
-                  <div className="p-3 rounded-xl bg-cyan-950/60 border border-cyan-800 text-cyan-300 text-xs">
+                  <div
+                    role="status"
+                    className="p-3 rounded-xl bg-cyan-950/60 border border-cyan-800 text-cyan-300 text-xs"
+                  >
                     {statusMessage}
                   </div>
                 )}
