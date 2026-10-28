@@ -12,6 +12,8 @@ import { ContactPage } from './components/pages/ContactPage';
 import { GuidesIndexPage } from './components/pages/GuidesIndexPage';
 import { GuideDetailPage } from './components/pages/GuideDetailPage';
 import { SlidingPuzzleGame } from './components/puzzle/SlidingPuzzleGame';
+import { GamesDirectoryPage } from './components/pages/GamesDirectoryPage';
+import { IndividualGamePage } from './components/pages/IndividualGamePage';
 import { ImageGamesPage } from './components/pages/ImageGamesPage';
 import { StudyMaterialPage } from './components/pages/StudyMaterialPage';
 import { PuzzleBanner } from './components/PuzzleBanner';
@@ -20,6 +22,7 @@ import { TOOLS } from './data/tools';
 import { getToolGuide } from './data/toolGuides';
 import { TOOL_SEO_CONFIG } from './data/toolSeoConfig';
 import { EDUCATIONAL_GUIDES } from './data/guidesData';
+import { GAMES_CATALOG, getGameBySlug } from './data/gamesData';
 import { ToolCategory } from './types';
 import { useTheme } from './context/ThemeContext';
 import {
@@ -67,6 +70,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<string>('home');
   const [selectedToolId, setSelectedToolId] = useState<string>('image-compressor');
   const [selectedGuideSlug, setSelectedGuideSlug] = useState<string>('how-to-make-a-youtube-thumbnail');
+  const [selectedGameSlug, setSelectedGameSlug] = useState<string>('sliding-picture-puzzle');
   const [activeCategory, setActiveCategory] = useState<ToolCategory>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -130,8 +134,27 @@ export default function App() {
         return;
       }
 
-      if (['games', 'image-games', 'puzzle', 'game', 'picture-puzzle'].includes(pathname)) {
+      // Games & Fun: Individual Game Page (e.g. /games/sudoku, /games/sliding-picture-puzzle)
+      if (pathname.startsWith('games/')) {
+        const slug = pathname.replace(/^games\//, '').replace(/\/$/, '');
+        const found = GAMES_CATALOG.find((g) => g.slug === slug || g.id === slug);
+        if (found) {
+          setSelectedGameSlug(found.slug);
+          setCurrentView('game');
+          return;
+        }
+      }
+
+      // Games & Fun: Central Directory (/games)
+      if (['games', 'games/', 'image-games'].includes(pathname)) {
         setCurrentView('games');
+        return;
+      }
+
+      // Legacy direct puzzle link
+      if (['puzzle', 'picture-puzzle'].includes(pathname)) {
+        setSelectedGameSlug('sliding-picture-puzzle');
+        setCurrentView('game');
         return;
       }
 
@@ -170,13 +193,29 @@ export default function App() {
         }
       }
 
+      if (hash.startsWith('games/')) {
+        const slug = hash.replace('games/', '').replace(/\/$/, '');
+        const found = GAMES_CATALOG.find((g) => g.slug === slug || g.id === slug);
+        if (found) {
+          setSelectedGameSlug(found.slug);
+          setCurrentView('game');
+          return;
+        }
+      }
+
       if (hash === 'guides') {
         setCurrentView('guides');
         return;
       }
 
-      if (['games', 'image-games', 'puzzle', 'game', 'picture-puzzle'].includes(hash)) {
+      if (['games', 'image-games'].includes(hash)) {
         setCurrentView('games');
+        return;
+      }
+
+      if (['puzzle', 'picture-puzzle'].includes(hash)) {
+        setSelectedGameSlug('sliding-picture-puzzle');
+        setCurrentView('game');
         return;
       }
 
@@ -418,19 +457,53 @@ export default function App() {
       pageDesc =
         'Get in touch with the PIXAL LAB engineering and support team for feedback, feature requests, or questions.';
       canonicalUrl = `${DOMAIN}/contact`;
-    } else if (currentView === 'games' || currentView === 'puzzle') {
-      pageTitle = 'Free Online Image Games & Visual Puzzles | PIXAL LAB';
+    } else if (currentView === 'games') {
+      pageTitle = 'Games & Fun — Free Online Brain & Visual Puzzles | PIXAL LAB';
       pageDesc =
-        'Play interactive client-side visual puzzles and spatial challenges. Solve the sliding Picture Puzzle Challenge with adjustable difficulty, timer, and audio effects.';
+        'Play 8 free online games on PIXAL LAB Games & Fun. Enjoy Sliding Picture Puzzle, Sudoku, Memory Match, 2048, Tic-Tac-Toe, Spot the Difference, Word Search, and Jigsaw Puzzle.';
       canonicalUrl = `${DOMAIN}/games`;
       jsonLdData = [
         {
           '@context': 'https://schema.org',
-          '@type': 'WebApplication',
-          name: 'PIXAL LAB — Image Games Hub',
-          applicationCategory: 'GameApplication',
+          '@type': 'CollectionPage',
+          name: 'PIXAL LAB — Games & Fun Hub',
+          url: canonicalUrl,
+          description: pageDesc,
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: `${DOMAIN}/`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Games & Fun',
+              item: canonicalUrl,
+            },
+          ],
+        },
+      ];
+    } else if (currentView === 'game' || currentView === 'puzzle') {
+      const activeGame =
+        GAMES_CATALOG.find((g) => g.slug === selectedGameSlug) || GAMES_CATALOG[0];
+      pageTitle = activeGame.seoTitle;
+      pageDesc = activeGame.seoDescription;
+      canonicalUrl = `${DOMAIN}/games/${activeGame.slug}`;
+      jsonLdData = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'VideoGame',
+          name: `${activeGame.title} — PIXAL LAB`,
+          description: activeGame.shortDescription,
+          gamePlatform: 'Web Browser',
+          applicationCategory: 'Game',
           operatingSystem: 'All',
-          browserRequirements: 'Requires modern web browser with HTML5 Canvas and Web Audio support',
           url: canonicalUrl,
           offers: {
             '@type': 'Offer',
@@ -451,7 +524,13 @@ export default function App() {
             {
               '@type': 'ListItem',
               position: 2,
-              name: 'Image Games Hub',
+              name: 'Games & Fun',
+              item: `${DOMAIN}/games`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: activeGame.title,
               item: canonicalUrl,
             },
           ],
@@ -551,7 +630,7 @@ export default function App() {
         send_to: 'G-ZBTVJ487QP',
       });
     }
-  }, [currentView, selectedToolId, selectedGuideSlug]);
+  }, [currentView, selectedToolId, selectedGuideSlug, selectedGameSlug]);
 
   const navigateTo = (view: string, toolId?: string, guideSlug?: string) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -565,12 +644,17 @@ export default function App() {
       setSelectedGuideSlug(guideSlug);
       setCurrentView('guide');
       cleanPath = `/guide/${guideSlug}`;
-    } else if (view === 'guides') {
-      setCurrentView('guides');
-      cleanPath = '/guides';
-    } else if (view === 'games' || view === 'puzzle' || view === 'game' || view === 'image-games') {
+    } else if (view === 'games' || view === 'image-games') {
       setCurrentView('games');
       cleanPath = '/games';
+    } else if (view === 'game' && toolId) {
+      setSelectedGameSlug(toolId);
+      setCurrentView('game');
+      cleanPath = `/games/${toolId}`;
+    } else if (view === 'puzzle' || view === 'picture-puzzle') {
+      setSelectedGameSlug('sliding-picture-puzzle');
+      setCurrentView('game');
+      cleanPath = '/games/sliding-picture-puzzle';
     } else if (view === 'study-material' || view === 'study' || view === 'study-materials') {
       setCurrentView('study-material');
       cleanPath = '/study-material';
@@ -870,9 +954,20 @@ export default function App() {
           />
         )}
 
-        {/* VIEW 11: SECTION 2 — IMAGE GAMES HUB */}
-        {(currentView === 'games' || currentView === 'puzzle') && (
-          <ImageGamesPage onNavigate={navigateTo} />
+        {/* VIEW 11: SECTION 2 — GAMES & FUN DIRECTORY */}
+        {currentView === 'games' && (
+          <GamesDirectoryPage
+            onSelectGame={(slug) => navigateTo('game', slug)}
+            onExploreTools={() => navigateTo('all-tools')}
+          />
+        )}
+
+        {/* VIEW 12: INDIVIDUAL PLAYABLE GAME PAGE */}
+        {(currentView === 'game' || currentView === 'puzzle') && (
+          <IndividualGamePage
+            gameSlug={selectedGameSlug}
+            onNavigate={navigateTo}
+          />
         )}
 
         {/* VIEW 12: SECTION 3 — FREE STUDY MATERIAL */}

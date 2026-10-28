@@ -138,13 +138,13 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
                 }
               }}
               className={`px-3 py-1.5 rounded-full text-xs transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                currentView === 'games' || currentView === 'puzzle'
+                currentView === 'games' || currentView === 'game' || currentView === 'puzzle'
                   ? 'bg-white dark:bg-white/15 text-[#1D1D1F] dark:text-white font-semibold shadow-xs'
                   : 'text-[#6E6E73] dark:text-[#86868B] hover:text-[#1D1D1F] dark:hover:text-white font-medium'
               }`}
             >
               <Sparkles className="w-3 h-3 text-indigo-500" />
-              <span>Image Games</span>
+              <span>Games & Fun</span>
             </a>
             <a
               href="/study-material"
@@ -367,15 +367,15 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
                     <button
                       onClick={() => handleNavClick('games')}
                       className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
-                        currentView === 'games' || currentView === 'puzzle'
+                        currentView === 'games' || currentView === 'game' || currentView === 'puzzle'
                           ? 'bg-indigo-600 text-white shadow-sm'
                           : 'text-theme-primary hover:bg-black/5 dark:hover:bg-white/10'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="font-bold">2. Image Games</span>
+                        <span className="font-bold">2. Games & Fun</span>
                         <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-400 font-mono">
-                          Flagship
+                          8 Games
                         </span>
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 opacity-60" />

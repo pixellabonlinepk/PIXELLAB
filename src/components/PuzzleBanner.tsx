@@ -20,8 +20,8 @@ export const PuzzleBanner: React.FC<PuzzleBannerProps> = ({
   });
 
   useEffect(() => {
-    // Never show on the game page itself or if dismissed in this session
-    if (isDismissed || currentView === 'puzzle' || currentView === 'games') {
+    // Never show on game pages or if dismissed in this session
+    if (isDismissed || currentView === 'puzzle' || currentView === 'games' || currentView === 'game') {
       setIsVisible(false);
       return;
     }

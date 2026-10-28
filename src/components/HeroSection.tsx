@@ -162,7 +162,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          {/* Card 2: IMAGE GAMES */}
+          {/* Card 2: GAMES & FUN */}
           <div className="glass-panel glass-panel-interactive rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-lg border border-cyan-500/20 group relative overflow-hidden">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -170,14 +170,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   Section 2
                 </span>
                 <span className="text-xs font-mono font-bold text-cyan-500">
-                  Interactive Hub
+                  8 Playable Games
                 </span>
               </div>
               <h2 className="text-xl font-extrabold font-display text-theme-primary group-hover:text-cyan-500 transition-colors">
-                Image Games
+                Games & Fun
               </h2>
               <p className="text-xs text-theme-secondary leading-relaxed">
-                Picture Puzzle Challenge with mathematical solvable shuffling, landmark themes, timer, sound effects, and Phase 2 cognitive game previews.
+                Sliding Picture Puzzle, Sudoku, Memory Match, 2048, Tic-Tac-Toe, Spot the Difference, Word Search, and Jigsaw Puzzle. 100% free with zero downloads.
               </p>
             </div>
             <div className="pt-4 mt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
@@ -189,7 +189,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 }}
                 className="text-xs font-bold text-cyan-500 hover:text-cyan-400 flex items-center gap-1.5 transition-colors cursor-pointer no-underline"
               >
-                <span>Play Image Games</span>
+                <span>Explore Games & Fun</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </a>
             </div>

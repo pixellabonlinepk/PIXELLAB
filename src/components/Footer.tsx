@@ -105,10 +105,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* Col 3: SECTION 2 - IMAGE GAMES */}
+          {/* Col 3: SECTION 2 - GAMES & FUN */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-theme-primary">
-              2. Image Games
+              2. Games & Fun
             </h4>
             <ul className="space-y-2">
               <li>
@@ -117,32 +117,80 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   onClick={(e) => handleLinkClick(e, 'games')}
                   className="text-cyan-500 hover:text-cyan-400 font-bold transition-colors block"
                 >
-                  Image Games Hub →
+                  Games & Fun Hub →
                 </a>
               </li>
               <li>
                 <a
-                  href="/games"
-                  onClick={(e) => handleLinkClick(e, 'games')}
+                  href="/games/sliding-picture-puzzle"
+                  onClick={(e) => handleLinkClick(e, 'game', 'sliding-picture-puzzle')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
-                  🧩 Picture Puzzle Challenge
+                  🧩 Sliding Picture Puzzle
                 </a>
               </li>
               <li>
-                <span className="text-theme-muted text-[11px] block pt-1">
-                  Spot the Difference (Phase 2)
-                </span>
+                <a
+                  href="/games/sudoku"
+                  onClick={(e) => handleLinkClick(e, 'game', 'sudoku')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
+                >
+                  🔢 Classic Sudoku Master
+                </a>
               </li>
               <li>
-                <span className="text-theme-muted text-[11px] block">
-                  Visual Memory Match (Phase 2)
-                </span>
+                <a
+                  href="/games/2048"
+                  onClick={(e) => handleLinkClick(e, 'game', '2048')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
+                >
+                  🥞 2048 Number Merge
+                </a>
               </li>
               <li>
-                <span className="text-theme-muted text-[11px] block">
-                  Color Hue Spectrum (Phase 2)
-                </span>
+                <a
+                  href="/games/memory-match"
+                  onClick={(e) => handleLinkClick(e, 'game', 'memory-match')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
+                >
+                  ✨ Visual Memory Match
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/games/tic-tac-toe"
+                  onClick={(e) => handleLinkClick(e, 'game', 'tic-tac-toe')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
+                >
+                  ❌ Tic-Tac-Toe Pro (AI)
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/games/spot-the-difference"
+                  onClick={(e) => handleLinkClick(e, 'game', 'spot-the-difference')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
+                >
+                  👁️ Spot the Difference
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/games/word-search"
+                  onClick={(e) => handleLinkClick(e, 'game', 'word-search')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
+                >
+                  🔍 Word Search Explorer
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/games/jigsaw-puzzle"
+                  onClick={(e) => handleLinkClick(e, 'game', 'jigsaw-puzzle')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
+                >
+                  🖼️ Artistic Jigsaw Puzzle
+                </a>
               </li>
             </ul>
           </div>
