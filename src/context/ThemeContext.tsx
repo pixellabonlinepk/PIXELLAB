@@ -13,7 +13,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     try {
-      const saved = localStorage.getItem('pixellab_theme');
+      const saved = localStorage.getItem('pixallab_theme') || localStorage.getItem('pixellab_theme');
       if (saved === 'dark') {
         return 'dark';
       }
@@ -25,7 +25,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     try {
-      localStorage.setItem('pixellab_theme', theme);
+      localStorage.setItem('pixallab_theme', theme);
     } catch {
       // storage unavailable
     }

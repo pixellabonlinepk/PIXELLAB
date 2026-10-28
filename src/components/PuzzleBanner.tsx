@@ -21,7 +21,7 @@ export const PuzzleBanner: React.FC<PuzzleBannerProps> = ({
 
   useEffect(() => {
     // Never show on the game page itself or if dismissed in this session
-    if (isDismissed || currentView === 'puzzle') {
+    if (isDismissed || currentView === 'puzzle' || currentView === 'games') {
       setIsVisible(false);
       return;
     }
@@ -67,8 +67,8 @@ export const PuzzleBanner: React.FC<PuzzleBannerProps> = ({
     onPlayNow();
   };
 
-  // Do not render anything if dismissed or currently on puzzle page
-  if (isDismissed || currentView === 'puzzle') {
+  // Do not render anything if dismissed or currently on puzzle/games page
+  if (isDismissed || currentView === 'puzzle' || currentView === 'games') {
     return null;
   }
 

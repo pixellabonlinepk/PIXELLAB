@@ -42,12 +42,21 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* Col 2: Popular Tools */}
+          {/* Col 2: SECTION 1 - IMAGE TOOLS */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-theme-primary">
-              Popular Tools
+              1. Image Tools
             </h4>
             <ul className="space-y-2">
+              <li>
+                <a
+                  href="/all-tools"
+                  onClick={(e) => handleLinkClick(e, 'all-tools')}
+                  className="text-indigo-500 hover:text-indigo-400 font-bold transition-colors block"
+                >
+                  All 26 Image Tools →
+                </a>
+              </li>
               <li>
                 <a
                   href="/tool/image-compressor"
@@ -59,29 +68,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <a
-                  href="/tool/image-resizer"
-                  onClick={(e) => handleLinkClick(e, 'tool', 'image-resizer')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  Image Resizer
-                </a>
-              </li>
-              <li>
-                <a
                   href="/tool/passport-photo-resizer"
                   onClick={(e) => handleLinkClick(e, 'tool', 'passport-photo-resizer')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
-                  Passport & ID Photo
+                  Passport & ID Photo Maker
                 </a>
               </li>
               <li>
                 <a
-                  href="/tool/image-to-pdf-converter"
-                  onClick={(e) => handleLinkClick(e, 'tool', 'image-to-pdf-converter')}
+                  href="/tool/photo-collage-dp-maker"
+                  onClick={(e) => handleLinkClick(e, 'tool', 'photo-collage-dp-maker')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
-                  Image to PDF Converter
+                  Squad DP Collage Maker
                 </a>
               </li>
               <li>
@@ -95,157 +95,136 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <a
-                  href="/tool/qr-code-generator"
-                  onClick={(e) => handleLinkClick(e, 'tool', 'qr-code-generator')}
+                  href="/tool/image-to-pdf-converter"
+                  onClick={(e) => handleLinkClick(e, 'tool', 'image-to-pdf-converter')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
-                  QR Code Generator
+                  Image to PDF Converter
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: How-To Guides (NEW for SEO & Crawlability) */}
+          {/* Col 3: SECTION 2 - IMAGE GAMES */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-theme-primary">
-              Guides & Tutorials
+              2. Image Games
             </h4>
             <ul className="space-y-2">
               <li>
                 <a
-                  href="/guide/how-to-make-a-youtube-thumbnail"
-                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-make-a-youtube-thumbnail')}
+                  href="/games"
+                  onClick={(e) => handleLinkClick(e, 'games')}
+                  className="text-cyan-500 hover:text-cyan-400 font-bold transition-colors block"
+                >
+                  Image Games Hub →
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/games"
+                  onClick={(e) => handleLinkClick(e, 'games')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  YouTube Thumbnail Guide
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guide/how-to-resize-an-image-online"
-                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-resize-an-image-online')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  Resize Without Distortion
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guide/how-to-create-a-digital-signature"
-                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-create-a-digital-signature')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  Digital Signature Tutorial
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guide/how-to-make-a-whatsapp-dp"
-                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-make-a-whatsapp-dp')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  No-Crop WhatsApp DP
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guide/how-to-split-an-image-into-multiple-parts"
-                  onClick={(e) => handleLinkClick(e, 'guide', 'how-to-split-an-image-into-multiple-parts')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  Instagram Grid Splitter
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guides"
-                  onClick={(e) => handleLinkClick(e, 'guides')}
-                  className="text-indigo-500 hover:text-indigo-400 font-semibold transition-colors block pt-1"
-                >
-                  View All Guides →
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 4: Tool Categories */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-theme-primary">
-              Explore Suite
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <a
-                  href="/all-tools"
-                  onClick={(e) => handleLinkClick(e, 'all-tools')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  All 26 Image Tools
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/tool/batch-image-resizer"
-                  onClick={(e) => handleLinkClick(e, 'tool', 'batch-image-resizer')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  Batch Resizer Studio
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/tool/photo-collage-dp-maker"
-                  onClick={(e) => handleLinkClick(e, 'tool', 'photo-collage-dp-maker')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  Photo Collage Maker
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/tool/image-splitter"
-                  onClick={(e) => handleLinkClick(e, 'tool', 'image-splitter')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  Image Splitter & Slicer
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/tool/image-joiner"
-                  onClick={(e) => handleLinkClick(e, 'tool', 'image-joiner')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
-                >
-                  Image Joiner & Merger
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/puzzle"
-                  onClick={(e) => handleLinkClick(e, 'puzzle')}
-                  className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors block"
                 >
                   🧩 Picture Puzzle Challenge
                 </a>
               </li>
               <li>
+                <span className="text-theme-muted text-[11px] block pt-1">
+                  Spot the Difference (Phase 2)
+                </span>
+              </li>
+              <li>
+                <span className="text-theme-muted text-[11px] block">
+                  Visual Memory Match (Phase 2)
+                </span>
+              </li>
+              <li>
+                <span className="text-theme-muted text-[11px] block">
+                  Color Hue Spectrum (Phase 2)
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 4: SECTION 3 - FREE STUDY MATERIAL */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-theme-primary">
+              3. Study Material
+            </h4>
+            <ul className="space-y-2">
+              <li>
                 <a
-                  href="/tool/pdf-to-image-converter"
-                  onClick={(e) => handleLinkClick(e, 'tool', 'pdf-to-image-converter')}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors block"
+                  href="/study-material"
+                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  className="text-emerald-500 hover:text-emerald-400 font-bold transition-colors block"
                 >
-                  PDF to Image Converter
+                  Open Study Library →
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/study-material"
+                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
+                >
+                  Computer Science & Imaging
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/study-material"
+                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
+                >
+                  AI & Computer Vision
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/study-material"
+                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
+                >
+                  Mathematics & Linear Algebra
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/study-material"
+                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
+                >
+                  Physics, Optics & Biology
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/study-material"
+                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
+                >
+                  Logical & Analytical Reasoning
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Col 5: Platform & Legal */}
+          {/* Col 5: Platform & Guides */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-theme-primary">
-              Platform & Trust
+              Guides & Trust
             </h4>
             <ul className="space-y-2">
+              <li>
+                <a
+                  href="/guides"
+                  onClick={(e) => handleLinkClick(e, 'guides')}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors block font-semibold"
+                >
+                  How-To Guides Directory
+                </a>
+              </li>
               <li>
                 <a
                   href="/about"

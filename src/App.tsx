@@ -12,6 +12,8 @@ import { ContactPage } from './components/pages/ContactPage';
 import { GuidesIndexPage } from './components/pages/GuidesIndexPage';
 import { GuideDetailPage } from './components/pages/GuideDetailPage';
 import { SlidingPuzzleGame } from './components/puzzle/SlidingPuzzleGame';
+import { ImageGamesPage } from './components/pages/ImageGamesPage';
+import { StudyMaterialPage } from './components/pages/StudyMaterialPage';
 import { PuzzleBanner } from './components/PuzzleBanner';
 import { RatingWidget } from './components/RatingWidget';
 import { TOOLS } from './data/tools';
@@ -128,12 +130,22 @@ export default function App() {
         return;
       }
 
-      if (['puzzle', 'game', 'picture-puzzle'].includes(pathname)) {
-        setCurrentView('puzzle');
+      if (['games', 'image-games', 'puzzle', 'game', 'picture-puzzle'].includes(pathname)) {
+        setCurrentView('games');
         return;
       }
 
-      if (['all-tools', 'about', 'privacy', 'terms', 'contact'].includes(pathname)) {
+      if (['study-material', 'study', 'study-materials', 'free-study-material'].includes(pathname)) {
+        setCurrentView('study-material');
+        return;
+      }
+
+      if (['all-tools', 'tools'].includes(pathname)) {
+        setCurrentView('all-tools');
+        return;
+      }
+
+      if (['about', 'privacy', 'terms', 'contact'].includes(pathname)) {
         setCurrentView(pathname);
         return;
       }
@@ -163,12 +175,22 @@ export default function App() {
         return;
       }
 
-      if (['puzzle', 'game', 'picture-puzzle'].includes(hash)) {
-        setCurrentView('puzzle');
+      if (['games', 'image-games', 'puzzle', 'game', 'picture-puzzle'].includes(hash)) {
+        setCurrentView('games');
         return;
       }
 
-      if (['home', 'all-tools', 'about', 'privacy', 'terms', 'contact'].includes(hash)) {
+      if (['study-material', 'study', 'study-materials', 'free-study-material'].includes(hash)) {
+        setCurrentView('study-material');
+        return;
+      }
+
+      if (['all-tools', 'tools'].includes(hash)) {
+        setCurrentView('all-tools');
+        return;
+      }
+
+      if (['home', 'about', 'privacy', 'terms', 'contact'].includes(hash)) {
         setCurrentView(hash);
         return;
       }
@@ -396,16 +418,16 @@ export default function App() {
       pageDesc =
         'Get in touch with the PIXAL LAB engineering and support team for feedback, feature requests, or questions.';
       canonicalUrl = `${DOMAIN}/contact`;
-    } else if (currentView === 'puzzle') {
-      pageTitle = 'Free Online Picture Puzzle Game | PIXAL LAB';
+    } else if (currentView === 'games' || currentView === 'puzzle') {
+      pageTitle = 'Free Online Image Games & Visual Puzzles | PIXAL LAB';
       pageDesc =
-        'Play a free online sliding picture puzzle with beautiful landmarks, nature scenes, cartoon-style illustrations, and scenic destinations. Solve puzzles, track your moves, and unlock new levels.';
-      canonicalUrl = `${DOMAIN}/puzzle`;
+        'Play interactive client-side visual puzzles and spatial challenges. Solve the sliding Picture Puzzle Challenge with adjustable difficulty, timer, and audio effects.';
+      canonicalUrl = `${DOMAIN}/games`;
       jsonLdData = [
         {
           '@context': 'https://schema.org',
           '@type': 'WebApplication',
-          name: 'PIXAL LAB — Picture Puzzle Challenge',
+          name: 'PIXAL LAB — Image Games Hub',
           applicationCategory: 'GameApplication',
           operatingSystem: 'All',
           browserRequirements: 'Requires modern web browser with HTML5 Canvas and Web Audio support',
@@ -429,7 +451,45 @@ export default function App() {
             {
               '@type': 'ListItem',
               position: 2,
-              name: 'Picture Puzzle Challenge',
+              name: 'Image Games Hub',
+              item: canonicalUrl,
+            },
+          ],
+        },
+      ];
+    } else if (currentView === 'study-material') {
+      pageTitle = 'Free Study Material & Academic Reference Library | PIXAL LAB';
+      pageDesc =
+        'Download free open-access academic reference notes, algorithms, and illustrated formula sheets across Computer Science, AI, Physics, Mathematics, Chemistry, Biology, and Logic.';
+      canonicalUrl = `${DOMAIN}/study-material`;
+      jsonLdData = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'PIXAL LAB — Free Study Material Library',
+          applicationCategory: 'EducationalApplication',
+          operatingSystem: 'All',
+          url: canonicalUrl,
+          offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'USD',
+          },
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: `${DOMAIN}/`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Free Study Material',
               item: canonicalUrl,
             },
           ],
@@ -508,9 +568,15 @@ export default function App() {
     } else if (view === 'guides') {
       setCurrentView('guides');
       cleanPath = '/guides';
-    } else if (view === 'puzzle' || view === 'game') {
-      setCurrentView('puzzle');
-      cleanPath = '/puzzle';
+    } else if (view === 'games' || view === 'puzzle' || view === 'game' || view === 'image-games') {
+      setCurrentView('games');
+      cleanPath = '/games';
+    } else if (view === 'study-material' || view === 'study' || view === 'study-materials') {
+      setCurrentView('study-material');
+      cleanPath = '/study-material';
+    } else if (view === 'all-tools' || view === 'tools') {
+      setCurrentView('all-tools');
+      cleanPath = '/all-tools';
     } else if (view === 'home') {
       setCurrentView('home');
       cleanPath = '/';
@@ -569,7 +635,15 @@ export default function App() {
                 const el = document.getElementById('tools-gallery');
                 el?.scrollIntoView({ behavior: 'smooth' });
               }}
-              onSelectTool={(id) => (id === 'puzzle' ? navigateTo('puzzle') : navigateTo('tool', id))}
+              onSelectTool={(id) => {
+                if (id === 'puzzle' || id === 'games') {
+                  navigateTo('games');
+                } else if (id === 'study-material') {
+                  navigateTo('study-material');
+                } else {
+                  navigateTo('tool', id);
+                }
+              }}
               onSearchQueryChange={(q) => setSearchQuery(q)}
             />
 
@@ -796,12 +870,14 @@ export default function App() {
           />
         )}
 
-        {/* VIEW 11: PICTURE PUZZLE GAME */}
-        {currentView === 'puzzle' && (
-          <SlidingPuzzleGame
-            onBackToHome={() => navigateTo('home')}
-            onExploreTools={() => navigateTo('all-tools')}
-          />
+        {/* VIEW 11: SECTION 2 — IMAGE GAMES HUB */}
+        {(currentView === 'games' || currentView === 'puzzle') && (
+          <ImageGamesPage onNavigate={navigateTo} />
+        )}
+
+        {/* VIEW 12: SECTION 3 — FREE STUDY MATERIAL */}
+        {currentView === 'study-material' && (
+          <StudyMaterialPage onNavigate={navigateTo} />
         )}
       </main>
 

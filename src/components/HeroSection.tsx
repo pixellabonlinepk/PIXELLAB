@@ -130,10 +130,109 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           )}
         </div>
 
+        {/* THREE SECTION GATEWAY CARDS (SECTION 1, 2, 3) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 max-w-5xl mx-auto mb-8 text-left">
+          {/* Card 1: IMAGE TOOLS */}
+          <div className="glass-panel glass-panel-interactive rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-lg border border-indigo-500/20 group relative overflow-hidden">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                  Section 1
+                </span>
+                <span className="text-xs font-mono font-bold text-indigo-500">
+                  {TOOLS.length} Pro Utilities
+                </span>
+              </div>
+              <h2 className="text-xl font-extrabold font-display text-theme-primary group-hover:text-indigo-500 transition-colors">
+                Image Tools
+              </h2>
+              <p className="text-xs text-theme-secondary leading-relaxed">
+                Compress, resize, crop, convert, extract EXIF, generate digital signatures, and make passport photos with 100% in-browser privacy.
+              </p>
+            </div>
+            <div className="pt-4 mt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={onExploreClick}
+                className="text-xs font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>Explore Image Tools</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+
+          {/* Card 2: IMAGE GAMES */}
+          <div className="glass-panel glass-panel-interactive rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-lg border border-cyan-500/20 group relative overflow-hidden">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
+                  Section 2
+                </span>
+                <span className="text-xs font-mono font-bold text-cyan-500">
+                  Interactive Hub
+                </span>
+              </div>
+              <h2 className="text-xl font-extrabold font-display text-theme-primary group-hover:text-cyan-500 transition-colors">
+                Image Games
+              </h2>
+              <p className="text-xs text-theme-secondary leading-relaxed">
+                Picture Puzzle Challenge with mathematical solvable shuffling, landmark themes, timer, sound effects, and Phase 2 cognitive game previews.
+              </p>
+            </div>
+            <div className="pt-4 mt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
+              <a
+                href="/games"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSelectTool('games');
+                }}
+                className="text-xs font-bold text-cyan-500 hover:text-cyan-400 flex items-center gap-1.5 transition-colors cursor-pointer no-underline"
+              >
+                <span>Play Image Games</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
+          </div>
+
+          {/* Card 3: FREE STUDY MATERIAL */}
+          <div className="glass-panel glass-panel-interactive rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-lg border border-emerald-500/20 group relative overflow-hidden">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                  Section 3
+                </span>
+                <span className="text-xs font-mono font-bold text-emerald-500">
+                  Free PDFs
+                </span>
+              </div>
+              <h2 className="text-xl font-extrabold font-display text-theme-primary group-hover:text-emerald-500 transition-colors">
+                Free Study Material
+              </h2>
+              <p className="text-xs text-theme-secondary leading-relaxed">
+                Curated open-access academic reference notes, algorithms & formula sheets for CS, AI, Math, Physics, Chemistry, Biology & Logic.
+              </p>
+            </div>
+            <div className="pt-4 mt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
+              <a
+                href="/study-material"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSelectTool('study-material');
+                }}
+                className="text-xs font-bold text-emerald-500 hover:text-emerald-400 flex items-center gap-1.5 transition-colors cursor-pointer no-underline"
+              >
+                <span>Browse Study Notes</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* 4 Quick Category Glass Pills */}
         <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto mb-5 sm:mb-6">
           {QUICK_CATEGORY_GLASS_PILLS.map((pill) => {
-            const href = pill.id === 'puzzle' ? '/puzzle' : `/tool/${pill.id}`;
+            const href = pill.id === 'puzzle' ? '/games' : `/tool/${pill.id}`;
             return (
               <a
                 key={pill.id}
@@ -180,8 +279,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-xs font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">{TOOLS.length} Focused Tools</div>
-              <div className="text-[11px] text-[#6E6E73] dark:text-[#86868B] leading-relaxed">No bloat, no subscription walls, no ads</div>
+              <div className="text-xs font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">Three Structured Sections</div>
+              <div className="text-[11px] text-[#6E6E73] dark:text-[#86868B] leading-relaxed">Image Tools · Image Games · Free Study Material</div>
             </div>
           </div>
         </div>
