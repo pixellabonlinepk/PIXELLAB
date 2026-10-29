@@ -9,19 +9,24 @@ import {
   ArrowRight,
   Undo2,
   Flame,
+  Infinity as InfinityIcon,
+  Award,
 } from 'lucide-react';
 import { gameAudio } from '../../utils/gameAudio';
+import { GameDifficulty } from '../../types/gameProgression';
+import {
+  loadGameProgress,
+  completeLevel,
+  resetDifficultyProgress,
+} from '../../utils/gameProgressionStore';
+import { GAME_LEVELS } from '../../data/gameLevelsData';
+import { LevelHeaderBar } from './common/LevelHeaderBar';
+import { LevelSelectorModal } from './common/LevelSelectorModal';
+import { LevelVictoryModal } from './common/LevelVictoryModal';
+import { PauseModal } from './common/PauseModal';
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
-interface TileData {
-  id: number;
-  value: number;
-  row: number;
-  col: number;
-}
-
-// 4x4 Grid Helpers
 function getEmptyCells(grid: number[][]): [number, number][] {
   const empty: [number, number][] = [];
   for (let r = 0; r < 4; r++) {
@@ -34,18 +39,17 @@ function getEmptyCells(grid: number[][]): [number, number][] {
   return empty;
 }
 
-function spawnRandomTile(grid: number[][]): number[][] {
+function spawnRandomTile(grid: number[][], fourProb: number = 0.1): number[][] {
   const empty = getEmptyCells(grid);
   if (empty.length === 0) return grid;
 
   const [r, c] = empty[Math.floor(Math.random() * empty.length)];
-  const val = Math.random() < 0.9 ? 2 : 4;
+  const val = Math.random() < (1 - fourProb) ? 2 : 4;
   const next = grid.map((row) => [...row]);
   next[r][c] = val;
   return next;
 }
 
-// Check if any legal moves remain
 function canMove(grid: number[][]): boolean {
   for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 4; c++) {
@@ -57,7 +61,6 @@ function canMove(grid: number[][]): boolean {
   return false;
 }
 
-// Slide and merge one row or column line
 function slideLine(line: number[]): { newLine: number[]; points: number } {
   const nonZero = line.filter((v) => v !== 0);
   const result: number[] = [];
@@ -84,6 +87,22 @@ function slideLine(line: number[]): { newLine: number[]; points: number } {
 }
 
 export const Game2048: React.FC = () => {
+  const gameId = '2048';
+  const levelsMeta = GAME_LEVELS[gameId] || [];
+
+  // Difficulty & Progression State
+  const [difficulty, setDifficulty] = useState<GameDifficulty>('Medium');
+  const [progressState, setProgressState] = useState(() => loadGameProgress(gameId));
+  const [currentLevelNumber, setCurrentLevelNumber] = useState<number>(1);
+  const [isLevelSelectorOpen, setIsLevelSelectorOpen] = useState<boolean>(false);
+  const [isVictoryModalOpen, setIsVictoryModalOpen] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [earnedStars, setEarnedStars] = useState<number>(3);
+  const [gameMode, setGameMode] = useState<'campaign' | 'endless'>('campaign');
+
+  const currentLevelMeta = levelsMeta[currentLevelNumber - 1] || levelsMeta[0];
+
+  // Board State
   const [grid, setGrid] = useState<number[][]>(() => {
     let initial = [
       [0, 0, 0, 0],
@@ -97,6 +116,8 @@ export const Game2048: React.FC = () => {
   });
 
   const [score, setScore] = useState<number>(0);
+  const [moves, setMoves] = useState<number>(0);
+  const [undosRemaining, setUndosRemaining] = useState<number>(3);
   const [bestScore, setBestScore] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('pixallab_2048_best');
@@ -109,15 +130,27 @@ export const Game2048: React.FC = () => {
   const [previousState, setPreviousState] = useState<{
     grid: number[][];
     score: number;
+    moves: number;
   } | null>(null);
 
-  const [hasWon, setHasWon] = useState<boolean>(false);
-  const [keepPlaying, setKeepPlaying] = useState<boolean>(false);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [levelCleared, setLevelCleared] = useState<boolean>(false);
+  const [timerSeconds, setTimerSeconds] = useState<number>(0);
 
-  // Touch swipe tracking coordinates
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const boardRef = useRef<HTMLDivElement | null>(null);
+
+  // Difficulty parameters
+  const fourProbability = difficulty === 'Easy' ? 0.05 : difficulty === 'Medium' ? 0.1 : 0.2;
+  const initialUndos = difficulty === 'Easy' ? 999 : difficulty === 'Medium' ? 3 : 1;
+
+  // Level objectives
+  const targetTile = (currentLevelMeta?.params?.targetTile as number) || 2048;
+  const targetScore = (currentLevelMeta?.params?.targetScore as number) || 20000;
+  const maxMoves = (currentLevelMeta?.params?.maxMoves as number) || undefined;
+
+  // Highest tile on board currently
+  const highestTile = Math.max(...grid.flat());
 
   // Save best score
   useEffect(() => {
@@ -131,28 +164,76 @@ export const Game2048: React.FC = () => {
     }
   }, [score, bestScore]);
 
-  // Restart game
-  const restartGame = useCallback(() => {
+  // Timer
+  useEffect(() => {
+    if (isPaused || isGameOver || levelCleared) return;
+    const interval = setInterval(() => {
+      setTimerSeconds((s) => s + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isPaused, isGameOver, levelCleared]);
+
+  // Format timer
+  const formatTimer = (total: number) => {
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // Reset or initialize board for level
+  const initBoard = useCallback(() => {
     let initial = [
       [0, 0, 0, 0],
       [0, 0, 0, 0],
       [0, 0, 0, 0],
       [0, 0, 0, 0],
     ];
-    initial = spawnRandomTile(initial);
-    initial = spawnRandomTile(initial);
+    initial = spawnRandomTile(initial, fourProbability);
+    initial = spawnRandomTile(initial, fourProbability);
     setGrid(initial);
     setScore(0);
+    setMoves(0);
+    setUndosRemaining(initialUndos);
     setPreviousState(null);
-    setHasWon(false);
-    setKeepPlaying(false);
     setIsGameOver(false);
-  }, []);
+    setLevelCleared(false);
+    setTimerSeconds(0);
+  }, [fourProbability, initialUndos]);
+
+  // When level, difficulty, or mode changes
+  useEffect(() => {
+    initBoard();
+  }, [currentLevelNumber, difficulty, gameMode, initBoard]);
+
+  // Handle Level Victory
+  const triggerVictory = useCallback(
+    (finalScore: number, finalMoves: number) => {
+      setLevelCleared(true);
+      gameAudio.playVictory();
+
+      // Calculate Stars (1-3)
+      let stars = 1;
+      if (highestTile >= targetTile * 2 || (maxMoves && finalMoves <= maxMoves * 0.75)) {
+        stars = 3;
+      } else if (highestTile >= targetTile) {
+        stars = 2;
+        if (finalScore >= targetScore) stars = 3;
+      } else {
+        stars = 1;
+      }
+      setEarnedStars(stars);
+
+      const { updatedState } = completeLevel(gameId, difficulty, currentLevelNumber, finalScore, stars);
+      setProgressState(updatedState);
+      setIsVictoryModalOpen(true);
+    },
+    [difficulty, currentLevelNumber, highestTile, targetTile, maxMoves, targetScore]
+  );
 
   // Move action in direction
   const move = useCallback(
     (dir: Direction) => {
-      if (isGameOver) return;
+      if (isGameOver || isPaused || (gameMode === 'campaign' && levelCleared)) return;
 
       let changed = false;
       let earnedPoints = 0;
@@ -203,11 +284,14 @@ export const Game2048: React.FC = () => {
 
       if (changed) {
         // Save undo point
-        setPreviousState({ grid: grid.map((r) => [...r]), score });
+        setPreviousState({ grid: grid.map((r) => [...r]), score, moves });
 
-        const withSpawn = spawnRandomTile(nextGrid);
+        const withSpawn = spawnRandomTile(nextGrid, fourProbability);
+        const newScore = score + earnedPoints;
+        const newMoves = moves + 1;
         setGrid(withSpawn);
-        setScore((s) => s + earnedPoints);
+        setScore(newScore);
+        setMoves(newMoves);
 
         if (earnedPoints > 0) {
           gameAudio.playMatch();
@@ -215,12 +299,15 @@ export const Game2048: React.FC = () => {
           gameAudio.playMove();
         }
 
-        // Check for 2048 victory
-        if (!hasWon && !keepPlaying) {
-          const reached2048 = withSpawn.some((row) => row.some((v) => v >= 2048));
-          if (reached2048) {
-            setHasWon(true);
-            gameAudio.playVictory();
+        // Campaign Mode Objective Check
+        if (gameMode === 'campaign' && !levelCleared) {
+          const maxBoardTile = Math.max(...withSpawn.flat());
+          const reachedTargetTile = maxBoardTile >= targetTile;
+          const reachedTargetScore = newScore >= targetScore;
+
+          if (reachedTargetTile || reachedTargetScore) {
+            triggerVictory(newScore, newMoves);
+            return;
           }
         }
 
@@ -231,15 +318,31 @@ export const Game2048: React.FC = () => {
         }
       }
     },
-    [grid, score, hasWon, keepPlaying, isGameOver]
+    [
+      grid,
+      score,
+      moves,
+      isGameOver,
+      isPaused,
+      gameMode,
+      levelCleared,
+      fourProbability,
+      targetTile,
+      targetScore,
+      triggerVictory,
+    ]
   );
 
   // Undo 1 step
   const handleUndo = () => {
-    if (!previousState) return;
+    if (!previousState || undosRemaining <= 0) return;
     setGrid(previousState.grid);
     setScore(previousState.score);
+    setMoves(previousState.moves);
     setPreviousState(null);
+    if (difficulty !== 'Easy') {
+      setUndosRemaining((u) => u - 1);
+    }
     setIsGameOver(false);
     gameAudio.playMove();
   };
@@ -247,6 +350,8 @@ export const Game2048: React.FC = () => {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isPaused || isLevelSelectorOpen || isVictoryModalOpen) return;
+
       if (
         ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(e.key)
       ) {
@@ -266,7 +371,7 @@ export const Game2048: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [move]);
+  }, [move, isPaused, isLevelSelectorOpen, isVictoryModalOpen]);
 
   // Touch swipe support
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -284,7 +389,7 @@ export const Game2048: React.FC = () => {
     const absX = Math.abs(dx);
     const absY = Math.abs(dy);
 
-    if (Math.max(absX, absY) < 25) return; // Ignore small taps
+    if (Math.max(absX, absY) < 25) return;
 
     if (absX > absY) {
       if (dx > 0) move('RIGHT');
@@ -293,6 +398,28 @@ export const Game2048: React.FC = () => {
       if (dy > 0) move('DOWN');
       else move('UP');
     }
+  };
+
+  // Switch level
+  const handleSelectLevel = (lvl: number) => {
+    setCurrentLevelNumber(lvl);
+    setIsLevelSelectorOpen(false);
+  };
+
+  // Next level from victory modal
+  const handleNextLevel = () => {
+    setIsVictoryModalOpen(false);
+    if (currentLevelNumber < 10) {
+      setCurrentLevelNumber((l) => l + 1);
+    }
+  };
+
+  // Reset difficulty progress
+  const handleResetDifficulty = () => {
+    const updated = resetDifficultyProgress(gameId, difficulty);
+    setProgressState(updated);
+    setCurrentLevelNumber(1);
+    setIsLevelSelectorOpen(false);
   };
 
   // Tile Color Styling
@@ -328,59 +455,133 @@ export const Game2048: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto flex flex-col items-center">
-      {/* Top Header & Scoreboard */}
+    <div ref={containerRef} className="max-w-2xl mx-auto flex flex-col items-center">
+      {/* UNIVERSAL LEVEL HEADER BAR */}
+      <div className="w-full mb-4">
+        <LevelHeaderBar
+          levelNumber={currentLevelNumber}
+          levelTitle={currentLevelMeta?.title || `Level ${currentLevelNumber}`}
+          difficulty={difficulty}
+          isPaused={isPaused}
+          onTogglePause={() => setIsPaused((p) => !p)}
+          onRestartLevel={initBoard}
+          onOpenLevelSelector={() => setIsLevelSelectorOpen(true)}
+          onChangeDifficulty={(d: GameDifficulty) => {
+            setDifficulty(d);
+            setCurrentLevelNumber(1);
+          }}
+        />
+      </div>
+
+      {/* MODE PICKER: CAMPAIGN VS ENDLESS */}
+      <div className="w-full flex items-center justify-between mb-4 glass-panel p-2.5 rounded-2xl gap-3 flex-wrap">
+        <div className="flex items-center gap-1.5 apple-segmented p-1 rounded-full">
+          <button
+            type="button"
+            onClick={() => setGameMode('campaign')}
+            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              gameMode === 'campaign'
+                ? 'bg-white dark:bg-white/15 text-theme-primary shadow-xs'
+                : 'text-theme-muted hover:text-theme-primary'
+            }`}
+          >
+            <Trophy className="w-3.5 h-3.5 text-amber-500" />
+            <span>10-Level Campaign</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setGameMode('endless')}
+            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              gameMode === 'endless'
+                ? 'bg-white dark:bg-white/15 text-theme-primary shadow-xs'
+                : 'text-theme-muted hover:text-theme-primary'
+            }`}
+          >
+            <InfinityIcon className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Endless Sandbox</span>
+          </button>
+        </div>
+
+        {/* Live Objective Badge */}
+        {gameMode === 'campaign' && currentLevelMeta && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-theme-muted">Target:</span>
+            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs">
+              Tile: {targetTile}
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-xs">
+              Score: {targetScore.toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* TOP STATS & SCOREBOARD */}
       <div className="w-full flex items-center justify-between mb-4 gap-3">
-        <div>
-          <span className="text-xs font-bold text-theme-muted uppercase tracking-wider block">
-            Objective: 2048
-          </span>
-          <span className="text-2xl font-black font-display text-theme-primary">
-            2048 Merge
-          </span>
+        <div className="flex items-center gap-2">
+          <div className="glass-panel px-3.5 py-1.5 rounded-xl text-center border border-black/5 dark:border-white/10">
+            <span className="text-[10px] font-bold text-theme-muted uppercase block">Score</span>
+            <span className="text-base font-black font-mono text-indigo-500">
+              {score.toLocaleString()}
+            </span>
+          </div>
+          <div className="glass-panel px-3.5 py-1.5 rounded-xl text-center border border-black/5 dark:border-white/10">
+            <span className="text-[10px] font-bold text-theme-muted uppercase block">High Tile</span>
+            <span className="text-base font-black font-mono text-emerald-500">
+              {highestTile > 0 ? highestTile : '-'}
+            </span>
+          </div>
+          <div className="glass-panel px-3.5 py-1.5 rounded-xl text-center border border-black/5 dark:border-white/10">
+            <span className="text-[10px] font-bold text-theme-muted uppercase block">Moves</span>
+            <span className="text-base font-black font-mono text-theme-primary">{moves}</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="glass-panel px-3.5 py-1.5 rounded-xl text-center border border-black/5 dark:border-white/10">
-            <span className="text-[10px] font-bold text-theme-muted uppercase block">Score</span>
-            <span className="text-base font-black font-mono text-indigo-500">{score}</span>
-          </div>
-
-          <div className="glass-panel px-3.5 py-1.5 rounded-xl text-center border border-black/5 dark:border-white/10">
             <span className="text-[10px] font-bold text-theme-muted uppercase block">Best</span>
-            <span className="text-base font-black font-mono text-theme-primary">{bestScore}</span>
+            <span className="text-base font-black font-mono text-theme-primary">
+              {bestScore.toLocaleString()}
+            </span>
+          </div>
+          <div className="glass-panel px-3.5 py-1.5 rounded-xl text-center border border-black/5 dark:border-white/10">
+            <span className="text-[10px] font-bold text-theme-muted uppercase block">Time</span>
+            <span className="text-base font-black font-mono text-theme-secondary">
+              {formatTimer(timerSeconds)}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Action Bar: Undo, Restart */}
+      {/* ACTION BAR: UNDO WITH COUNTER */}
       <div className="w-full flex items-center justify-between mb-4">
         <button
           type="button"
           onClick={handleUndo}
-          disabled={!previousState}
+          disabled={!previousState || undosRemaining <= 0}
           className="px-3.5 py-1.5 rounded-xl text-xs font-semibold glass-panel text-theme-secondary hover:text-theme-primary disabled:opacity-40 flex items-center gap-1.5 transition-all shadow-xs"
         >
           <Undo2 className="w-3.5 h-3.5" />
-          <span>Undo Move</span>
+          <span>
+            Undo Move ({difficulty === 'Easy' ? '∞' : `${undosRemaining} left`})
+          </span>
         </button>
 
         <button
           type="button"
-          onClick={restartGame}
+          onClick={initBoard}
           className="px-3.5 py-1.5 rounded-xl text-xs font-semibold glass-panel text-theme-secondary hover:text-theme-primary flex items-center gap-1.5 transition-all shadow-xs"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          <span>New Game</span>
+          <span>Reset Board</span>
         </button>
       </div>
 
       {/* 4x4 GAME BOARD CONTAINER */}
       <div
-        ref={boardRef}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="w-full aspect-square p-3 sm:p-3.5 rounded-3xl glass-panel shadow-lg border border-black/10 dark:border-white/15 grid grid-cols-4 gap-2.5 sm:gap-3 bg-stone-200/50 dark:bg-stone-900/50 select-none relative"
+        className="w-full max-w-md aspect-square p-3 sm:p-3.5 rounded-3xl glass-panel shadow-lg border border-black/10 dark:border-white/15 grid grid-cols-4 gap-2.5 sm:gap-3 bg-stone-200/50 dark:bg-stone-900/50 select-none relative"
       >
         {grid.map((row, r) =>
           row.map((val, c) => (
@@ -395,45 +596,29 @@ export const Game2048: React.FC = () => {
           ))
         )}
 
-        {/* 2048 VICTORY OVERLAY */}
-        {hasWon && !keepPlaying && (
-          <div className="absolute inset-0 z-20 rounded-3xl bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white animate-in fade-in">
-            <Trophy className="w-12 h-12 text-yellow-400 mb-2 animate-bounce" />
-            <h3 className="text-2xl font-black font-display mb-1">You reached 2048!</h3>
-            <p className="text-xs text-stone-300 mb-5">
-              Outstanding strategy! Would you like to keep going for an even higher score?
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setKeepPlaying(true)}
-                className="px-4 py-2 rounded-xl bg-white text-stone-900 font-bold text-xs shadow-md"
-              >
-                Keep Playing
-              </button>
-              <button
-                type="button"
-                onClick={restartGame}
-                className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md"
-              >
-                Restart
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* GAME OVER OVERLAY */}
         {isGameOver && (
           <div className="absolute inset-0 z-20 rounded-3xl bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white animate-in fade-in">
             <h3 className="text-2xl font-black font-display mb-1">Game Over!</h3>
             <p className="text-xs text-stone-300 mb-4">No valid moves remaining on the board.</p>
-            <button
-              type="button"
-              onClick={restartGame}
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md"
-            >
-              Try Again
-            </button>
+            <div className="flex gap-2">
+              {previousState && undosRemaining > 0 && (
+                <button
+                  type="button"
+                  onClick={handleUndo}
+                  className="px-4 py-2 rounded-xl bg-white/20 text-white font-bold text-xs"
+                >
+                  Undo Last Move
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={initBoard}
+                className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md"
+              >
+                Try Again
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -478,6 +663,73 @@ export const Game2048: React.FC = () => {
           Tip: You can also swipe directly on the board!
         </span>
       </div>
+
+      {/* LEVEL SELECTOR MODAL */}
+      <LevelSelectorModal
+        isOpen={isLevelSelectorOpen}
+        onClose={() => setIsLevelSelectorOpen(false)}
+        levels={levelsMeta}
+        currentLevel={currentLevelNumber}
+        currentDifficulty={difficulty}
+        progressionState={progressState}
+        onSelectLevel={(lvl, diff) => {
+          setDifficulty(diff);
+          setCurrentLevelNumber(lvl);
+          setIsLevelSelectorOpen(false);
+        }}
+        onResetDifficultyProgress={(diff) => {
+          const updated = resetDifficultyProgress(gameId, diff);
+          setProgressState(updated);
+          setCurrentLevelNumber(1);
+          setIsLevelSelectorOpen(false);
+        }}
+      />
+
+      {/* VICTORY MODAL */}
+      <LevelVictoryModal
+        isOpen={isVictoryModalOpen}
+        levelNumber={currentLevelNumber}
+        levelTitle={currentLevelMeta?.title || `Level ${currentLevelNumber}`}
+        difficulty={difficulty}
+        stars={earnedStars}
+        stats={[
+          { label: 'Score', value: score.toLocaleString() },
+          { label: 'Moves', value: moves },
+          { label: 'Time', value: formatTimer(timerSeconds) },
+          { label: 'High Tile', value: highestTile },
+        ]}
+        onNextLevel={handleNextLevel}
+        onReplayLevel={() => {
+          setIsVictoryModalOpen(false);
+          initBoard();
+        }}
+        onOpenLevelSelector={() => {
+          setIsVictoryModalOpen(false);
+          setIsLevelSelectorOpen(true);
+        }}
+      />
+
+      {/* PAUSE MODAL */}
+      <PauseModal
+        isOpen={isPaused}
+        levelNumber={currentLevelNumber}
+        levelTitle={currentLevelMeta?.title || `Level ${currentLevelNumber}`}
+        objective={currentLevelMeta?.objective || ''}
+        difficulty={difficulty}
+        onResume={() => setIsPaused(false)}
+        onRestartLevel={() => {
+          setIsPaused(false);
+          initBoard();
+        }}
+        onOpenLevelSelector={() => {
+          setIsPaused(false);
+          setIsLevelSelectorOpen(true);
+        }}
+        howToPlayTips={[
+          'Use arrow keys, WASD, or swipe on mobile to slide and merge matching numerical tiles.',
+          'Build chains in descending order towards one corner to keep open space for new spawns.',
+        ]}
+      />
     </div>
   );
 };

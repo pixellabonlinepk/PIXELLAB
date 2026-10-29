@@ -7,30 +7,20 @@ import {
   Clock,
   Search,
   BookOpen,
+  Lightbulb,
 } from 'lucide-react';
 import { gameAudio } from '../../utils/gameAudio';
-
-type WordDifficulty = 'Easy' | 'Medium' | 'Hard';
-
-interface WordTheme {
-  name: string;
-  words: string[];
-}
-
-const THEMES: WordTheme[] = [
-  {
-    name: 'Digital Imaging',
-    words: ['PIXEL', 'CANVAS', 'SHUTTER', 'LENS', 'FOCUS', 'FILTER', 'MATRIX', 'VECTOR', 'EXPOSURE'],
-  },
-  {
-    name: 'Color Harmony',
-    words: ['CYAN', 'MAGENTA', 'INDIGO', 'VIOLET', 'AMBER', 'EMERALD', 'COBALT', 'SEPIA', 'BRONZE'],
-  },
-  {
-    name: 'Creative Tech',
-    words: ['PYTHON', 'CODE', 'RENDER', 'SHADOW', 'GRAPHIC', 'TEXTURE', 'GRADIENT', 'LAYERS'],
-  },
-];
+import { GameDifficulty } from '../../types/gameProgression';
+import {
+  loadGameProgress,
+  completeLevel,
+  resetDifficultyProgress,
+} from '../../utils/gameProgressionStore';
+import { GAME_LEVELS } from '../../data/gameLevelsData';
+import { LevelHeaderBar } from './common/LevelHeaderBar';
+import { LevelSelectorModal } from './common/LevelSelectorModal';
+import { LevelVictoryModal } from './common/LevelVictoryModal';
+import { PauseModal } from './common/PauseModal';
 
 interface PlacedWord {
   word: string;
@@ -52,12 +42,17 @@ const PASTEL_COLORS = [
   'bg-purple-500/30 text-purple-800 dark:text-purple-200 ring-2 ring-purple-500',
   'bg-rose-500/30 text-rose-800 dark:text-rose-200 ring-2 ring-rose-500',
   'bg-teal-500/30 text-teal-800 dark:text-teal-200 ring-2 ring-teal-500',
+  'bg-orange-500/30 text-orange-800 dark:text-orange-200 ring-2 ring-orange-500',
+  'bg-blue-500/30 text-blue-800 dark:text-blue-200 ring-2 ring-blue-500',
+  'bg-violet-500/30 text-violet-800 dark:text-violet-200 ring-2 ring-violet-500',
+  'bg-lime-500/30 text-lime-800 dark:text-lime-200 ring-2 ring-lime-500',
 ];
 
 // Generate Grid with Guaranteed Placed Words
 function generateWordSearch(
   size: number,
-  wordList: string[]
+  wordList: string[],
+  difficulty: GameDifficulty
 ): {
   grid: string[][];
   placedWords: PlacedWord[];
@@ -67,12 +62,34 @@ function generateWordSearch(
     .map(() => Array(size).fill(''));
 
   const placedWords: PlacedWord[] = [];
-  const directions: [number, number][] = [
-    [0, 1], // horizontal right
-    [1, 0], // vertical down
-    [1, 1], // diagonal down-right
-    [-1, 1], // diagonal up-right
-  ];
+
+  // Allowed directions depending on difficulty
+  let directions: [number, number][];
+  if (difficulty === 'Easy') {
+    directions = [
+      [0, 1], // horizontal right
+      [1, 0], // vertical down
+    ];
+  } else if (difficulty === 'Medium') {
+    directions = [
+      [0, 1], // horizontal right
+      [1, 0], // vertical down
+      [1, 1], // diagonal down-right
+      [-1, 1], // diagonal up-right
+    ];
+  } else {
+    // Hard: includes backward and all diagonals
+    directions = [
+      [0, 1],
+      [1, 0],
+      [1, 1],
+      [-1, 1],
+      [0, -1], // horizontal left
+      [-1, 0], // vertical up
+      [-1, -1], // diagonal up-left
+      [1, -1], // diagonal down-left
+    ];
+  }
 
   // Try placing each word
   wordList.forEach((rawWord, idx) => {
@@ -80,16 +97,16 @@ function generateWordSearch(
     let placed = false;
     let attempts = 0;
 
-    while (!placed && attempts < 150) {
+    while (!placed && attempts < 200) {
       attempts++;
       const dir = directions[Math.floor(Math.random() * directions.length)];
       const [dr, dc] = dir;
 
       // Calculate starting boundaries
-      const minR = dr === -1 ? word.length - 1 : 0;
-      const maxR = dr === 1 ? size - word.length : size - 1;
-      const minC = 0;
-      const maxC = size - word.length;
+      const minR = dr < 0 ? word.length - 1 : 0;
+      const maxR = dr > 0 ? size - word.length : size - 1;
+      const minC = dc < 0 ? word.length - 1 : 0;
+      const maxC = dc > 0 ? size - word.length : size - 1;
 
       if (maxR < minR || maxC < minC) continue;
 
@@ -146,63 +163,71 @@ function generateWordSearch(
 }
 
 export const WordSearchGame: React.FC = () => {
-  const [difficulty, setDifficulty] = useState<WordDifficulty>('Easy');
-  const [themeIdx, setThemeIdx] = useState<number>(0);
-  const [gridSize, setGridSize] = useState<number>(10);
+  const gameId = 'word-search';
+  const levelsMeta = GAME_LEVELS[gameId] || [];
 
+  // Progression & Difficulty
+  const [difficulty, setDifficulty] = useState<GameDifficulty>('Medium');
+  const [progressState, setProgressState] = useState(() => loadGameProgress(gameId));
+  const [currentLevelNumber, setCurrentLevelNumber] = useState<number>(1);
+  const [isLevelSelectorOpen, setIsLevelSelectorOpen] = useState<boolean>(false);
+  const [isVictoryModalOpen, setIsVictoryModalOpen] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [earnedStars, setEarnedStars] = useState<number>(3);
+
+  const currentLevelMeta = levelsMeta[currentLevelNumber - 1] || levelsMeta[0];
+
+  // Grid & Words state
+  const [gridSize, setGridSize] = useState<number>(10);
   const [grid, setGrid] = useState<string[][]>([]);
   const [placedWords, setPlacedWords] = useState<PlacedWord[]>([]);
   const [isSelecting, setIsSelecting] = useState<boolean>(false);
   const [selectionStart, setSelectionStart] = useState<[number, number] | null>(null);
   const [currentSelection, setCurrentSelection] = useState<[number, number][]>([]);
 
+  // Hints
+  const maxHints = difficulty === 'Easy' ? 4 : difficulty === 'Medium' ? 2 : 1;
+  const [hintsRemaining, setHintsRemaining] = useState<number>(maxHints);
+  const [hintedWordCells, setHintedWordCells] = useState<[number, number][]>([]);
+
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
-  const [isVictory, setIsVictory] = useState<boolean>(false);
+  const [isLevelSolved, setIsLevelSolved] = useState<boolean>(false);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const currentTheme = THEMES[themeIdx];
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const getGridSize = (diff: WordDifficulty) => {
-    switch (diff) {
-      case 'Easy':
-        return 10;
-      case 'Medium':
-        return 12;
-      case 'Hard':
-        return 14;
-    }
-  };
+  // Initialize level
+  const initLevel = useCallback(() => {
+    const rawWords = (currentLevelMeta?.params?.words as string[]) || ['PIXEL', 'LENS', 'FOCUS'];
+    let baseSize = (currentLevelMeta?.params?.gridSize as number) || 10;
+    // Adjust size slightly per difficulty
+    if (difficulty === 'Easy') baseSize = Math.max(8, baseSize - 1);
+    if (difficulty === 'Hard') baseSize = Math.min(15, baseSize + 1);
 
-  const startNewPuzzle = useCallback((diff: WordDifficulty, thIdx: number) => {
-    const size = getGridSize(diff);
-    setGridSize(size);
-    const result = generateWordSearch(size, THEMES[thIdx].words);
+    setGridSize(baseSize);
+    const result = generateWordSearch(baseSize, rawWords, difficulty);
     setGrid(result.grid);
     setPlacedWords(result.placedWords);
     setIsSelecting(false);
     setSelectionStart(null);
     setCurrentSelection([]);
+    setHintsRemaining(maxHints);
+    setHintedWordCells([]);
     setTimerSeconds(0);
-    setIsVictory(false);
-  }, []);
+    setIsLevelSolved(false);
+  }, [currentLevelMeta, difficulty, maxHints]);
 
   useEffect(() => {
-    startNewPuzzle(difficulty, themeIdx);
-  }, [difficulty, themeIdx, startNewPuzzle]);
+    initLevel();
+  }, [currentLevelNumber, difficulty, initLevel]);
 
-  // Timer runner
+  // Stopwatch
   useEffect(() => {
-    if (isVictory) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
-    timerRef.current = setInterval(() => {
+    if (isPaused || isLevelSolved) return;
+    const interval = setInterval(() => {
       setTimerSeconds((s) => s + 1);
     }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isVictory]);
+    return () => clearInterval(interval);
+  }, [isPaused, isLevelSolved]);
 
   const formatTimer = (total: number) => {
     const m = Math.floor(total / 60);
@@ -210,14 +235,13 @@ export const WordSearchGame: React.FC = () => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Calculate straight line cells between start and end
+  // Straight line cells calculation
   const getLineCells = (start: [number, number], end: [number, number]): [number, number][] => {
     const [r1, c1] = start;
     const [r2, c2] = end;
     const dr = r2 - r1;
     const dc = c2 - c1;
 
-    // Check if horizontal, vertical, or 45-degree diagonal
     const isHorizontal = dr === 0;
     const isVertical = dc === 0;
     const isDiagonal = Math.abs(dr) === Math.abs(dc);
@@ -237,27 +261,66 @@ export const WordSearchGame: React.FC = () => {
     return cells;
   };
 
-  const handleCellMouseDown = (r: number, c: number) => {
-    if (isVictory) return;
-    setIsSelecting(true);
-    setSelectionStart([r, c]);
-    setCurrentSelection([[r, c]]);
+  // Complete level
+  const triggerVictory = useCallback(
+    (timeSec: number) => {
+      setIsLevelSolved(true);
+      gameAudio.playVictory();
+
+      // Calculate Stars (1-3)
+      let stars = 1;
+      if (timeSec < 60) {
+        stars = 3;
+      } else if (timeSec < 150) {
+        stars = 2;
+      } else {
+        stars = 1;
+      }
+      setEarnedStars(stars);
+
+      const baseScore = 1500;
+      const timeBonus = Math.max(0, 500 - timeSec * 2);
+      const finalScore = baseScore + timeBonus;
+
+      const { updatedState } = completeLevel(gameId, difficulty, currentLevelNumber, finalScore, stars);
+      setProgressState(updatedState);
+      setIsVictoryModalOpen(true);
+    },
+    [difficulty, currentLevelNumber]
+  );
+
+  // Touch and Click handling: Tap-to-select and Drag support
+  const handleCellClick = (r: number, c: number) => {
+    if (isLevelSolved || isPaused) return;
+
+    if (!selectionStart) {
+      // First tap
+      setSelectionStart([r, c]);
+      setCurrentSelection([[r, c]]);
+      setIsSelecting(true);
+      gameAudio.playMove();
+    } else {
+      // Second tap: complete line!
+      const line = getLineCells(selectionStart, [r, c]);
+      validateSelection(line);
+    }
   };
 
   const handleCellMouseEnter = (r: number, c: number) => {
-    if (!isSelecting || !selectionStart || isVictory) return;
+    if (!isSelecting || !selectionStart || isLevelSolved || isPaused) return;
     const line = getLineCells(selectionStart, [r, c]);
     setCurrentSelection(line);
   };
 
-  const handleMouseUp = () => {
-    if (!isSelecting || currentSelection.length === 0 || isVictory) {
+  const validateSelection = (selection: [number, number][]) => {
+    if (selection.length === 0) {
       setIsSelecting(false);
+      setSelectionStart(null);
+      setCurrentSelection([]);
       return;
     }
 
-    // Check if selection matches any placed word
-    const selectedLetters = currentSelection.map(([r, c]) => grid[r][c]).join('');
+    const selectedLetters = selection.map(([r, c]) => grid[r]?.[c] || '').join('');
     const reversedLetters = selectedLetters.split('').reverse().join('');
 
     let foundMatch = false;
@@ -271,13 +334,12 @@ export const WordSearchGame: React.FC = () => {
     });
 
     if (foundMatch) {
-      gameAudio.playMatch();
+      gameAudio.playSnap();
       setPlacedWords(updated);
 
       const allFound = updated.every((w) => w.isFound);
       if (allFound) {
-        setIsVictory(true);
-        gameAudio.playVictory();
+        triggerVictory(timerSeconds);
       }
     } else {
       gameAudio.playMove();
@@ -288,72 +350,109 @@ export const WordSearchGame: React.FC = () => {
     setCurrentSelection([]);
   };
 
+  const handleMouseUp = () => {
+    if (isSelecting && currentSelection.length > 1) {
+      validateSelection(currentSelection);
+    }
+  };
+
+  // Provide a hint: reveals the starting letter and direction of an unfound word
+  const triggerHint = () => {
+    if (hintsRemaining <= 0 || isLevelSolved || isPaused) return;
+    const unfound = placedWords.filter((w) => !w.isFound);
+    if (unfound.length === 0) return;
+
+    const pick = unfound[0];
+    setHintedWordCells(pick.cells.slice(0, 2)); // Highlight first 2 cells
+    setHintsRemaining((h) => h - 1);
+    gameAudio.playSnap();
+
+    setTimeout(() => {
+      setHintedWordCells([]);
+    }, 3500);
+  };
+
   const foundCount = placedWords.filter((w) => w.isFound).length;
   const totalCount = placedWords.length;
 
+  // Next level
+  const handleNextLevel = () => {
+    setIsVictoryModalOpen(false);
+    if (currentLevelNumber < 10) {
+      setCurrentLevelNumber((l) => l + 1);
+    }
+  };
+
+  // Select level from modal
+  const handleSelectLevel = (lvl: number) => {
+    setCurrentLevelNumber(lvl);
+    setIsLevelSelectorOpen(false);
+  };
+
+  // Reset difficulty progress
+  const handleResetDifficulty = () => {
+    const updated = resetDifficultyProgress(gameId, difficulty);
+    setProgressState(updated);
+    setCurrentLevelNumber(1);
+    setIsLevelSelectorOpen(false);
+  };
+
   return (
     <div
+      ref={containerRef}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
       className="max-w-4xl mx-auto flex flex-col items-center select-none"
     >
-      {/* Top Controls & Status Bar */}
+      {/* UNIVERSAL LEVEL HEADER BAR */}
+      <div className="w-full mb-4">
+        <LevelHeaderBar
+          levelNumber={currentLevelNumber}
+          levelTitle={currentLevelMeta?.title || `Level ${currentLevelNumber}`}
+          difficulty={difficulty}
+          isPaused={isPaused}
+          onTogglePause={() => setIsPaused((p) => !p)}
+          onRestartLevel={initLevel}
+          onOpenLevelSelector={() => setIsLevelSelectorOpen(true)}
+          onChangeDifficulty={(d: GameDifficulty) => {
+            setDifficulty(d);
+            setCurrentLevelNumber(1);
+          }}
+        />
+      </div>
+
+      {/* LEVEL INFO & STATUS BAR */}
       <div className="w-full flex items-center justify-between mb-4 glass-panel p-3.5 rounded-2xl gap-3 flex-wrap">
-        {/* Difficulty Selector */}
-        <div className="flex items-center gap-1 apple-segmented p-1 rounded-full">
-          {(['Easy', 'Medium', 'Hard'] as WordDifficulty[]).map((d) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => setDifficulty(d)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                difficulty === d
-                  ? 'bg-white dark:bg-white/15 text-theme-primary shadow-xs'
-                  : 'text-theme-muted hover:text-theme-primary'
-              }`}
-            >
-              {d} ({getGridSize(d)}×{getGridSize(d)})
-            </button>
-          ))}
+        <div>
+          <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider block">
+            Level {currentLevelNumber} of 10 · {currentLevelMeta?.title}
+          </span>
+          <p className="text-xs text-theme-muted mt-0.5">{currentLevelMeta?.objective}</p>
         </div>
 
-        {/* Theme Selector */}
-        <div className="flex items-center gap-2">
-          <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
-          <select
-            value={themeIdx}
-            onChange={(e) => setThemeIdx(parseInt(e.target.value, 10))}
-            className="text-xs font-semibold bg-black/5 dark:bg-white/10 rounded-lg px-2.5 py-1 text-theme-primary border-none focus:outline-none"
-          >
-            {THEMES.map((th, idx) => (
-              <option key={th.name} value={idx}>
-                {th.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Stats */}
-        <div className="flex items-center gap-4 text-xs font-semibold">
-          <div className="flex items-center gap-1.5 text-theme-secondary">
-            <Clock className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="font-mono">{formatTimer(timerSeconds)}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-indigo-500">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-3">
+          {/* Found Count */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs">
+            <CheckCircle2 className="w-4 h-4" />
             <span>
-              Found: {foundCount} / {totalCount}
+              {foundCount} / {totalCount} Words
             </span>
           </div>
 
+          {/* Timer */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-500/10 text-theme-secondary font-mono text-xs">
+            <Clock className="w-3.5 h-3.5 text-theme-muted" />
+            <span>{formatTimer(timerSeconds)}</span>
+          </div>
+
+          {/* Hint */}
           <button
             type="button"
-            onClick={() => startNewPuzzle(difficulty, themeIdx)}
-            className="p-1 rounded-full text-theme-muted hover:text-theme-primary transition-colors"
-            title="New Puzzle"
+            onClick={triggerHint}
+            disabled={hintsRemaining <= 0 || isLevelSolved}
+            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold glass-panel text-amber-500 hover:text-amber-600 disabled:opacity-40 flex items-center gap-1.5 transition-all shadow-xs border border-amber-500/20"
           >
-            <RotateCcw className="w-4 h-4" />
+            <Lightbulb className="w-3.5 h-3.5" />
+            <span>Hint ({hintsRemaining})</span>
           </button>
         </div>
       </div>
@@ -366,14 +465,12 @@ export const WordSearchGame: React.FC = () => {
             style={{
               gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
             }}
-            className="grid gap-1 sm:gap-1.5 p-3 rounded-2xl glass-panel shadow-md border border-black/10 dark:border-white/15 max-w-full"
+            className="grid gap-1 sm:gap-1.5 p-3 sm:p-4 rounded-3xl glass-panel shadow-md border border-black/10 dark:border-white/15 max-w-full overflow-hidden"
           >
             {grid.map((row, r) =>
               row.map((letter, c) => {
-                // Check if in current mouse drag
                 const isSelected = currentSelection.some(([sr, sc]) => sr === r && sc === c);
-
-                // Check if cell belongs to a found word
+                const isHinted = hintedWordCells.some(([hr, hc]) => hr === r && hc === c);
                 const foundWord = placedWords.find(
                   (w) => w.isFound && w.cells.some(([fr, fc]) => fr === r && fc === c)
                 );
@@ -382,11 +479,13 @@ export const WordSearchGame: React.FC = () => {
                   <button
                     key={`${r}-${c}`}
                     type="button"
-                    onMouseDown={() => handleCellMouseDown(r, c)}
+                    onClick={() => handleCellClick(r, c)}
                     onMouseEnter={() => handleCellMouseEnter(r, c)}
                     className={`w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-lg sm:rounded-xl font-mono font-bold text-xs sm:text-base flex items-center justify-center transition-all select-none ${
                       isSelected
-                        ? 'bg-indigo-600 text-white scale-105 shadow-xs'
+                        ? 'bg-indigo-600 text-white scale-105 shadow-xs ring-2 ring-indigo-400'
+                        : isHinted
+                        ? 'bg-amber-400 text-stone-900 animate-pulse ring-2 ring-amber-500 font-black'
                         : foundWord
                         ? `${foundWord.color} font-black`
                         : 'bg-white/60 dark:bg-black/30 hover:bg-black/5 dark:hover:bg-white/10 text-theme-primary'
@@ -401,11 +500,11 @@ export const WordSearchGame: React.FC = () => {
         </div>
 
         {/* TARGET WORD CHECKLIST (1 Col) */}
-        <div className="lg:col-span-1 glass-panel p-4 rounded-2xl border border-black/5 dark:border-white/10">
+        <div className="lg:col-span-1 glass-panel p-4 rounded-3xl border border-black/5 dark:border-white/10 w-full">
           <h4 className="text-xs font-bold text-theme-muted uppercase tracking-wider mb-3">
-            Target Words ({foundCount}/{totalCount})
+            Target Lexicon ({foundCount}/{totalCount})
           </h4>
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5">
+          <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5 max-h-[360px] overflow-y-auto pr-1">
             {placedWords.map((item, idx) => (
               <div
                 key={idx}
@@ -420,33 +519,79 @@ export const WordSearchGame: React.FC = () => {
               </div>
             ))}
           </div>
+
+          <p className="text-[11px] text-theme-muted mt-3 italic border-t border-black/5 dark:border-white/10 pt-2">
+            Tip: Click the first letter, then click the last letter of any straight word!
+          </p>
         </div>
       </div>
 
-      {/* VICTORY MODAL OVERLAY */}
-      {isVictory && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-panel max-w-sm w-full p-6 sm:p-8 rounded-3xl text-center shadow-2xl border border-white/20 animate-in fade-in zoom-in-95">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 mx-auto flex items-center justify-center mb-4">
-              <Trophy className="w-8 h-8" />
-            </div>
-            <h3 className="text-2xl font-black font-display text-theme-primary mb-1">
-              Word Search Cleared!
-            </h3>
-            <p className="text-xs text-theme-secondary mb-4">
-              You uncovered all {totalCount} words in {formatTimer(timerSeconds)}!
-            </p>
+      {/* LEVEL SELECTOR MODAL */}
+      <LevelSelectorModal
+        isOpen={isLevelSelectorOpen}
+        onClose={() => setIsLevelSelectorOpen(false)}
+        levels={levelsMeta}
+        currentLevel={currentLevelNumber}
+        currentDifficulty={difficulty}
+        progressionState={progressState}
+        onSelectLevel={(lvl, diff) => {
+          setDifficulty(diff);
+          setCurrentLevelNumber(lvl);
+          setIsLevelSelectorOpen(false);
+        }}
+        onResetDifficultyProgress={(diff) => {
+          const updated = resetDifficultyProgress(gameId, diff);
+          setProgressState(updated);
+          setCurrentLevelNumber(1);
+          setIsLevelSelectorOpen(false);
+        }}
+      />
 
-            <button
-              type="button"
-              onClick={() => startNewPuzzle(difficulty, (themeIdx + 1) % THEMES.length)}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all active:scale-95"
-            >
-              Play Next Theme
-            </button>
-          </div>
-        </div>
-      )}
+      {/* VICTORY MODAL */}
+      <LevelVictoryModal
+        isOpen={isVictoryModalOpen}
+        levelNumber={currentLevelNumber}
+        levelTitle={currentLevelMeta?.title || `Level ${currentLevelNumber}`}
+        difficulty={difficulty}
+        stars={earnedStars}
+        stats={[
+          { label: 'Words Found', value: totalCount },
+          { label: 'Time Elapsed', value: formatTimer(timerSeconds) },
+          { label: 'Score', value: 1500 + Math.max(0, 500 - timerSeconds * 2) },
+        ]}
+        onNextLevel={handleNextLevel}
+        onReplayLevel={() => {
+          setIsVictoryModalOpen(false);
+          initLevel();
+        }}
+        onOpenLevelSelector={() => {
+          setIsVictoryModalOpen(false);
+          setIsLevelSelectorOpen(true);
+        }}
+      />
+
+      {/* PAUSE MODAL */}
+      <PauseModal
+        isOpen={isPaused}
+        levelNumber={currentLevelNumber}
+        levelTitle={currentLevelMeta?.title || `Level ${currentLevelNumber}`}
+        objective={currentLevelMeta?.objective || ''}
+        difficulty={difficulty}
+        onResume={() => setIsPaused(false)}
+        onRestartLevel={() => {
+          setIsPaused(false);
+          initLevel();
+        }}
+        onOpenLevelSelector={() => {
+          setIsPaused(false);
+          setIsLevelSelectorOpen(true);
+        }}
+        howToPlayTips={[
+          'Find all words listed in the Target Lexicon within the grid.',
+          'Tap or click the starting letter, then tap the ending letter to highlight the word.',
+          'Words can run horizontally, vertically, or diagonally depending on the difficulty setting.',
+        ]}
+      />
     </div>
   );
 };

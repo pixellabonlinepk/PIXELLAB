@@ -2,5 +2,7 @@
 # Official Domain: https://www.pixallab.online/
 User-agent: *
 Allow: /
+Disallow: /404
+Disallow: /*?p=*
 
 Sitemap: https://www.pixallab.online/sitemap.xml

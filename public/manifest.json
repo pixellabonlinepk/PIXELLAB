@@ -1,15 +1,22 @@
 {
   "short_name": "PIXAL LAB",
   "name": "PIXAL LAB — Every Image. More Possibilities.",
+  "description": "Free in-browser image tools, brain games, and academic study materials with zero server uploads.",
+  "categories": ["photo", "utilities", "productivity", "games", "education"],
   "icons": [
     {
       "src": "/icon.svg",
       "type": "image/svg+xml",
-      "sizes": "any"
+      "sizes": "any",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",
-  "background_color": "#050811",
-  "theme_color": "#0b1022",
-  "display": "standalone"
+  "scope": "/",
+  "background_color": "#FBFBFD",
+  "theme_color": "#4f46e5",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "en-US",
+  "dir": "ltr"
 }

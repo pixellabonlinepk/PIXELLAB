@@ -58,6 +58,7 @@ export const SlidingPuzzleGame: React.FC<SlidingPuzzleGameProps> = ({
   // Level & Image state
   const [currentLevelNum, setCurrentLevelNum] = useState<number>(1);
   const [unlockedLevel, setUnlockedLevel] = useState<number>(1);
+  const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
   const [selectedImage, setSelectedImage] = useState<PuzzleImage>(PUZZLE_IMAGES[0]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [imageLoadError, setImageLoadError] = useState<boolean>(false);
@@ -101,13 +102,14 @@ export const SlidingPuzzleGame: React.FC<SlidingPuzzleGameProps> = ({
 
   // Start fresh game for current level or custom settings
   const startNewGame = useCallback(
-    (levelNum: number, chosenImage?: PuzzleImage, customGridSize?: number) => {
+    (levelNum: number, chosenImage?: PuzzleImage, customGridSize?: number, chosenDiff?: 'Easy' | 'Medium' | 'Hard') => {
       // Clear existing timer
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
 
+      const activeDiff = chosenDiff || difficulty;
       const lvl = PUZZLE_LEVELS.find((l) => l.level === levelNum) || PUZZLE_LEVELS[0];
       const gSize = customGridSize || lvl.gridSize;
       const img = chosenImage || PUZZLE_IMAGES.find((i) => i.id === lvl.recommendedImageId) || PUZZLE_IMAGES[0];
@@ -117,7 +119,17 @@ export const SlidingPuzzleGame: React.FC<SlidingPuzzleGameProps> = ({
       setSelectedImage(img);
       setImageLoadError(false);
 
-      const { board: newBoard, emptyIndex: newEmpty } = shuffleBoard(gSize, lvl.scrambleSteps);
+      // Scale scramble steps by difficulty
+      const diffMultiplier = activeDiff === 'Easy' ? 0.6 : activeDiff === 'Hard' ? 1.4 : 1.0;
+      const calculatedScramble = Math.max(3, Math.round(lvl.scrambleSteps * diffMultiplier));
+
+      if (activeDiff === 'Easy') {
+        setShowNumbers(true);
+      } else if (activeDiff === 'Hard') {
+        setShowNumbers(false);
+      }
+
+      const { board: newBoard, emptyIndex: newEmpty } = shuffleBoard(gSize, calculatedScramble);
       setBoard(newBoard);
       setEmptyIndex(newEmpty);
       setMoves(0);
@@ -128,7 +140,7 @@ export const SlidingPuzzleGame: React.FC<SlidingPuzzleGameProps> = ({
       setIsVictory(false);
       setIsNewRecord(false);
     },
-    []
+    [difficulty]
   );
 
   // Initial load
@@ -288,7 +300,28 @@ export const SlidingPuzzleGame: React.FC<SlidingPuzzleGameProps> = ({
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Difficulty Selector */}
+            <div className="flex items-center gap-1 apple-segmented p-1 rounded-full">
+              {(['Easy', 'Medium', 'Hard'] as const).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => {
+                    setDifficulty(d);
+                    startNewGame(currentLevelNum, selectedImage, undefined, d);
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
+                    difficulty === d
+                      ? 'bg-white dark:bg-white/15 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                      : 'text-theme-muted hover:text-theme-primary'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+
             {/* Show / Hide Numbers Badge */}
             <button
               type="button"

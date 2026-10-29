@@ -17,10 +17,24 @@ import {
   Wand2,
   Maximize2,
   Check,
+  Zap,
+  Brush,
+  Aperture,
 } from 'lucide-react';
 import { gameAudio } from '../../utils/gameAudio';
+import { GameDifficulty } from '../../types/gameProgression';
+import {
+  loadGameProgress,
+  completeLevel,
+  resetDifficultyProgress,
+} from '../../utils/gameProgressionStore';
+import { GAME_LEVELS } from '../../data/gameLevelsData';
+import { LevelHeaderBar } from './common/LevelHeaderBar';
+import { LevelSelectorModal } from './common/LevelSelectorModal';
+import { LevelVictoryModal } from './common/LevelVictoryModal';
+import { PauseModal } from './common/PauseModal';
 
-type MemoryDifficulty = 'Easy' | 'Medium' | 'Hard';
+const MEMORY_LEVELS = GAME_LEVELS['memory-match'];
 
 interface CardItem {
   id: number;
@@ -43,6 +57,9 @@ const ICON_COMPONENTS = [
   Wand2,
   Maximize2,
   Sparkles,
+  Zap,
+  Brush,
+  Aperture,
 ];
 
 const ICON_NAMES = [
@@ -58,10 +75,16 @@ const ICON_NAMES = [
   'Magic Wand',
   'Maximize',
   'Sparkles',
+  'Lighting',
+  'Brush',
+  'Aperture',
 ];
 
 export const MemoryMatchGame: React.FC = () => {
-  const [difficulty, setDifficulty] = useState<MemoryDifficulty>('Medium');
+  const [progression, setProgression] = useState(() => loadGameProgress('memory-match'));
+  const [difficulty, setDifficulty] = useState<GameDifficulty>(progression.currentDifficulty);
+  const [currentLevelNum, setCurrentLevelNum] = useState<number>(progression.currentLevel);
+
   const [cards, setCards] = useState<CardItem[]>([]);
   const [flippedIndices, setFlippedIndices] = useState<number[]>([]);
   const [isLocked, setIsLocked] = useState<boolean>(false);
@@ -70,66 +93,72 @@ export const MemoryMatchGame: React.FC = () => {
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [isVictory, setIsVictory] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isSelectorOpen, setIsSelectorOpen] = useState<boolean>(false);
+  const [earnedStars, setEarnedStars] = useState<number>(3);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentLevelMeta =
+    MEMORY_LEVELS.find((l) => l.level === currentLevelNum) || MEMORY_LEVELS[0];
+  const pairCount = currentLevelMeta.params?.pairCount || 6;
 
-  const getPairCount = (diff: MemoryDifficulty) => {
-    switch (diff) {
-      case 'Easy':
-        return 6; // 12 cards
-      case 'Medium':
-        return 8; // 16 cards
-      case 'Hard':
-        return 12; // 24 cards
-    }
-  };
+  // Flip glance duration per difficulty
+  const flipGlanceDuration =
+    difficulty === 'Easy' ? 1200 : difficulty === 'Medium' ? 800 : 500;
 
-  const initGame = useCallback((diff: MemoryDifficulty) => {
-    const pairCount = getPairCount(diff);
-    const chosenIcons = Array.from({ length: pairCount }, (_, i) => i);
+  // Initialize deck for current level
+  const initLevel = useCallback(
+    (lvlNum: number, diff: GameDifficulty) => {
+      const lvlMeta = MEMORY_LEVELS.find((l) => l.level === lvlNum) || MEMORY_LEVELS[0];
+      const pCount = lvlMeta.params?.pairCount || 6;
+      const chosenIcons = Array.from({ length: pCount }, (_, i) => i % ICON_COMPONENTS.length);
 
-    // Create pairs
-    const deck: CardItem[] = [];
-    chosenIcons.forEach((iconIndex, idx) => {
-      deck.push({
-        id: idx * 2,
-        pairId: iconIndex,
-        iconIndex,
-        isFlipped: false,
-        isMatched: false,
+      const deck: CardItem[] = [];
+      chosenIcons.forEach((iconIndex, idx) => {
+        deck.push({
+          id: idx * 2,
+          pairId: iconIndex,
+          iconIndex,
+          isFlipped: false,
+          isMatched: false,
+        });
+        deck.push({
+          id: idx * 2 + 1,
+          pairId: iconIndex,
+          iconIndex,
+          isFlipped: false,
+          isMatched: false,
+        });
       });
-      deck.push({
-        id: idx * 2 + 1,
-        pairId: iconIndex,
-        iconIndex,
-        isFlipped: false,
-        isMatched: false,
-      });
-    });
 
-    // Shuffle deck
-    for (let i = deck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
+      // Fisher-Yates Shuffle
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
 
-    setCards(deck);
-    setFlippedIndices([]);
-    setIsLocked(false);
-    setMoves(0);
-    setMatchesCount(0);
-    setTimerSeconds(0);
-    setIsTimerRunning(false);
-    setIsVictory(false);
-  }, []);
+      setCards(deck);
+      setFlippedIndices([]);
+      setIsLocked(false);
+      setMoves(0);
+      setMatchesCount(0);
+      setTimerSeconds(0);
+      setIsTimerRunning(false);
+      setIsVictory(false);
+      setIsPaused(false);
+      setCurrentLevelNum(lvlNum);
+      setDifficulty(diff);
+    },
+    []
+  );
 
   useEffect(() => {
-    initGame(difficulty);
-  }, [difficulty, initGame]);
+    initLevel(currentLevelNum, difficulty);
+  }, [currentLevelNum, difficulty, initLevel]);
 
-  // Timer runner
+  // Stopwatch runner
   useEffect(() => {
-    if (!isTimerRunning || isVictory) {
+    if (!isTimerRunning || isVictory || isPaused) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
@@ -139,7 +168,7 @@ export const MemoryMatchGame: React.FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isTimerRunning, isVictory]);
+  }, [isTimerRunning, isVictory, isPaused]);
 
   const formatTimer = (total: number) => {
     const m = Math.floor(total / 60);
@@ -148,18 +177,15 @@ export const MemoryMatchGame: React.FC = () => {
   };
 
   const handleCardClick = (index: number) => {
-    if (isLocked || isVictory) return;
+    if (isLocked || isVictory || isPaused) return;
     const card = cards[index];
 
-    // Ignore already flipped or matched cards
     if (card.isFlipped || card.isMatched) return;
 
-    // Start timer on first move
     if (!isTimerRunning) {
       setIsTimerRunning(true);
     }
 
-    // Flip card
     gameAudio.playMove();
     const updatedCards = [...cards];
     updatedCards[index] = { ...card, isFlipped: true };
@@ -168,7 +194,6 @@ export const MemoryMatchGame: React.FC = () => {
     const nextFlipped = [...flippedIndices, index];
     setFlippedIndices(nextFlipped);
 
-    // If second card flipped, evaluate pair
     if (nextFlipped.length === 2) {
       setMoves((m) => m + 1);
       setIsLocked(true);
@@ -186,22 +211,40 @@ export const MemoryMatchGame: React.FC = () => {
             matchedDeck[firstIdx] = { ...matchedDeck[firstIdx], isMatched: true };
             matchedDeck[secondIdx] = { ...matchedDeck[secondIdx], isMatched: true };
 
-            const totalPairs = getPairCount(difficulty);
             const newMatches = matchesCount + 1;
             setMatchesCount(newMatches);
 
-            if (newMatches === totalPairs) {
+            if (newMatches === pairCount) {
+              const maxTargetMoves = currentLevelMeta.params?.maxTargetMoves || pairCount * 2.5;
+              const stars =
+                moves + 1 <= maxTargetMoves
+                  ? 3
+                  : moves + 1 <= maxTargetMoves * 1.4
+                  ? 2
+                  : 1;
+
+              setEarnedStars(stars);
               setIsVictory(true);
               setIsTimerRunning(false);
               gameAudio.playVictory();
+
+              const res = completeLevel(
+                'memory-match',
+                difficulty,
+                currentLevelNum,
+                moves + 1,
+                stars,
+                false
+              );
+              setProgression(res.updatedState);
             }
             return matchedDeck;
           });
           setFlippedIndices([]);
           setIsLocked(false);
-        }, 350);
+        }, 300);
       } else {
-        // NO MATCH -> Flip back after brief glance
+        // MISMATCH
         setTimeout(() => {
           setCards((prev) => {
             const resetDeck = [...prev];
@@ -211,73 +254,58 @@ export const MemoryMatchGame: React.FC = () => {
           });
           setFlippedIndices([]);
           setIsLocked(false);
-        }, 900);
+        }, flipGlanceDuration);
       }
     }
   };
 
-  const totalPairs = getPairCount(difficulty);
-
   return (
     <div className="max-w-3xl mx-auto flex flex-col items-center">
-      {/* Top Controls & Status Bar */}
-      <div className="w-full flex items-center justify-between mb-6 glass-panel p-3.5 rounded-2xl gap-3 flex-wrap">
-        {/* Difficulty Selector */}
-        <div className="flex items-center gap-1 apple-segmented p-1 rounded-full">
-          {(['Easy', 'Medium', 'Hard'] as MemoryDifficulty[]).map((d) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => setDifficulty(d)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                difficulty === d
-                  ? 'bg-white dark:bg-white/15 text-theme-primary shadow-xs'
-                  : 'text-theme-muted hover:text-theme-primary'
-              }`}
-            >
-              {d} ({getPairCount(d) * 2})
-            </button>
-          ))}
-        </div>
+      {/* 1. LEVEL HEADER BAR */}
+      <LevelHeaderBar
+        levelNumber={currentLevelNum}
+        levelTitle={currentLevelMeta.title}
+        difficulty={difficulty}
+        isPaused={isPaused}
+        onTogglePause={() => setIsPaused((p) => !p)}
+        onRestartLevel={() => initLevel(currentLevelNum, difficulty)}
+        onOpenLevelSelector={() => setIsSelectorOpen(true)}
+        onChangeDifficulty={(newDiff) => {
+          setDifficulty(newDiff);
+          initLevel(1, newDiff);
+        }}
+        additionalStats={
+          <>
+            <div className="flex items-center gap-1.5 text-theme-secondary">
+              <Clock className="w-3.5 h-3.5 text-indigo-500" />
+              <span className="font-mono">{formatTimer(timerSeconds)}</span>
+            </div>
 
-        {/* Stats: Moves, Pairs & Timer */}
-        <div className="flex items-center gap-4 text-xs font-semibold">
-          <div className="flex items-center gap-1.5 text-theme-secondary">
-            <Clock className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="font-mono">{formatTimer(timerSeconds)}</span>
-          </div>
+            <div className="flex items-center gap-1.5 text-theme-secondary">
+              <Footprints className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Moves: {moves}</span>
+            </div>
 
-          <div className="flex items-center gap-1.5 text-theme-secondary">
-            <Footprints className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Moves: {moves}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-indigo-500">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>
-              Pairs: {matchesCount}/{totalPairs}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => initGame(difficulty)}
-            className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-theme-muted hover:text-theme-primary transition-colors"
-            title="Restart Game"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+            <div className="flex items-center gap-1.5 text-indigo-500">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>
+                Pairs: {matchesCount}/{pairCount}
+              </span>
+            </div>
+          </>
+        }
+      />
 
       {/* CARDS GRID */}
       <div
-        className={`grid gap-2.5 sm:gap-3.5 w-full max-w-xl mx-auto ${
-          difficulty === 'Easy'
-            ? 'grid-cols-3 sm:grid-cols-4'
-            : difficulty === 'Medium'
-            ? 'grid-cols-4'
-            : 'grid-cols-4 sm:grid-cols-6'
+        className={`grid gap-2.5 sm:gap-3.5 w-full mx-auto ${
+          pairCount <= 4
+            ? 'grid-cols-2 sm:grid-cols-4 max-w-md'
+            : pairCount <= 8
+            ? 'grid-cols-3 sm:grid-cols-4 max-w-lg'
+            : pairCount <= 12
+            ? 'grid-cols-4 sm:grid-cols-6 max-w-2xl'
+            : 'grid-cols-4 sm:grid-cols-7 max-w-3xl'
         }`}
       >
         {cards.map((card, idx) => {
@@ -295,17 +323,17 @@ export const MemoryMatchGame: React.FC = () => {
                   ? `${ICON_NAMES[card.iconIndex]} card revealed`
                   : `Hidden card at position ${idx + 1}`
               }
-              className={`aspect-square rounded-2xl flex items-center justify-center transition-all duration-300 relative select-none shadow-xs transform active:scale-95 ${
+              className={`aspect-square rounded-2xl flex items-center justify-center transition-all duration-200 relative select-none shadow-xs transform active:scale-95 ${
                 card.isMatched
                   ? 'bg-emerald-500/15 border-2 border-emerald-500/40 text-emerald-500 cursor-default'
                   : card.isFlipped
-                  ? 'bg-indigo-600 border-2 border-indigo-400 text-white rotate-y-180'
+                  ? 'bg-indigo-600 border-2 border-indigo-400 text-white'
                   : 'glass-panel hover:border-indigo-500/40 hover:-translate-y-0.5 text-theme-muted'
               }`}
             >
               {isRevealed ? (
                 <div className="flex flex-col items-center justify-center p-2">
-                  <IconComp className="w-7 h-7 sm:w-9 sm:h-9" />
+                  <IconComp className="w-6 h-6 sm:w-8 sm:h-8" />
                   {card.isMatched && (
                     <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center">
                       <Check className="w-2.5 h-2.5 stroke-[3]" />
@@ -322,43 +350,69 @@ export const MemoryMatchGame: React.FC = () => {
         })}
       </div>
 
-      {/* VICTORY MODAL OVERLAY */}
-      {isVictory && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-panel max-w-sm w-full p-6 sm:p-8 rounded-3xl text-center shadow-2xl border border-white/20 animate-in fade-in zoom-in-95">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 mx-auto flex items-center justify-center mb-4">
-              <Trophy className="w-8 h-8" />
-            </div>
-            <h3 className="text-2xl font-black font-display text-theme-primary mb-1">
-              Memory Master!
-            </h3>
-            <p className="text-xs text-theme-secondary mb-4">
-              You uncovered all {totalPairs} pairs on {difficulty} difficulty!
-            </p>
+      {/* LEVEL SELECTOR MODAL */}
+      <LevelSelectorModal
+        isOpen={isSelectorOpen}
+        onClose={() => setIsSelectorOpen(false)}
+        levels={MEMORY_LEVELS}
+        currentLevel={currentLevelNum}
+        currentDifficulty={difficulty}
+        progressionState={progression}
+        onSelectLevel={(lvl, diff) => {
+          setDifficulty(diff);
+          initLevel(lvl, diff);
+        }}
+        onResetDifficultyProgress={(diff) => {
+          const updated = resetDifficultyProgress('memory-match', diff);
+          setProgression(updated);
+          initLevel(1, diff);
+        }}
+      />
 
-            <div className="grid grid-cols-2 gap-3 mb-6 bg-black/5 dark:bg-white/10 p-3 rounded-xl text-xs">
-              <div>
-                <span className="text-theme-muted block">Total Moves</span>
-                <span className="font-bold text-theme-primary">{moves}</span>
-              </div>
-              <div>
-                <span className="text-theme-muted block">Time Elapsed</span>
-                <span className="font-mono font-bold text-theme-primary">
-                  {formatTimer(timerSeconds)}
-                </span>
-              </div>
-            </div>
+      {/* PAUSE MODAL */}
+      <PauseModal
+        isOpen={isPaused}
+        levelNumber={currentLevelNum}
+        levelTitle={currentLevelMeta.title}
+        objective={currentLevelMeta.objective}
+        difficulty={difficulty}
+        onResume={() => setIsPaused(false)}
+        onRestartLevel={() => {
+          setIsPaused(false);
+          initLevel(currentLevelNum, difficulty);
+        }}
+        onOpenLevelSelector={() => {
+          setIsPaused(false);
+          setIsSelectorOpen(true);
+        }}
+        howToPlayTips={[
+          'Flip cards two at a time to discover matching pairs of visual icons.',
+          'Memorize corner icons first as visual anchors.',
+        ]}
+      />
 
-            <button
-              type="button"
-              onClick={() => initGame(difficulty)}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all active:scale-95"
-            >
-              Play Again
-            </button>
-          </div>
-        </div>
-      )}
+      {/* LEVEL VICTORY MODAL */}
+      <LevelVictoryModal
+        isOpen={isVictory}
+        levelNumber={currentLevelNum}
+        levelTitle={currentLevelMeta.title}
+        difficulty={difficulty}
+        stars={earnedStars}
+        stats={[
+          { label: 'Total Moves', value: moves },
+          { label: 'Time', value: formatTimer(timerSeconds) },
+          { label: 'Pairs Found', value: `${pairCount}/${pairCount}` },
+        ]}
+        onNextLevel={() => {
+          const nextLvl = Math.min(10, currentLevelNum + 1);
+          initLevel(nextLvl, difficulty);
+        }}
+        onReplayLevel={() => initLevel(currentLevelNum, difficulty)}
+        onOpenLevelSelector={() => {
+          setIsVictory(false);
+          setIsSelectorOpen(true);
+        }}
+      />
     </div>
   );
 };

@@ -1,0 +1,822 @@
+# PIXAL LAB — ELITE GAME DEVELOPMENT, UI/UX & SEO OPTIMIZATION MASTER PROMPT
+
+## 1. YOUR ROLE
+
+Act as a world-class Senior Game Developer, Frontend Engineer, UI/UX Designer, Game Mechanics Architect, Accessibility Specialist, Performance Engineer, and Technical SEO Expert.
+
+You are working on my EXISTING website project, **PIXAL LAB**.
+
+Your task is to professionally upgrade the existing browser-based games into polished, engaging, responsive, high-quality gaming experiences.
+
+This is an existing project, NOT a request to create a completely new website.
+
+Your work must prioritize:
+- Excellent gameplay and reliable functionality.
+- Professional, premium-quality user interfaces.
+- A consistent gaming experience across the website.
+- Ten thoughtfully designed levels for every game.
+- Easy, Medium, and Hard difficulty modes.
+- Persistent game progress.
+- Functional and useful settings.
+- Search engine optimization.
+- Mobile and desktop compatibility.
+- Clean, maintainable code.
+- Zero unnecessary paid dependencies.
+
+Do not merely explain what needs to be changed. Inspect the existing project, implement the improvements directly in its source files, and verify the results wherever the available environment permits.
+
+---
+
+# 2. CRITICAL PROJECT PRESERVATION RULES
+
+Before making any changes, thoroughly inspect the existing project.
+
+Identify:
+- The framework and programming languages.
+- The application entry point.
+- The routing structure.
+- All existing games and their components.
+- Existing styles, themes, and design tokens.
+- Shared UI components.
+- Game logic and scoring systems.
+- Existing difficulty settings.
+- Local storage or other progress-saving mechanisms.
+- SEO metadata and page structure.
+- Sitemap and robots configuration.
+- Existing build and test commands.
+- Any existing bugs or incomplete functionality.
+
+Preserve the existing PIXAL LAB branding, website structure, navigation, working tools, existing game functionality, and established design language.
+
+Do not:
+- Rebuild the entire website unnecessarily.
+- Delete existing features simply to simplify development.
+- Replace working game mechanics with generic mock implementations.
+- introduce unrelated features.
+- Create duplicate routes or duplicate components without a clear reason.
+- Hardcode fake scores, fake achievements, or fake player statistics.
+- Add paid APIs, paid services, or API keys.
+- Claim that something works without testing it.
+- Replace the existing project architecture without a compelling technical reason.
+
+Make focused, compatible, incremental changes.
+
+If a critical architectural limitation prevents a requested feature, explain the limitation and implement the best compatible solution.
+
+---
+
+# 3. GAMES INCLUDED IN THIS UPGRADE
+
+Inspect the actual project and identify the following existing games:
+
+1. Sliding Picture Puzzle
+2. Classic Sudoku Master
+3. Visual Memory Match
+4. Tic-Tac-Toe Pro
+5. 2048 Number Merge
+6. Spot the Difference
+7. Word Search Explorer
+8. Artistic Jigsaw Puzzle
+
+Verify the actual filenames, routes, components, and game implementations before editing them.
+
+Do not assume every game has identical mechanics.
+
+Each game must retain its unique identity while following a shared design and quality standard.
+
+If additional games are found in the project, do not ignore or remove them. Include them in the audit and determine whether the same upgrade system applies.
+
+---
+
+# 4. UNIVERSAL TEN-LEVEL PROGRESSION SYSTEM
+
+Every game must have ten meaningful progression levels.
+
+The ten levels must represent actual gameplay progression, not merely ten buttons that load the same game with different labels.
+
+Implement the progression system according to each game's mechanics.
+
+## Level progression
+
+- Level 1 is initially unlocked.
+- Subsequent levels unlock after successful completion of the required preceding level.
+- Locked levels must be visually distinguishable from available levels.
+- Players must receive clear feedback when a level is unlocked.
+- Previously completed levels can be replayed.
+- The player can see completed, current, available, and locked levels.
+- The game must prevent players from accidentally bypassing progression rules.
+- Restarting a level must restart the current level without incorrectly resetting all saved progress.
+- A game must display an appropriate completion screen after Level 10.
+- Provide a clear option to replay the game or return to the level selection screen.
+
+Use a maintainable, reusable level-progression architecture wherever the existing framework allows it.
+
+Each game must supply its own level configuration and validation logic.
+
+## Level configuration
+
+Where appropriate, configure each level with data such as:
+
+- Level number.
+- Difficulty rating.
+- Game-specific challenge parameters.
+- Target score or completion condition.
+- Time limit, if suitable.
+- Available hints, if suitable.
+- Completion requirements.
+- Optional rewards or achievements.
+
+Do not force every game to use a timer, hints, or a target score when those features do not suit the gameplay.
+
+## Meaningful progression
+
+Difficulty should increase gradually.
+
+Avoid arbitrary or unfair difficulty jumps.
+
+Every level must remain playable and have a clearly defined completion condition.
+
+Where randomness is used, ensure generated challenges remain valid, solvable when required, and appropriate for the selected difficulty.
+
+---
+
+# 5. THREE DIFFICULTY MODES
+
+Every game must offer:
+
+- EASY
+- MEDIUM
+- HARD
+
+Provide a visually clear difficulty selector before gameplay starts.
+
+Use distinct visual treatments for each option while maintaining accessibility and sufficient contrast.
+
+Each difficulty must make a real gameplay difference.
+
+Do not simply rename the same gameplay three times.
+
+## EASY
+
+Designed for beginners.
+
+Depending on the game, this may include:
+- Simpler challenges.
+- More forgiving rules.
+- More hints.
+- Longer time limits.
+- Fewer pieces, cards, or distractions.
+- More accessible introductory levels.
+
+## MEDIUM
+
+Designed for players who understand the basics.
+
+Depending on the game, this may include:
+- More complex challenges.
+- Moderate time limits.
+- Fewer hints.
+- Increased board or puzzle complexity.
+- More demanding completion conditions.
+
+## HARD
+
+Designed for experienced players.
+
+Depending on the game, this may include:
+- More complex challenges.
+- Tighter time limits where appropriate.
+- Fewer hints.
+- More demanding puzzle configurations.
+- Higher completion requirements.
+
+Do not make Hard unfair or impossible.
+
+## Difficulty and levels
+
+The ten levels should form a progression within the selected difficulty mode.
+
+For example, Easy Level 10 can be more challenging than Easy Level 1 without becoming equivalent to the hardest challenge in Hard mode.
+
+Where appropriate, keep the progression state of Easy, Medium, and Hard separate.
+
+Switching difficulty must not silently overwrite progress belonging to another difficulty.
+
+Persist the selected difficulty and its progress when technically appropriate.
+
+---
+
+# 6. GAME-SPECIFIC IMPLEMENTATION REQUIREMENTS
+
+Implement genuine, game-specific progression.
+
+## A. Sliding Picture Puzzle
+
+Create ten progressively harder puzzle configurations.
+
+Where supported by the existing implementation, increase the grid complexity gradually.
+
+Requirements:
+- Valid, solvable puzzle configurations.
+- Correct tile movement.
+- Clear empty-tile indication.
+- Move counter.
+- Optional timer.
+- Restart and shuffle controls.
+- A clear victory condition.
+- A completion screen.
+- Properly functioning difficulty selection.
+
+Never generate an unsolvable puzzle configuration.
+
+## B. Classic Sudoku Master
+
+Provide ten progressively challenging Sudoku stages for each difficulty mode.
+
+Requirements:
+- Valid Sudoku puzzles.
+- Correct row, column, and 3×3 box constraints.
+- Clear number-selection controls.
+- Notes or pencil marks if supported or reasonably implementable.
+- Mistake feedback where appropriate.
+- Reset and hint controls where appropriate.
+- A reliable puzzle-completion validator.
+
+Do not generate arbitrary number grids that violate Sudoku rules.
+
+Verify puzzle solvability and ensure the intended solution is valid.
+
+If unique-solution generation is implemented, validate uniqueness rather than assuming it.
+
+## C. Visual Memory Match
+
+Provide ten levels with progressively more challenging memory tasks.
+
+Requirements:
+- Appropriate numbers of card pairs.
+- Reliable card-flip animations.
+- Correct match and mismatch logic.
+- Move counter.
+- Optional timer.
+- Restart controls.
+- Clear completion feedback.
+
+Prevent rapid repeated clicks from breaking the matching logic or allowing invalid states.
+
+## D. Tic-Tac-Toe Pro
+
+Adapt the ten-level system to genuine progression.
+
+Requirements:
+- Correct turn-taking.
+- Reliable win, draw, and reset logic.
+- Difficulty-appropriate opponents if an AI opponent exists.
+- Increasingly challenging objectives or opponent behavior where appropriate.
+- Clear game-result feedback.
+
+Do not pretend that ordinary Tic-Tac-Toe has ten fundamentally different board sizes.
+
+Instead, design meaningful stages through legitimate challenge variations, opponent difficulty, win conditions, or other mechanics compatible with the existing implementation.
+
+Any AI opponent must make legal moves and correctly recognize winning and drawing states.
+
+## E. 2048 Number Merge
+
+Create ten progression stages using meaningful, game-specific objectives.
+
+Possible progression variables include:
+- Target tile.
+- Target score.
+- Move restrictions.
+- Optional time challenges.
+- Other compatible challenge conditions.
+
+Requirements:
+- Correct tile-merging rules.
+- No invalid duplicate merges in a single move.
+- Correct random tile generation.
+- Reliable win and game-over detection.
+- Undo only if properly implemented.
+- Restart controls.
+- Progress tracking.
+
+Do not generate an impossible target or claim a challenge is complete when its actual requirements have not been satisfied.
+
+## F. Spot the Difference
+
+Create ten progressively challenging picture stages.
+
+Requirements:
+- Valid image pairs.
+- Correctly defined difference regions.
+- Accurate click or touch detection.
+- Responsive image scaling.
+- Found-difference counter.
+- Optional timer and hints.
+- Clear success feedback.
+
+If image assets already exist, inspect and reuse them where appropriate.
+
+Do not claim that differences exist when the displayed images do not actually contain those differences.
+
+If suitable image pairs are missing, identify that asset requirement rather than silently substituting broken or misleading content.
+
+## G. Word Search Explorer
+
+Create ten progressively challenging word-search stages.
+
+Requirements:
+- Valid letter grids.
+- A clear list of target words.
+- Correct word-placement logic.
+- Support for the directions permitted by the game.
+- Reliable mouse and touch selection.
+- Found-word highlighting.
+- Accurate completion detection.
+
+Ensure every listed word exists in the grid and can be selected correctly.
+
+Use an appropriate vocabulary progression.
+
+## H. Artistic Jigsaw Puzzle
+
+Create ten meaningful puzzle stages.
+
+Requirements:
+- Progressive puzzle complexity.
+- Correct piece positioning and snapping.
+- Responsive layout.
+- Reliable completion detection.
+- Restart and shuffle controls.
+- Appropriate image assets.
+- Touch-friendly controls.
+
+If the existing game uses grid-based pieces, improve that system rather than introducing a completely different puzzle engine without necessity.
+
+Never declare a puzzle complete until its actual completion condition is satisfied.
+
+---
+
+# 7. PREMIUM GAME UI/UX DESIGN
+
+The website should feel polished, modern, consistent, and trustworthy.
+
+Follow the existing PIXAL LAB branding.
+
+Do not redesign unrelated website pages.
+
+## Game landing and start screen
+
+Each game should have a clear, attractive starting experience containing, where appropriate:
+
+- Game title.
+- Short introduction.
+- Difficulty selector.
+- Level selector.
+- Start or Continue button.
+- Best score or saved progress when available.
+- How to Play.
+- Settings.
+- Back to Games navigation.
+
+Avoid overcrowded screens.
+
+Use a clear visual hierarchy.
+
+## Level selection screen
+
+Create an attractive level-selection interface.
+
+Each level card should display:
+- Level number.
+- Lock or unlock status.
+- Completion status.
+- Difficulty indicator where relevant.
+- Best score or stars only if genuinely supported.
+
+Use smooth, restrained transitions.
+
+Do not allow animations to delay essential interaction.
+
+## Gameplay interface
+
+Keep important information visible without overwhelming the game.
+
+Depending on the game, display:
+- Current level.
+- Selected difficulty.
+- Score.
+- Moves.
+- Timer.
+- Progress indicator.
+- Pause or restart controls.
+
+Use reusable components for shared interface elements.
+
+## Completion screens
+
+When a level is successfully completed, display:
+- A clear success message.
+- Final score or relevant performance statistics.
+- Next Level button if another level is available.
+- Replay Level button.
+- Level Selection button.
+
+After Level 10, show a final completion screen with options to replay or return to the games collection.
+
+Only display statistics that have actually been calculated.
+
+## Visual quality
+
+Use:
+- Consistent spacing.
+- Carefully selected typography.
+- Professional buttons.
+- Clear card layouts.
+- Consistent border radii.
+- Subtle shadows.
+- Smooth but restrained transitions.
+- Responsive grids.
+- Well-designed loading, empty, error, and completion states.
+
+Avoid excessive gradients, distracting animations, unnecessary decorative elements, and inconsistent styles.
+
+Respect the existing theme system and dark/light mode if available.
+
+---
+
+# 8. COMPREHENSIVE GAME SETTINGS
+
+Implement functional settings appropriate to each game.
+
+Potential settings include:
+
+1. Sound On/Off.
+2. Music On/Off, if music exists.
+3. Difficulty selection.
+4. Restart current level.
+5. Pause and Resume, where appropriate.
+6. Fullscreen, where supported.
+7. How to Play.
+8. Reduced motion.
+9. Optional timer settings where appropriate.
+
+Every visible setting must work.
+
+Do not show a control that does nothing.
+
+If sound or music is not implemented, do not display a misleading toggle.
+
+## Pause and restart behavior
+
+- Pause must stop relevant gameplay timers.
+- Resume must continue the current game correctly.
+- Restart must reset the current game state.
+- Restarting must not erase unrelated saved progress.
+- Leaving a game should behave predictably.
+- Confirmation dialogs should appear only when they provide genuine value.
+
+Use accessible dialog and keyboard behavior.
+
+Fullscreen must respect browser restrictions and exit cleanly.
+
+---
+
+# 9. PERSISTENT PROGRESS SAVING
+
+Implement reliable progress persistence using the project's existing storage architecture where possible.
+
+For a standalone browser-based game, localStorage may be appropriate.
+
+Save relevant information such as:
+- Completed levels.
+- Unlocked levels.
+- Best scores.
+- Selected difficulty.
+- Settings.
+- Other meaningful game progress.
+
+Requirements:
+- Save progress at appropriate moments.
+- Restore progress after page reloads.
+- Avoid resetting progress when switching between games.
+- Keep progress for different games separate.
+- Keep difficulty-specific progress separate where appropriate.
+- Handle missing, invalid, or outdated stored data safely.
+- Provide a reset-progress option only with appropriate confirmation.
+
+Do not introduce an unnecessary backend, account system, or paid database.
+
+Be transparent about storage limitations.
+
+Local browser storage does not automatically synchronize progress across devices or browsers.
+
+Do not promise cross-device synchronization unless it is actually implemented.
+
+---
+
+# 10. TECHNICAL SEO OPTIMIZATION
+
+Audit and improve the existing SEO implementation for every game page.
+
+Do not use generic metadata across all games.
+
+## Metadata
+
+For each game:
+- Write a unique, descriptive page title.
+- Write a unique meta description.
+- Set the correct canonical URL when appropriate.
+- Configure relevant Open Graph metadata.
+- Configure social-sharing metadata.
+- Use accurate page-specific metadata.
+
+Avoid keyword stuffing, repetitive descriptions, and unsupported claims.
+
+## Page structure
+
+Use:
+- One clear primary H1 heading.
+- Logical H2 and H3 headings.
+- Semantic HTML.
+- Descriptive links.
+- Meaningful image alt text.
+- Accessible controls and labels.
+
+Where useful, include original, helpful content such as:
+- How to play.
+- Game rules.
+- Difficulty descriptions.
+- Level progression details.
+- Useful tips.
+- Keyboard controls.
+- Frequently asked questions that genuinely address player needs.
+
+Do not create thin, repetitive text solely to target keywords.
+
+## Internal linking
+
+Where appropriate:
+- Link games to related games.
+- Link to the main games collection.
+- Keep navigation crawlable.
+- Ensure important game pages are discoverable through internal links.
+
+## Indexing and sitemap
+
+Inspect the existing:
+- robots.txt.
+- XML sitemap.
+- Canonical URL strategy.
+- Game page routing.
+- Metadata rendering.
+- Internal navigation.
+
+Update the sitemap if new indexable routes are added or existing URLs change.
+
+Do not block game pages that are intended to be indexed.
+
+Do not expose unnecessary duplicate or development URLs.
+
+Preserve valid existing URLs wherever possible.
+
+Do not claim that Google has indexed a page merely because a sitemap entry exists.
+
+## Structured data
+
+Where appropriate, use valid structured data that accurately describes the actual page.
+
+Do not invent ratings, reviews, prices, organizations, or user statistics.
+
+Validate structured data syntax and avoid unsupported schema types or properties.
+
+## SEO performance
+
+Aim for:
+- Fast initial rendering.
+- Crawlable content.
+- Minimal unnecessary JavaScript.
+- Efficient asset loading.
+- Responsive layouts.
+- Good Core Web Vitals.
+- Accessible navigation.
+
+Do not promise first-page Google rankings.
+
+SEO improvements should follow genuine technical and content quality rather than manipulative tactics.
+
+---
+
+# 11. PERFORMANCE AND ACCESSIBILITY
+
+All games must work on desktop, tablet, and mobile devices.
+
+Test:
+- Responsive layouts.
+- Touch interactions.
+- Keyboard interactions where appropriate.
+- Small screens.
+- Large screens.
+- Portrait and landscape layouts where relevant.
+- Browser refresh and navigation.
+- Long gameplay sessions.
+- Rapid repeated interactions.
+- Invalid or interrupted game states.
+
+Follow accessibility best practices:
+- Clear focus indicators.
+- Accessible button names.
+- Sufficient text contrast.
+- Semantic HTML.
+- Reduced-motion support.
+- Appropriate keyboard controls.
+- Accessible dialogs.
+- Status messages that can be understood without relying exclusively on color.
+
+Do not compromise game usability for decorative effects.
+
+Optimize image assets and avoid loading large resources unnecessarily.
+
+---
+
+# 12. CODE QUALITY AND ARCHITECTURE
+
+Follow the existing project's conventions.
+
+Where appropriate:
+- Reuse shared components.
+- Separate gameplay logic from presentation.
+- Use typed interfaces if the project uses TypeScript.
+- Centralize level configuration.
+- Centralize shared progress utilities.
+- Avoid unnecessary duplicated logic.
+- Avoid giant components that mix unrelated responsibilities.
+- Remove obsolete code only after verifying that it is unused.
+- Handle errors gracefully.
+- Keep dependencies minimal.
+
+Do not install new packages unless there is a clear technical reason.
+
+Do not introduce a new framework merely to implement a level system.
+
+Keep the project easy to maintain and extend with additional games in the future.
+
+---
+
+# 13. IMPLEMENTATION WORKFLOW
+
+Follow this workflow in order.
+
+## Phase 1 — Project Audit
+
+Inspect the entire project.
+
+Create an internal inventory of:
+- Existing games.
+- Routes.
+- Game mechanics.
+- Current difficulty systems.
+- Existing level systems.
+- Storage mechanisms.
+- Shared UI components.
+- SEO implementation.
+- Build and test commands.
+
+Identify which features already work and which are missing.
+
+## Phase 2 — Shared Architecture
+
+Design the smallest appropriate reusable foundation for:
+- Level definitions.
+- Difficulty configuration.
+- Level unlocking.
+- Progress persistence.
+- Shared game settings.
+- Level selection.
+- Completion screens.
+
+Avoid unnecessary abstraction.
+
+## Phase 3 — Pilot Game
+
+Upgrade Sliding Picture Puzzle first.
+
+Implement the complete system:
+- Ten real levels.
+- Three working difficulty modes.
+- Progressive difficulty.
+- Level unlocking.
+- Saved progress.
+- Settings.
+- Responsive UI.
+- Completion screens.
+- SEO improvements.
+
+Verify that the game works before using it as the reference implementation for other games.
+
+## Phase 4 — Remaining Games
+
+Upgrade each remaining game individually.
+
+Respect the unique mechanics of every game.
+
+Reuse shared infrastructure, but do not force identical gameplay behavior across fundamentally different games.
+
+## Phase 5 — SEO and Website-Wide Integration
+
+Audit all game routes, metadata, internal links, sitemap, robots configuration, and responsive behavior.
+
+Ensure the upgrades integrate with the existing website without breaking navigation or other features.
+
+## Phase 6 — Testing and Verification
+
+Run the project's available:
+- Build command.
+- Type checking.
+- Linting.
+- Unit tests.
+- Integration tests.
+- Browser tests, if available.
+
+Test actual game behavior, not just whether the pages render.
+
+Verify:
+- Level progression.
+- Difficulty selection.
+- Unlocking rules.
+- Completion conditions.
+- Progress persistence.
+- Restart behavior.
+- Timer and pause behavior where implemented.
+- Settings.
+- Responsive layouts.
+- SEO metadata.
+- Existing navigation.
+- Regression issues.
+
+If automated browser testing is unavailable, perform the strongest available checks and explicitly identify anything that remains unverified.
+
+Fix errors introduced by the changes.
+
+Do not hide build failures or claim tests passed if they were not run.
+
+---
+
+# 14. DEFINITION OF DONE
+
+The project is complete only when the following conditions are satisfied:
+
+- Every existing game has ten meaningful progression levels.
+- Every game provides Easy, Medium, and Hard modes.
+- Difficulty selection changes real gameplay behavior.
+- Level progression follows clear, validated rules.
+- Unlocking works correctly.
+- Completed levels can be replayed.
+- Progress persists appropriately.
+- Game-specific mechanics remain correct.
+- Settings that are displayed actually function.
+- Victory and game-over states work correctly.
+- The interface is polished and responsive.
+- SEO metadata is unique and appropriate for each game.
+- Internal links and sitemap are correct.
+- Existing website functionality remains intact.
+- Available builds and tests pass, or remaining failures are clearly documented.
+- No unnecessary paid services or dependencies have been introduced.
+
+---
+
+# 15. FINAL REPORT
+
+After implementation, provide a concise but detailed report containing:
+
+1. Games inspected.
+2. Files modified.
+3. Features implemented.
+4. Level progression behavior for each game.
+5. Differences between Easy, Medium, and Hard.
+6. Progress-saving implementation.
+7. UI/UX improvements.
+8. SEO improvements.
+9. Build and test results.
+10. Remaining limitations or missing assets.
+11. Any features that require manual browser testing.
+
+Clearly distinguish implemented features from planned or unverified features.
+
+Do not report success merely because code was generated.
+
+---
+
+# FINAL EXECUTION INSTRUCTION
+
+Begin by inspecting the existing PIXAL LAB project and its actual source code.
+
+Then implement the improvements directly and incrementally.
+
+Preserve the existing website and all unrelated working features.
+
+Prioritize correctness, meaningful gameplay, premium design, maintainability, SEO quality, accessibility, and real testing.
+
+Do not stop after producing a plan or listing recommendations. Continue through implementation and verification to the fullest extent supported by the available environment.
+
+**The final result should be a reliable, polished, professional multi-game platform worthy of the PIXAL LAB brand.**

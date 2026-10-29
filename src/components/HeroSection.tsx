@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, ArrowRight, ShieldCheck, Zap, Lock, Sparkles } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, ArrowRight, ShieldCheck, Zap, Lock, Sparkles, X } from 'lucide-react';
 import { ToolMetadata } from '../types';
 import { TOOLS } from '../data/tools';
 
@@ -16,6 +16,32 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<ToolMetadata[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Global keyboard shortcut: Cmd+K or Ctrl+K or / to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+      } else if (
+        e.key === '/' &&
+        document.activeElement?.tagName !== 'INPUT' &&
+        document.activeElement?.tagName !== 'TEXTAREA'
+      ) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      } else if (e.key === 'Escape' && document.activeElement === inputRef.current) {
+        setQuery('');
+        setSuggestions([]);
+        if (onSearchQueryChange) onSearchQueryChange('');
+        inputRef.current?.blur();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onSearchQueryChange]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -33,6 +59,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     } else {
       setSuggestions([]);
     }
+  };
+
+  const clearSearch = () => {
+    setQuery('');
+    setSuggestions([]);
+    if (onSearchQueryChange) onSearchQueryChange('');
+    inputRef.current?.focus();
   };
 
   const QUICK_CATEGORY_GLASS_PILLS = [
@@ -75,14 +108,30 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <Search className="w-5 h-5" />
             </div>
             <input
+              ref={inputRef}
               type="text"
               value={query}
               onChange={handleInputChange}
               placeholder="Search tools (e.g. Compress, Resize, Passport, PDF, Collage)..."
+              aria-label="Search tools by name, category, or features"
               className="flex-1 min-w-0 bg-transparent px-2 py-1.5 text-sm sm:text-base text-[#1D1D1F] dark:text-[#F5F5F7] placeholder-[#6E6E73] dark:placeholder-[#86868B] focus:outline-none"
             />
+            {query.trim() && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                aria-label="Clear search query"
+                className="p-1 rounded-full text-theme-muted hover:text-theme-primary transition-colors mr-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
             <div className="hidden sm:flex items-center gap-1.5 pr-2">
-              <kbd className="px-2 py-0.5 text-[11px] font-mono text-[#6E6E73] dark:text-[#86868B] bg-black/5 dark:bg-white/10 rounded-md border border-black/5 dark:border-white/10">
+              <kbd
+                onClick={() => inputRef.current?.focus()}
+                className="px-2 py-0.5 text-[11px] font-mono text-[#6E6E73] dark:text-[#86868B] bg-black/5 dark:bg-white/10 rounded-md border border-black/5 dark:border-white/10 cursor-pointer"
+                title="Press ⌘K or / to search"
+              >
                 ⌘K
               </kbd>
             </div>

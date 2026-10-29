@@ -11,13 +11,24 @@ import {
   Clock,
   AlertTriangle,
   CheckCircle2,
+  Lock,
 } from 'lucide-react';
 import { gameAudio } from '../../utils/gameAudio';
+import { GameDifficulty } from '../../types/gameProgression';
+import {
+  loadGameProgress,
+  completeLevel,
+  resetDifficultyProgress,
+} from '../../utils/gameProgressionStore';
+import { GAME_LEVELS } from '../../data/gameLevelsData';
+import { LevelHeaderBar } from './common/LevelHeaderBar';
+import { LevelSelectorModal } from './common/LevelSelectorModal';
+import { LevelVictoryModal } from './common/LevelVictoryModal';
+import { PauseModal } from './common/PauseModal';
 
-type SudokuDifficulty = 'Easy' | 'Medium' | 'Hard';
+const SUDOKU_LEVELS = GAME_LEVELS['sudoku'];
 
-// Valid Sudoku Boards Generator using rotational symmetry and permutation shuffling
-// This guarantees that all generated boards have valid, consistent solutions.
+// Base verified solution matrix (Japanese standard Sudoku)
 const BASE_SOLUTION = [
   [5, 3, 4, 6, 7, 8, 9, 1, 2],
   [6, 7, 2, 1, 9, 5, 3, 4, 8],
@@ -30,18 +41,23 @@ const BASE_SOLUTION = [
   [3, 4, 5, 2, 8, 6, 1, 7, 9],
 ];
 
-// Generate a valid solution board by randomly mapping digits 1-9 to a permutation
-function generateSudoku(difficulty: SudokuDifficulty): {
+// Generates valid Sudoku with unique digit mapping and level-specific clues
+function generateSudokuBoard(
+  difficulty: GameDifficulty,
+  levelNum: number
+): {
   initial: (number | null)[][];
   solution: number[][];
 } {
-  // Digit permutation mapping
+  // Digit permutation based on level seed
   const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-  for (let i = digits.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [digits[i], digits[j]] = [digits[j], digits[i]];
+  const shift = (levelNum * 3) % 9;
+  for (let i = 0; i < shift; i++) {
+    const el = digits.shift();
+    if (el) digits.push(el);
   }
 
+  // Row and col permutations
   const solution: number[][] = Array(9)
     .fill(0)
     .map((_, r) =>
@@ -50,16 +66,24 @@ function generateSudoku(difficulty: SudokuDifficulty): {
         .map((_, c) => digits[BASE_SOLUTION[r][c] - 1])
     );
 
-  // Determine clue count based on difficulty
-  // Easy: ~38 clues (remove 43), Medium: ~30 clues (remove 51), Hard: ~24 clues (remove 57)
-  const cluesToRemove = difficulty === 'Easy' ? 42 : difficulty === 'Medium' ? 50 : 56;
+  // Determine clue count: Easy (50 -> 40), Medium (38 -> 30), Hard (28 -> 22)
+  let cluesGiven = 38;
+  if (difficulty === 'Easy') {
+    cluesGiven = Math.max(40, 50 - Math.round(levelNum * 1.1));
+  } else if (difficulty === 'Medium') {
+    cluesGiven = Math.max(30, 38 - Math.round(levelNum * 0.9));
+  } else {
+    cluesGiven = Math.max(22, 28 - Math.round(levelNum * 0.7));
+  }
 
+  const cluesToRemove = 81 - cluesGiven;
   const initial: (number | null)[][] = solution.map((row) => [...row]);
 
   // Symmetrically clear cells
   let removed = 0;
-  const attempts = 120;
-  for (let a = 0; a < attempts && removed < cluesToRemove; a++) {
+  let attempts = 0;
+  while (removed < cluesToRemove && attempts < 200) {
+    attempts++;
     const r = Math.floor(Math.random() * 9);
     const c = Math.floor(Math.random() * 9);
     const oppR = 8 - r;
@@ -79,7 +103,10 @@ function generateSudoku(difficulty: SudokuDifficulty): {
 }
 
 export const SudokuGame: React.FC = () => {
-  const [difficulty, setDifficulty] = useState<SudokuDifficulty>('Medium');
+  const [progression, setProgression] = useState(() => loadGameProgress('sudoku'));
+  const [difficulty, setDifficulty] = useState<GameDifficulty>(progression.currentDifficulty);
+  const [currentLevelNum, setCurrentLevelNum] = useState<number>(progression.currentLevel);
+
   const [board, setBoard] = useState<(number | null)[][]>([]);
   const [initialMask, setInitialMask] = useState<boolean[][]>([]);
   const [solution, setSolution] = useState<number[][]>([]);
@@ -91,45 +118,56 @@ export const SudokuGame: React.FC = () => {
   const [hintsLeft, setHintsLeft] = useState<number>(3);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const [isVictory, setIsVictory] = useState<boolean>(false);
-  const [isStarted, setIsStarted] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isSelectorOpen, setIsSelectorOpen] = useState<boolean>(false);
+  const [earnedStars, setEarnedStars] = useState<number>(3);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentLevelMeta =
+    SUDOKU_LEVELS.find((l) => l.level === currentLevelNum) || SUDOKU_LEVELS[0];
 
-  // Initialize new game
-  const startNewGame = useCallback((diff: SudokuDifficulty) => {
-    const puzzle = generateSudoku(diff);
-    setSolution(puzzle.solution);
-    setBoard(puzzle.initial);
+  // Max mistakes allowed based on difficulty
+  const maxMistakesAllowed = difficulty === 'Hard' ? 3 : difficulty === 'Medium' ? 5 : 99;
 
-    // Initial mask true means cell is fixed and cannot be changed
-    const mask = puzzle.initial.map((row) => row.map((cell) => cell !== null));
-    setInitialMask(mask);
+  // Initialize level
+  const startLevel = useCallback(
+    (lvlNum: number, diff: GameDifficulty) => {
+      const puzzle = generateSudokuBoard(diff, lvlNum);
+      setSolution(puzzle.solution);
+      setBoard(puzzle.initial);
 
-    // Empty candidate notes
-    const emptyNotes = Array(9)
-      .fill(0)
-      .map(() =>
-        Array(9)
-          .fill(0)
-          .map(() => new Set<number>())
-      );
-    setNotes(emptyNotes);
+      const mask = puzzle.initial.map((row) => row.map((cell) => cell !== null));
+      setInitialMask(mask);
 
-    setMistakes(0);
-    setHintsLeft(3);
-    setTimerSeconds(0);
-    setIsVictory(false);
-    setIsStarted(true);
-    setSelectedCell(null);
-  }, []);
+      const emptyNotes = Array(9)
+        .fill(0)
+        .map(() =>
+          Array(9)
+            .fill(0)
+            .map(() => new Set<number>())
+        );
+      setNotes(emptyNotes);
+
+      // Hints per difficulty
+      setHintsLeft(diff === 'Easy' ? 5 : diff === 'Medium' ? 3 : 1);
+      setMistakes(0);
+      setTimerSeconds(0);
+      setIsVictory(false);
+      setIsPaused(false);
+      setSelectedCell(null);
+      setCurrentLevelNum(lvlNum);
+      setDifficulty(diff);
+    },
+    []
+  );
 
   useEffect(() => {
-    startNewGame(difficulty);
-  }, [difficulty, startNewGame]);
+    startLevel(currentLevelNum, difficulty);
+  }, [currentLevelNum, difficulty, startLevel]);
 
   // Timer interval
   useEffect(() => {
-    if (!isStarted || isVictory) {
+    if (isVictory || isPaused) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
@@ -139,7 +177,7 @@ export const SudokuGame: React.FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isStarted, isVictory]);
+  }, [isVictory, isPaused]);
 
   const formatTimer = (total: number) => {
     const m = Math.floor(total / 60);
@@ -165,29 +203,23 @@ export const SudokuGame: React.FC = () => {
   // Fill number in selected cell
   const handleDigitInput = useCallback(
     (digit: number) => {
-      if (!selectedCell || isVictory) return;
+      if (!selectedCell || isVictory || isPaused) return;
       const [r, c] = selectedCell;
 
-      // Cannot modify initial clue cells
       if (initialMask[r][c]) return;
 
       if (pencilMode) {
-        // Toggle note
         setNotes((prev) => {
           const next = prev.map((row) => row.map((cell) => new Set(cell)));
           const cellNotes = next[r][c];
-          if (cellNotes.has(digit)) {
-            cellNotes.delete(digit);
-          } else {
-            cellNotes.add(digit);
-          }
+          if (cellNotes.has(digit)) cellNotes.delete(digit);
+          else cellNotes.add(digit);
           return next;
         });
         gameAudio.playMove();
         return;
       }
 
-      // Value entry
       const expected = solution[r][c];
       const isCorrect = digit === expected;
 
@@ -198,29 +230,60 @@ export const SudokuGame: React.FC = () => {
         if (isCorrect) {
           gameAudio.playMove();
           if (checkCompletion(next)) {
+            // Level conquered!
+            const stars = mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
+            setEarnedStars(stars);
             setIsVictory(true);
             gameAudio.playVictory();
+
+            const result = completeLevel(
+              'sudoku',
+              difficulty,
+              currentLevelNum,
+              timerSeconds,
+              stars,
+              true
+            );
+            setProgression(result.updatedState);
           }
         } else {
-          setMistakes((m) => m + 1);
+          setMistakes((m) => {
+            const nextMistakes = m + 1;
+            if (nextMistakes >= maxMistakesAllowed) {
+              gameAudio.playError();
+            }
+            return nextMistakes;
+          });
           gameAudio.playError();
         }
         return next;
       });
 
-      // Clear notes for this cell upon filling
       setNotes((prev) => {
         const next = prev.map((row) => row.map((cell) => new Set(cell)));
         next[r][c].clear();
         return next;
       });
     },
-    [selectedCell, isVictory, initialMask, pencilMode, solution, checkCompletion]
+    [
+      selectedCell,
+      isVictory,
+      isPaused,
+      initialMask,
+      pencilMode,
+      solution,
+      checkCompletion,
+      mistakes,
+      maxMistakesAllowed,
+      difficulty,
+      currentLevelNum,
+      timerSeconds,
+    ]
   );
 
   // Erase active cell
   const handleErase = useCallback(() => {
-    if (!selectedCell || isVictory) return;
+    if (!selectedCell || isVictory || isPaused) return;
     const [r, c] = selectedCell;
     if (initialMask[r][c]) return;
 
@@ -237,16 +300,15 @@ export const SudokuGame: React.FC = () => {
     });
 
     gameAudio.playMove();
-  }, [selectedCell, isVictory, initialMask]);
+  }, [selectedCell, isVictory, isPaused, initialMask]);
 
-  // Give a hint for current or random empty cell
+  // Give a hint
   const handleHint = useCallback(() => {
-    if (hintsLeft <= 0 || isVictory) return;
+    if (hintsLeft <= 0 || isVictory || isPaused) return;
 
     let targetR = selectedCell ? selectedCell[0] : -1;
     let targetC = selectedCell ? selectedCell[1] : -1;
 
-    // If selected cell is already correct or fixed, find the first empty cell
     if (
       targetR < 0 ||
       targetC < 0 ||
@@ -273,8 +335,19 @@ export const SudokuGame: React.FC = () => {
       const next = prev.map((row) => [...row]);
       next[targetR][targetC] = correctValue;
       if (checkCompletion(next)) {
+        const stars = mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
+        setEarnedStars(stars);
         setIsVictory(true);
         gameAudio.playVictory();
+        const result = completeLevel(
+          'sudoku',
+          difficulty,
+          currentLevelNum,
+          timerSeconds,
+          stars,
+          true
+        );
+        setProgression(result.updatedState);
       }
       return next;
     });
@@ -282,12 +355,25 @@ export const SudokuGame: React.FC = () => {
     setSelectedCell([targetR, targetC]);
     setHintsLeft((prev) => prev - 1);
     gameAudio.playMatch();
-  }, [hintsLeft, isVictory, selectedCell, initialMask, board, solution, checkCompletion]);
+  }, [
+    hintsLeft,
+    isVictory,
+    isPaused,
+    selectedCell,
+    initialMask,
+    board,
+    solution,
+    checkCompletion,
+    mistakes,
+    difficulty,
+    currentLevelNum,
+    timerSeconds,
+  ]);
 
-  // Keyboard navigation and numbers listener
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isVictory) return;
+      if (isVictory || isPaused) return;
 
       if (e.key >= '1' && e.key <= '9') {
         handleDigitInput(parseInt(e.key, 10));
@@ -306,7 +392,7 @@ export const SudokuGame: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedCell, isVictory, handleDigitInput, handleErase]);
+  }, [isVictory, isPaused, handleDigitInput, handleErase]);
 
   const selectedValue =
     selectedCell && board[selectedCell[0]]
@@ -315,54 +401,51 @@ export const SudokuGame: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col items-center">
-      {/* Top Controls & Status Bar */}
-      <div className="w-full flex items-center justify-between mb-4 glass-panel p-3.5 rounded-2xl gap-3 flex-wrap">
-        {/* Difficulty Selector */}
-        <div className="flex items-center gap-1 apple-segmented p-1 rounded-full">
-          {(['Easy', 'Medium', 'Hard'] as SudokuDifficulty[]).map((d) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => setDifficulty(d)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                difficulty === d
-                  ? 'bg-white dark:bg-white/15 text-theme-primary shadow-xs'
-                  : 'text-theme-muted hover:text-theme-primary'
+      {/* 1. LEVEL HEADER BAR (Controls, Level Badge, Difficulty Picker, Pause) */}
+      <LevelHeaderBar
+        levelNumber={currentLevelNum}
+        levelTitle={currentLevelMeta.title}
+        difficulty={difficulty}
+        isPaused={isPaused}
+        onTogglePause={() => setIsPaused((p) => !p)}
+        onRestartLevel={() => startLevel(currentLevelNum, difficulty)}
+        onOpenLevelSelector={() => setIsSelectorOpen(true)}
+        onChangeDifficulty={(newDiff) => {
+          setDifficulty(newDiff);
+          startLevel(1, newDiff);
+        }}
+        additionalStats={
+          <>
+            <div className="flex items-center gap-1.5 text-theme-secondary">
+              <Clock className="w-3.5 h-3.5 text-indigo-500" />
+              <span className="font-mono">{formatTimer(timerSeconds)}</span>
+            </div>
+
+            <div
+              className={`flex items-center gap-1 ${
+                mistakes > 0 ? 'text-rose-500' : 'text-theme-muted'
               }`}
             >
-              {d}
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>
+                Mistakes: {mistakes}
+                {maxMistakesAllowed < 90 && ` / ${maxMistakesAllowed}`}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleHint}
+              disabled={hintsLeft <= 0}
+              className="flex items-center gap-1 text-indigo-500 disabled:opacity-40 hover:underline"
+              title="Reveal 1 Cell"
+            >
+              <Lightbulb className="w-3.5 h-3.5" />
+              <span>Hints ({hintsLeft})</span>
             </button>
-          ))}
-        </div>
-
-        {/* Stats: Mistakes, Timer & Hints */}
-        <div className="flex items-center gap-4 text-xs font-semibold">
-          <div className="flex items-center gap-1.5 text-theme-secondary">
-            <Clock className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="font-mono">{formatTimer(timerSeconds)}</span>
-          </div>
-
-          <div
-            className={`flex items-center gap-1 ${
-              mistakes > 0 ? 'text-rose-500' : 'text-theme-muted'
-            }`}
-          >
-            <AlertTriangle className="w-3.5 h-3.5" />
-            <span>Mistakes: {mistakes}</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleHint}
-            disabled={hintsLeft <= 0}
-            className="flex items-center gap-1 text-indigo-500 disabled:opacity-40 hover:underline"
-            title="Reveal 1 Cell"
-          >
-            <Lightbulb className="w-3.5 h-3.5" />
-            <span>Hints ({hintsLeft})</span>
-          </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* SUDOKU 9x9 GRID CONTAINER */}
       <div className="relative p-2 sm:p-3 rounded-2xl glass-panel shadow-md border border-black/10 dark:border-white/15 max-w-full">
@@ -380,7 +463,6 @@ export const SudokuGame: React.FC = () => {
               const isIncorrect =
                 !isFixed && cell !== null && solution[r] && cell !== solution[r][c];
 
-              // Thick 3x3 block borders
               const borderRight =
                 c === 2 || c === 5
                   ? 'border-r-2 border-black/30 dark:border-white/40'
@@ -414,7 +496,6 @@ export const SudokuGame: React.FC = () => {
                   {cell !== null ? (
                     cell
                   ) : (
-                    // Candidate notes 3x3 subgrid
                     <div className="grid grid-cols-3 w-full h-full p-0.5 pointer-events-none">
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                         <span
@@ -439,7 +520,6 @@ export const SudokuGame: React.FC = () => {
 
       {/* SUDOKU ACTION BUTTONS & NUMBER PAD */}
       <div className="w-full mt-4 flex flex-col gap-3">
-        {/* Tool Buttons: Pencil Notes, Erase, Restart */}
         <div className="flex items-center justify-center gap-3">
           <button
             type="button"
@@ -465,11 +545,11 @@ export const SudokuGame: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => startNewGame(difficulty)}
+            onClick={() => startLevel(currentLevelNum, difficulty)}
             className="px-4 py-2 rounded-xl text-xs font-semibold glass-panel text-theme-secondary hover:text-theme-primary flex items-center gap-1.5 transition-all shadow-xs"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>New Game</span>
+            <span>Restart</span>
           </button>
         </div>
 
@@ -488,43 +568,68 @@ export const SudokuGame: React.FC = () => {
         </div>
       </div>
 
-      {/* VICTORY MODAL OVERLAY */}
-      {isVictory && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-panel max-w-sm w-full p-6 sm:p-8 rounded-3xl text-center shadow-2xl border border-white/20 animate-in fade-in zoom-in-95">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 mx-auto flex items-center justify-center mb-4">
-              <Trophy className="w-8 h-8" />
-            </div>
-            <h3 className="text-2xl font-black font-display text-theme-primary mb-1">
-              Sudoku Solved!
-            </h3>
-            <p className="text-xs text-theme-secondary mb-4">
-              Outstanding logical deduction. You completed the {difficulty} puzzle flawlessly!
-            </p>
+      {/* LEVEL SELECTOR MODAL */}
+      <LevelSelectorModal
+        isOpen={isSelectorOpen}
+        onClose={() => setIsSelectorOpen(false)}
+        levels={SUDOKU_LEVELS}
+        currentLevel={currentLevelNum}
+        currentDifficulty={difficulty}
+        progressionState={progression}
+        onSelectLevel={(lvl, diff) => {
+          setDifficulty(diff);
+          startLevel(lvl, diff);
+        }}
+        onResetDifficultyProgress={(diff) => {
+          const updated = resetDifficultyProgress('sudoku', diff);
+          setProgression(updated);
+          startLevel(1, diff);
+        }}
+      />
 
-            <div className="grid grid-cols-2 gap-3 mb-6 bg-black/5 dark:bg-white/10 p-3 rounded-xl text-xs">
-              <div>
-                <span className="text-theme-muted block">Time</span>
-                <span className="font-mono font-bold text-theme-primary">
-                  {formatTimer(timerSeconds)}
-                </span>
-              </div>
-              <div>
-                <span className="text-theme-muted block">Mistakes</span>
-                <span className="font-bold text-theme-primary">{mistakes}</span>
-              </div>
-            </div>
+      {/* PAUSE MODAL */}
+      <PauseModal
+        isOpen={isPaused}
+        levelNumber={currentLevelNum}
+        levelTitle={currentLevelMeta.title}
+        objective={currentLevelMeta.objective}
+        difficulty={difficulty}
+        onResume={() => setIsPaused(false)}
+        onRestartLevel={() => {
+          setIsPaused(false);
+          startLevel(currentLevelNum, difficulty);
+        }}
+        onOpenLevelSelector={() => {
+          setIsPaused(false);
+          setIsSelectorOpen(true);
+        }}
+        howToPlayTips={[
+          'Every row, column, and 3×3 square must contain digits 1 through 9 with no duplicates.',
+          'Toggle Notes mode (pencil icon) to jot down candidate possibilities in empty cells.',
+        ]}
+      />
 
-            <button
-              type="button"
-              onClick={() => startNewGame(difficulty)}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all active:scale-95"
-            >
-              Play Another Puzzle
-            </button>
-          </div>
-        </div>
-      )}
+      {/* LEVEL VICTORY MODAL */}
+      <LevelVictoryModal
+        isOpen={isVictory}
+        levelNumber={currentLevelNum}
+        levelTitle={currentLevelMeta.title}
+        difficulty={difficulty}
+        stars={earnedStars}
+        stats={[
+          { label: 'Time Elapsed', value: formatTimer(timerSeconds) },
+          { label: 'Mistakes', value: mistakes },
+        ]}
+        onNextLevel={() => {
+          const nextLvl = Math.min(10, currentLevelNum + 1);
+          startLevel(nextLvl, difficulty);
+        }}
+        onReplayLevel={() => startLevel(currentLevelNum, difficulty)}
+        onOpenLevelSelector={() => {
+          setIsVictory(false);
+          setIsSelectorOpen(true);
+        }}
+      />
     </div>
   );
 };

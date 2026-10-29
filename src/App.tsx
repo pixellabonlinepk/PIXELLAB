@@ -16,6 +16,8 @@ import { GamesDirectoryPage } from './components/pages/GamesDirectoryPage';
 import { IndividualGamePage } from './components/pages/IndividualGamePage';
 import { ImageGamesPage } from './components/pages/ImageGamesPage';
 import { StudyMaterialPage } from './components/pages/StudyMaterialPage';
+import { NotFoundPage } from './components/pages/NotFoundPage';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { PuzzleBanner } from './components/PuzzleBanner';
 import { RatingWidget } from './components/RatingWidget';
 import { TOOLS } from './data/tools';
@@ -237,7 +239,11 @@ export default function App() {
       // Default to home if on root path without hash
       if (!pathname && !hash) {
         setCurrentView('home');
+        return;
       }
+
+      // If URL pathname is specified but does not match any recognized route, render custom 404
+      setCurrentView('404');
     };
 
     window.addEventListener('popstate', handleUrlChange);
@@ -574,6 +580,11 @@ export default function App() {
           ],
         },
       ];
+    } else if (currentView === '404') {
+      pageTitle = 'Page Not Found (404) | PIXAL LAB';
+      pageDesc =
+        'The page you requested could not be found. Explore our 26 free in-browser image tools, brain games, and free study materials on PIXAL LAB.';
+      canonicalUrl = `${DOMAIN}/404`;
     }
 
     // 1. Update document title
@@ -605,6 +616,19 @@ export default function App() {
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) {
       canonical.setAttribute('href', canonicalUrl);
+    }
+
+    // 4b. Update robots directive (noindex on 404, index on public content)
+    const robotsMeta = document.querySelector('meta[name="robots"]');
+    if (robotsMeta) {
+      if (currentView === '404') {
+        robotsMeta.setAttribute('content', 'noindex, follow');
+      } else {
+        robotsMeta.setAttribute(
+          'content',
+          'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+        );
+      }
     }
 
     // 5. Inject Dynamic JSON-LD Schema (free of fabricated ratings)
@@ -661,6 +685,9 @@ export default function App() {
     } else if (view === 'all-tools' || view === 'tools') {
       setCurrentView('all-tools');
       cleanPath = '/all-tools';
+    } else if (view === '404') {
+      setCurrentView('404');
+      cleanPath = '/404';
     } else if (view === 'home') {
       setCurrentView('home');
       cleanPath = '/';
@@ -917,11 +944,16 @@ export default function App() {
 
         {/* VIEW 4: DEDICATED TOOL WORKSPACE */}
         {currentView === 'tool' && (
-          <ToolWorkspace
-            tool={activeTool}
-            onBack={() => navigateTo('home')}
-            onSelectRelatedTool={(id) => navigateTo('tool', id)}
-          />
+          <ErrorBoundary
+            fallbackTitle={`Workspace Error: ${activeTool.name}`}
+            onReset={() => navigateTo('tool', activeTool.id)}
+          >
+            <ToolWorkspace
+              tool={activeTool}
+              onBack={() => navigateTo('home')}
+              onSelectRelatedTool={(id) => navigateTo('tool', id)}
+            />
+          </ErrorBoundary>
         )}
 
         {/* VIEW 5: ABOUT */}
@@ -964,15 +996,30 @@ export default function App() {
 
         {/* VIEW 12: INDIVIDUAL PLAYABLE GAME PAGE */}
         {(currentView === 'game' || currentView === 'puzzle') && (
-          <IndividualGamePage
-            gameSlug={selectedGameSlug}
-            onNavigate={navigateTo}
-          />
+          <ErrorBoundary
+            fallbackTitle="Game Module Error"
+            onReset={() => navigateTo('game', selectedGameSlug)}
+          >
+            <IndividualGamePage
+              gameSlug={selectedGameSlug}
+              onNavigate={navigateTo}
+            />
+          </ErrorBoundary>
         )}
 
-        {/* VIEW 12: SECTION 3 — FREE STUDY MATERIAL */}
+        {/* VIEW 13: SECTION 3 — FREE STUDY MATERIAL */}
         {currentView === 'study-material' && (
-          <StudyMaterialPage onNavigate={navigateTo} />
+          <ErrorBoundary
+            fallbackTitle="Study Material Library Error"
+            onReset={() => navigateTo('study-material')}
+          >
+            <StudyMaterialPage onNavigate={navigateTo} />
+          </ErrorBoundary>
+        )}
+
+        {/* VIEW 14: 404 NOT FOUND PAGE */}
+        {currentView === '404' && (
+          <NotFoundPage onNavigate={navigateTo} />
         )}
       </main>
 

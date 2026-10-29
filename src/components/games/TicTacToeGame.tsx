@@ -7,26 +7,41 @@ import {
   Bot,
   Flame,
   Award,
+  Crown,
 } from 'lucide-react';
 import { gameAudio } from '../../utils/gameAudio';
+import { GameDifficulty } from '../../types/gameProgression';
+import {
+  loadGameProgress,
+  completeLevel,
+  resetDifficultyProgress,
+} from '../../utils/gameProgressionStore';
+import { GAME_LEVELS } from '../../data/gameLevelsData';
+import { LevelHeaderBar } from './common/LevelHeaderBar';
+import { LevelSelectorModal } from './common/LevelSelectorModal';
+import { LevelVictoryModal } from './common/LevelVictoryModal';
+import { PauseModal } from './common/PauseModal';
 
 type Player = 'X' | 'O';
 type CellValue = Player | null;
-type GameMode = 'vs-ai' | 'pass-and-play';
-type AIDifficulty = 'Easy' | 'Medium' | 'Hard';
+
+const TICTACTOE_LEVELS = GAME_LEVELS['tic-tac-toe'];
 
 const WINNING_COMBOS = [
-  [0, 1, 2], // Row 0
-  [3, 4, 5], // Row 1
-  [6, 7, 8], // Row 2
-  [0, 3, 6], // Col 0
-  [1, 4, 7], // Col 1
-  [2, 5, 8], // Col 2
-  [0, 4, 8], // Diag 1
-  [2, 4, 6], // Diag 2
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
 ];
 
-function checkWinner(board: CellValue[]): { winner: Player | 'Tie' | null; line: number[] | null } {
+function checkWinner(board: CellValue[]): {
+  winner: Player | 'Tie' | null;
+  line: number[] | null;
+} {
   for (const combo of WINNING_COMBOS) {
     const [a, b, c] = combo;
     if (board[a] && board[a] === board[b] && board[a] === board[c]) {
@@ -39,7 +54,6 @@ function checkWinner(board: CellValue[]): { winner: Player | 'Tie' | null; line:
   return { winner: null, line: null };
 }
 
-// Minimax algorithm for unbeatable AI
 function minimax(
   newBoard: CellValue[],
   player: Player,
@@ -96,36 +110,67 @@ function minimax(
 }
 
 export const TicTacToeGame: React.FC = () => {
+  const [progression, setProgression] = useState(() => loadGameProgress('tic-tac-toe'));
+  const [difficulty, setDifficulty] = useState<GameDifficulty>(progression.currentDifficulty);
+  const [currentLevelNum, setCurrentLevelNum] = useState<number>(progression.currentLevel);
+
   const [board, setBoard] = useState<CellValue[]>(Array(9).fill(null));
   const [turn, setTurn] = useState<Player>('X');
-  const [gameMode, setGameMode] = useState<GameMode>('vs-ai');
-  const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>('Hard');
-
   const [winner, setWinner] = useState<Player | 'Tie' | null>(null);
   const [winningLine, setWinningLine] = useState<number[] | null>(null);
 
-  // Cumulative match score
-  const [scores, setScores] = useState<{ xWins: number; oWins: number; ties: number }>({
-    xWins: 0,
-    oWins: 0,
-    ties: 0,
-  });
+  // Campaign objective tracker
+  const [sessionWins, setSessionWins] = useState<number>(0);
+  const [sessionDraws, setSessionDraws] = useState<number>(0);
 
-  const resetRound = useCallback(() => {
+  const [isVictory, setIsVictory] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isSelectorOpen, setIsSelectorOpen] = useState<boolean>(false);
+  const [isPassAndPlay, setIsPassAndPlay] = useState<boolean>(false);
+  const [earnedStars, setEarnedStars] = useState<number>(3);
+
+  const currentLevelMeta =
+    TICTACTOE_LEVELS.find((l) => l.level === currentLevelNum) || TICTACTOE_LEVELS[0];
+
+  // AI smart probability calculated per level and difficulty
+  const baseAiProb = currentLevelMeta.params?.aiSmartProb || 0.5;
+  const targetWins = currentLevelMeta.params?.targetWins || 1;
+  const targetWinsOrDraws = currentLevelMeta.params?.targetWinsOrDraws;
+
+  const adjustedAiProb =
+    difficulty === 'Easy'
+      ? Math.max(0.1, baseAiProb * 0.75)
+      : difficulty === 'Hard'
+      ? Math.min(1.0, baseAiProb * 1.25)
+      : baseAiProb;
+
+  const initRound = useCallback(() => {
     setBoard(Array(9).fill(null));
     setTurn('X');
     setWinner(null);
     setWinningLine(null);
   }, []);
 
-  const resetMatchScores = () => {
-    resetRound();
-    setScores({ xWins: 0, oWins: 0, ties: 0 });
-  };
+  const startLevel = useCallback(
+    (lvlNum: number, diff: GameDifficulty) => {
+      initRound();
+      setSessionWins(0);
+      setSessionDraws(0);
+      setIsVictory(false);
+      setIsPaused(false);
+      setCurrentLevelNum(lvlNum);
+      setDifficulty(diff);
+    },
+    [initRound]
+  );
 
-  // AI Move Engine
   useEffect(() => {
-    if (gameMode !== 'vs-ai' || turn !== 'O' || winner !== null) return;
+    startLevel(currentLevelNum, difficulty);
+  }, [currentLevelNum, difficulty, startLevel]);
+
+  // AI Turn handling
+  useEffect(() => {
+    if (isPassAndPlay || turn !== 'O' || winner !== null || isPaused || isVictory) return;
 
     const availableSpots = board
       .map((val, idx) => (val === null ? idx : null))
@@ -136,21 +181,13 @@ export const TicTacToeGame: React.FC = () => {
     const timer = setTimeout(() => {
       let chosenMove: number = availableSpots[0];
 
-      if (aiDifficulty === 'Easy') {
-        // Random move
-        chosenMove = availableSpots[Math.floor(Math.random() * availableSpots.length)];
-      } else if (aiDifficulty === 'Medium') {
-        // 65% chance smart minimax, 35% random
-        if (Math.random() < 0.65) {
-          const res = minimax([...board], 'O', 0, 'O', 'X');
-          chosenMove = res.index !== undefined ? res.index : availableSpots[0];
-        } else {
-          chosenMove = availableSpots[Math.floor(Math.random() * availableSpots.length)];
-        }
-      } else {
-        // Hard / Unbeatable Minimax
+      if (Math.random() < adjustedAiProb) {
+        // Smart move via Minimax
         const res = minimax([...board], 'O', 0, 'O', 'X');
         chosenMove = res.index !== undefined ? res.index : availableSpots[0];
+      } else {
+        // Random move
+        chosenMove = availableSpots[Math.floor(Math.random() * availableSpots.length)];
       }
 
       const nextBoard = [...board];
@@ -162,24 +199,72 @@ export const TicTacToeGame: React.FC = () => {
       if (result.winner) {
         setWinner(result.winner);
         setWinningLine(result.line);
-        if (result.winner === 'O') {
-          setScores((s) => ({ ...s, oWins: s.oWins + 1 }));
-          gameAudio.playError();
-        } else if (result.winner === 'Tie') {
-          setScores((s) => ({ ...s, ties: s.ties + 1 }));
-          gameAudio.playMatch();
-        }
+        handleRoundEnd(result.winner, nextBoard);
       } else {
         setTurn('X');
       }
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [board, turn, gameMode, aiDifficulty, winner]);
+  }, [
+    board,
+    turn,
+    winner,
+    isPassAndPlay,
+    isPaused,
+    isVictory,
+    adjustedAiProb,
+  ]);
+
+  const handleRoundEnd = (roundWinner: Player | 'Tie', _finalBoard: CellValue[]) => {
+    if (isPassAndPlay) {
+      if (roundWinner === 'Tie') gameAudio.playMatch();
+      else gameAudio.playVictory();
+      return;
+    }
+
+    if (roundWinner === 'X') {
+      const nextWins = sessionWins + 1;
+      setSessionWins(nextWins);
+      gameAudio.playVictory();
+
+      // Check level victory
+      const needed = targetWinsOrDraws || targetWins;
+      if (nextWins >= needed) {
+        triggerLevelVictory(3);
+      }
+    } else if (roundWinner === 'Tie') {
+      const nextDraws = sessionDraws + 1;
+      setSessionDraws(nextDraws);
+      gameAudio.playMatch();
+
+      if (targetWinsOrDraws && sessionWins + nextDraws >= targetWinsOrDraws) {
+        triggerLevelVictory(sessionWins > 0 ? 3 : 2);
+      }
+    } else {
+      gameAudio.playError();
+    }
+  };
+
+  const triggerLevelVictory = (stars: number) => {
+    setEarnedStars(stars);
+    setIsVictory(true);
+    gameAudio.playVictory();
+
+    const res = completeLevel(
+      'tic-tac-toe',
+      difficulty,
+      currentLevelNum,
+      sessionWins + 1,
+      stars,
+      false
+    );
+    setProgression(res.updatedState);
+  };
 
   const handleCellClick = (index: number) => {
-    if (board[index] !== null || winner !== null) return;
-    if (gameMode === 'vs-ai' && turn === 'O') return; // AI is thinking
+    if (board[index] !== null || winner !== null || isPaused || isVictory) return;
+    if (!isPassAndPlay && turn === 'O') return;
 
     const nextBoard = [...board];
     nextBoard[index] = turn;
@@ -190,16 +275,7 @@ export const TicTacToeGame: React.FC = () => {
     if (result.winner) {
       setWinner(result.winner);
       setWinningLine(result.line);
-      if (result.winner === 'X') {
-        setScores((s) => ({ ...s, xWins: s.xWins + 1 }));
-        gameAudio.playVictory();
-      } else if (result.winner === 'O') {
-        setScores((s) => ({ ...s, oWins: s.oWins + 1 }));
-        gameAudio.playVictory();
-      } else if (result.winner === 'Tie') {
-        setScores((s) => ({ ...s, ties: s.ties + 1 }));
-        gameAudio.playMatch();
-      }
+      handleRoundEnd(result.winner, nextBoard);
     } else {
       setTurn(turn === 'X' ? 'O' : 'X');
     }
@@ -207,108 +283,57 @@ export const TicTacToeGame: React.FC = () => {
 
   return (
     <div className="max-w-xl mx-auto flex flex-col items-center">
-      {/* Top Controls: Mode & Difficulty */}
-      <div className="w-full flex items-center justify-between mb-6 glass-panel p-3.5 rounded-2xl gap-3 flex-wrap">
-        {/* Play Mode Switcher */}
-        <div className="flex items-center gap-1 apple-segmented p-1 rounded-full">
-          <button
-            type="button"
-            onClick={() => {
-              setGameMode('vs-ai');
-              resetRound();
-            }}
-            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              gameMode === 'vs-ai'
-                ? 'bg-white dark:bg-white/15 text-theme-primary shadow-xs'
-                : 'text-theme-muted hover:text-theme-primary'
-            }`}
-          >
-            <Bot className="w-3.5 h-3.5" />
-            <span>vs Computer</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setGameMode('pass-and-play');
-              resetRound();
-            }}
-            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              gameMode === 'pass-and-play'
-                ? 'bg-white dark:bg-white/15 text-theme-primary shadow-xs'
-                : 'text-theme-muted hover:text-theme-primary'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>2 Players</span>
-          </button>
-        </div>
+      {/* 1. LEVEL HEADER BAR */}
+      <LevelHeaderBar
+        levelNumber={currentLevelNum}
+        levelTitle={currentLevelMeta.title}
+        difficulty={difficulty}
+        isPaused={isPaused}
+        onTogglePause={() => setIsPaused((p) => !p)}
+        onRestartLevel={() => startLevel(currentLevelNum, difficulty)}
+        onOpenLevelSelector={() => setIsSelectorOpen(true)}
+        onChangeDifficulty={(newDiff) => {
+          setDifficulty(newDiff);
+          startLevel(1, newDiff);
+        }}
+        additionalStats={
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                setIsPassAndPlay(!isPassAndPlay);
+                initRound();
+              }}
+              className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs ${
+                isPassAndPlay
+                  ? 'bg-indigo-600 text-white'
+                  : 'glass-panel text-theme-secondary hover:text-theme-primary'
+              }`}
+            >
+              {isPassAndPlay ? <Users className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
+              <span>{isPassAndPlay ? '2-Player' : 'Campaign Bot'}</span>
+            </button>
 
-        {/* AI Difficulty (Only in vs-ai mode) */}
-        {gameMode === 'vs-ai' ? (
-          <div className="flex items-center gap-1 apple-segmented p-1 rounded-full">
-            {(['Easy', 'Medium', 'Hard'] as AIDifficulty[]).map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => {
-                  setAiDifficulty(d);
-                  resetRound();
-                }}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                  aiDifficulty === d
-                    ? 'bg-white dark:bg-white/15 text-indigo-500 font-bold shadow-xs'
-                    : 'text-theme-muted hover:text-theme-primary'
-                }`}
-              >
-                {d === 'Hard' ? 'Master AI' : d}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <span className="text-xs font-semibold text-theme-muted">Pass & Play</span>
-        )}
-      </div>
+            {!isPassAndPlay && (
+              <div className="flex items-center gap-1.5 text-indigo-500 font-bold">
+                <Trophy className="w-3.5 h-3.5" />
+                <span>
+                  Progress: {sessionWins}
+                  {targetWinsOrDraws
+                    ? `+${sessionDraws}/${targetWinsOrDraws}`
+                    : `/${targetWins}`}{' '}
+                  Needed
+                </span>
+              </div>
+            )}
+          </>
+        }
+      />
 
-      {/* SESSION SCOREBOARD */}
-      <div className="w-full grid grid-cols-3 gap-3 mb-6 text-center">
-        <div
-          className={`glass-panel p-3 rounded-2xl border transition-all ${
-            turn === 'X' && !winner
-              ? 'border-indigo-500 shadow-sm shadow-indigo-500/20'
-              : 'border-black/5 dark:border-white/10'
-          }`}
-        >
-          <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider block">
-            {gameMode === 'vs-ai' ? 'You (X)' : 'Player 1 (X)'}
-          </span>
-          <span className="text-2xl font-black font-display text-theme-primary">
-            {scores.xWins}
-          </span>
-        </div>
-
-        <div className="glass-panel p-3 rounded-2xl border border-black/5 dark:border-white/10">
-          <span className="text-[11px] font-bold text-theme-muted uppercase tracking-wider block">
-            Ties
-          </span>
-          <span className="text-2xl font-black font-display text-theme-secondary">
-            {scores.ties}
-          </span>
-        </div>
-
-        <div
-          className={`glass-panel p-3 rounded-2xl border transition-all ${
-            turn === 'O' && !winner
-              ? 'border-rose-500 shadow-sm shadow-rose-500/20'
-              : 'border-black/5 dark:border-white/10'
-          }`}
-        >
-          <span className="text-[11px] font-bold text-rose-500 uppercase tracking-wider block">
-            {gameMode === 'vs-ai' ? 'Computer (O)' : 'Player 2 (O)'}
-          </span>
-          <span className="text-2xl font-black font-display text-theme-primary">
-            {scores.oWins}
-          </span>
-        </div>
+      {/* OBJECTIVE BANNER */}
+      <div className="w-full glass-panel p-3 rounded-2xl mb-4 border border-indigo-500/20 text-xs text-theme-secondary text-center">
+        <span className="font-bold text-indigo-500">Mission: </span>
+        <span>{currentLevelMeta.objective}</span>
       </div>
 
       {/* STATUS BANNER */}
@@ -316,29 +341,27 @@ export const TicTacToeGame: React.FC = () => {
         {winner === null ? (
           <p className="text-sm font-semibold text-theme-primary">
             Turn:{' '}
-            <span
-              className={turn === 'X' ? 'text-indigo-500 font-bold' : 'text-rose-500 font-bold'}
-            >
-              {gameMode === 'vs-ai'
-                ? turn === 'X'
-                  ? 'Your Turn (X)'
-                  : 'Computer thinking...'
-                : `Player ${turn}'s Turn`}
+            <span className={turn === 'X' ? 'text-indigo-500 font-bold' : 'text-rose-500 font-bold'}>
+              {isPassAndPlay
+                ? `Player ${turn}'s Turn`
+                : turn === 'X'
+                ? 'Your Turn (X)'
+                : 'Bot is analyzing...'}
             </span>
           </p>
         ) : winner === 'Tie' ? (
-          <p className="text-sm font-bold text-amber-500 flex items-center justify-center gap-1.5">
-            <span>Stalemate! It's a draw.</span>
+          <p className="text-sm font-bold text-amber-500">
+            Stalemate! {targetWinsOrDraws ? 'Draw counts toward target!' : 'Round tied.'}
           </p>
         ) : (
           <p className="text-sm font-bold text-emerald-500 flex items-center justify-center gap-1.5">
             <Trophy className="w-4 h-4" />
             <span>
-              {gameMode === 'vs-ai'
-                ? winner === 'X'
-                  ? 'Congratulations! You Win!'
-                  : 'Computer wins this round!'
-                : `Player ${winner} Victorious!`}
+              {isPassAndPlay
+                ? `Player ${winner} won the round!`
+                : winner === 'X'
+                ? 'You won this round!'
+                : 'Bot took this round.'}
             </span>
           </p>
         )}
@@ -357,7 +380,7 @@ export const TicTacToeGame: React.FC = () => {
               key={idx}
               type="button"
               onClick={() => handleCellClick(idx)}
-              disabled={cell !== null || winner !== null}
+              disabled={cell !== null || winner !== null || isPaused || isVictory}
               aria-label={`Square ${idx + 1}, currently ${cell || 'empty'}`}
               className={`rounded-2xl font-display font-black text-4xl sm:text-5xl flex items-center justify-center transition-all duration-200 select-none ${
                 isWinningCell
@@ -375,25 +398,82 @@ export const TicTacToeGame: React.FC = () => {
         })}
       </div>
 
-      {/* ACTION BUTTONS */}
-      <div className="flex items-center gap-3 mt-6">
-        <button
-          type="button"
-          onClick={resetRound}
-          className="px-5 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm flex items-center gap-1.5 transition-all active:scale-95"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>New Round</span>
-        </button>
+      {/* ROUND ACTION BUTTONS */}
+      {winner !== null && !isVictory && (
+        <div className="mt-5 flex gap-3 animate-in fade-in">
+          <button
+            type="button"
+            onClick={initRound}
+            className="px-5 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm flex items-center gap-1.5 transition-all active:scale-95"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Next Round in Level</span>
+          </button>
+        </div>
+      )}
 
-        <button
-          type="button"
-          onClick={resetMatchScores}
-          className="px-4 py-2.5 rounded-xl font-semibold text-xs glass-panel text-theme-muted hover:text-theme-primary transition-all active:scale-95"
-        >
-          <span>Reset Match Score</span>
-        </button>
-      </div>
+      {/* LEVEL SELECTOR MODAL */}
+      <LevelSelectorModal
+        isOpen={isSelectorOpen}
+        onClose={() => setIsSelectorOpen(false)}
+        levels={TICTACTOE_LEVELS}
+        currentLevel={currentLevelNum}
+        currentDifficulty={difficulty}
+        progressionState={progression}
+        onSelectLevel={(lvl, diff) => {
+          setDifficulty(diff);
+          startLevel(lvl, diff);
+        }}
+        onResetDifficultyProgress={(diff) => {
+          const updated = resetDifficultyProgress('tic-tac-toe', diff);
+          setProgression(updated);
+          startLevel(1, diff);
+        }}
+      />
+
+      {/* PAUSE MODAL */}
+      <PauseModal
+        isOpen={isPaused}
+        levelNumber={currentLevelNum}
+        levelTitle={currentLevelMeta.title}
+        objective={currentLevelMeta.objective}
+        difficulty={difficulty}
+        onResume={() => setIsPaused(false)}
+        onRestartLevel={() => {
+          setIsPaused(false);
+          startLevel(currentLevelNum, difficulty);
+        }}
+        onOpenLevelSelector={() => {
+          setIsPaused(false);
+          setIsSelectorOpen(true);
+        }}
+        howToPlayTips={[
+          'Place your X mark to create 3-in-a-row horizontally, vertically, or diagonally.',
+          'Against high-level bots, forcing a strategic draw is considered optimal play!',
+        ]}
+      />
+
+      {/* LEVEL VICTORY MODAL */}
+      <LevelVictoryModal
+        isOpen={isVictory}
+        levelNumber={currentLevelNum}
+        levelTitle={currentLevelMeta.title}
+        difficulty={difficulty}
+        stars={earnedStars}
+        stats={[
+          { label: 'Rounds Won', value: sessionWins },
+          { label: 'Draws Held', value: sessionDraws },
+        ]}
+        onNextLevel={() => {
+          const nextLvl = Math.min(10, currentLevelNum + 1);
+          startLevel(nextLvl, difficulty);
+        }}
+        onReplayLevel={() => startLevel(currentLevelNum, difficulty)}
+        onOpenLevelSelector={() => {
+          setIsVictory(false);
+          setIsSelectorOpen(true);
+        }}
+      />
     </div>
   );
 };
