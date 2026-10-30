@@ -25,6 +25,7 @@ import { getToolGuide } from './data/toolGuides';
 import { TOOL_SEO_CONFIG } from './data/toolSeoConfig';
 import { EDUCATIONAL_GUIDES } from './data/guidesData';
 import { GAMES_CATALOG, getGameBySlug } from './data/gamesData';
+import { SUBJECTS_DATA } from './data/studyMaterialData';
 import { ToolCategory } from './types';
 import { useTheme } from './context/ThemeContext';
 import {
@@ -73,6 +74,7 @@ export default function App() {
   const [selectedToolId, setSelectedToolId] = useState<string>('image-compressor');
   const [selectedGuideSlug, setSelectedGuideSlug] = useState<string>('how-to-make-a-youtube-thumbnail');
   const [selectedGameSlug, setSelectedGameSlug] = useState<string>('sliding-picture-puzzle');
+  const [selectedSubjectSlug, setSelectedSubjectSlug] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<ToolCategory>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -160,7 +162,17 @@ export default function App() {
         return;
       }
 
+      if (pathname.startsWith('study-material/') || pathname.startsWith('study/')) {
+        const subSlug = pathname.replace(/^study-materials?\//, '').replace(/^study\//, '').replace(/\/$/, '');
+        if (SUBJECTS_DATA.some((s) => s.slug === subSlug)) {
+          setSelectedSubjectSlug(subSlug);
+          setCurrentView('study-material');
+          return;
+        }
+      }
+
       if (['study-material', 'study', 'study-materials', 'free-study-material'].includes(pathname)) {
+        setSelectedSubjectSlug(null);
         setCurrentView('study-material');
         return;
       }
@@ -221,7 +233,17 @@ export default function App() {
         return;
       }
 
+      if (hash.startsWith('study-material/')) {
+        const subSlug = hash.replace('study-material/', '').replace(/\/$/, '');
+        if (SUBJECTS_DATA.some((s) => s.slug === subSlug)) {
+          setSelectedSubjectSlug(subSlug);
+          setCurrentView('study-material');
+          return;
+        }
+      }
+
       if (['study-material', 'study', 'study-materials', 'free-study-material'].includes(hash)) {
+        setSelectedSubjectSlug(null);
         setCurrentView('study-material');
         return;
       }
@@ -543,43 +565,85 @@ export default function App() {
         },
       ];
     } else if (currentView === 'study-material') {
-      pageTitle = 'Free Study Material & Academic Reference Library | PIXAL LAB';
-      pageDesc =
-        'Download free open-access academic reference notes, algorithms, and illustrated formula sheets across Computer Science, AI, Physics, Mathematics, Chemistry, Biology, and Logic.';
-      canonicalUrl = `${DOMAIN}/study-material`;
-      jsonLdData = [
-        {
-          '@context': 'https://schema.org',
-          '@type': 'WebApplication',
-          name: 'PIXAL LAB — Free Study Material Library',
-          applicationCategory: 'EducationalApplication',
-          operatingSystem: 'All',
-          url: canonicalUrl,
-          offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'USD',
+      if (selectedSubjectSlug) {
+        const activeSubject = SUBJECTS_DATA.find((s) => s.slug === selectedSubjectSlug);
+        if (activeSubject) {
+          pageTitle = activeSubject.seoTitle;
+          pageDesc = activeSubject.seoDescription;
+          canonicalUrl = `${DOMAIN}/study-material/${activeSubject.slug}`;
+          jsonLdData = [
+            {
+              '@context': 'https://schema.org',
+              '@type': 'WebPage',
+              name: activeSubject.seoTitle,
+              description: activeSubject.seoDescription,
+              url: canonicalUrl,
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'Home',
+                  item: `${DOMAIN}/`,
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: 'Free Study Material',
+                  item: `${DOMAIN}/study-material`,
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 3,
+                  name: `${activeSubject.name} Notes`,
+                  item: canonicalUrl,
+                },
+              ],
+            },
+          ];
+        }
+      } else {
+        pageTitle = 'Free Study Material | PIXAL LAB';
+        pageDesc =
+          'Explore free educational study notes, reference sheets, and formula guides across Biology, Physics, Chemistry, Computer Science, and Mathematics on PIXAL LAB. 100% free with no sign-in required.';
+        canonicalUrl = `${DOMAIN}/study-material`;
+        jsonLdData = [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'PIXAL LAB — Free Study Material Library',
+            description: pageDesc,
+            url: canonicalUrl,
+            hasPart: SUBJECTS_DATA.map((sub) => ({
+              '@type': 'WebPage',
+              name: `${sub.name} Notes`,
+              url: `${DOMAIN}/study-material/${sub.slug}`,
+              description: sub.shortDescription,
+            })),
           },
-        },
-        {
-          '@context': 'https://schema.org',
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            {
-              '@type': 'ListItem',
-              position: 1,
-              name: 'Home',
-              item: `${DOMAIN}/`,
-            },
-            {
-              '@type': 'ListItem',
-              position: 2,
-              name: 'Free Study Material',
-              item: canonicalUrl,
-            },
-          ],
-        },
-      ];
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: `${DOMAIN}/`,
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Free Study Material',
+                item: canonicalUrl,
+              },
+            ],
+          },
+        ];
+      }
     } else if (currentView === '404') {
       pageTitle = 'Page Not Found (404) | PIXAL LAB';
       pageDesc =
@@ -654,7 +718,7 @@ export default function App() {
         send_to: 'G-ZBTVJ487QP',
       });
     }
-  }, [currentView, selectedToolId, selectedGuideSlug, selectedGameSlug]);
+  }, [currentView, selectedToolId, selectedGuideSlug, selectedGameSlug, selectedSubjectSlug]);
 
   const navigateTo = (view: string, toolId?: string, guideSlug?: string) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -680,8 +744,15 @@ export default function App() {
       setCurrentView('game');
       cleanPath = '/games/sliding-picture-puzzle';
     } else if (view === 'study-material' || view === 'study' || view === 'study-materials') {
-      setCurrentView('study-material');
-      cleanPath = '/study-material';
+      if (toolId && SUBJECTS_DATA.some((s) => s.slug === toolId)) {
+        setSelectedSubjectSlug(toolId);
+        setCurrentView('study-material');
+        cleanPath = `/study-material/${toolId}`;
+      } else {
+        setSelectedSubjectSlug(null);
+        setCurrentView('study-material');
+        cleanPath = '/study-material';
+      }
     } else if (view === 'all-tools' || view === 'tools') {
       setCurrentView('all-tools');
       cleanPath = '/all-tools';
@@ -1013,7 +1084,10 @@ export default function App() {
             fallbackTitle="Study Material Library Error"
             onReset={() => navigateTo('study-material')}
           >
-            <StudyMaterialPage onNavigate={navigateTo} />
+            <StudyMaterialPage
+              selectedSubjectSlug={selectedSubjectSlug}
+              onNavigate={navigateTo}
+            />
           </ErrorBoundary>
         )}
 

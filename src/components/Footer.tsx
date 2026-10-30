@@ -207,52 +207,52 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   onClick={(e) => handleLinkClick(e, 'study-material')}
                   className="text-emerald-500 hover:text-emerald-400 font-bold transition-colors block"
                 >
-                  Open Study Library →
+                  All 5 Subjects Hub →
                 </a>
               </li>
               <li>
                 <a
-                  href="/study-material"
-                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  href="/study-material/biology"
+                  onClick={(e) => handleLinkClick(e, 'study-material', 'biology')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
                 >
-                  Computer Science & Imaging
+                  🧬 Biology Notes
                 </a>
               </li>
               <li>
                 <a
-                  href="/study-material"
-                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  href="/study-material/physics"
+                  onClick={(e) => handleLinkClick(e, 'study-material', 'physics')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
                 >
-                  AI & Computer Vision
+                  ⚛️ Physics Notes
                 </a>
               </li>
               <li>
                 <a
-                  href="/study-material"
-                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  href="/study-material/chemistry"
+                  onClick={(e) => handleLinkClick(e, 'study-material', 'chemistry')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
                 >
-                  Mathematics & Linear Algebra
+                  🧪 Chemistry Notes
                 </a>
               </li>
               <li>
                 <a
-                  href="/study-material"
-                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  href="/study-material/computer-science"
+                  onClick={(e) => handleLinkClick(e, 'study-material', 'computer-science')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
                 >
-                  Physics, Optics & Biology
+                  💻 Computer Science Notes
                 </a>
               </li>
               <li>
                 <a
-                  href="/study-material"
-                  onClick={(e) => handleLinkClick(e, 'study-material')}
+                  href="/study-material/mathematics"
+                  onClick={(e) => handleLinkClick(e, 'study-material', 'mathematics')}
                   className="text-theme-secondary hover:text-theme-primary transition-colors block truncate"
                 >
-                  Logical & Analytical Reasoning
+                  📐 Mathematics Notes
                 </a>
               </li>
             </ul>
